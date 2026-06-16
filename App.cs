@@ -226,139 +226,118 @@ class App : Component
         }
 
         return FlexColumn(
-                Border(
-                    HStack(12,
-                        VStack(2,
-                            SubHeading(item.Name),
-                            Caption(item.TypeLabel).Foreground(Theme.SecondaryText))
-                        .Flex(grow: 1, basis: 0),
-                        Button(Icon(FontIcon("\uE70F")), () => dispatch(new EditorOpened(VaultItemDraft.FromItem(item))))
-                            .ToolTip("编辑")
-                            .AutomationName("编辑项目"),
-                        state.Filter == VaultFilter.Trash
-                            ? Button(Icon(FontIcon("\uE845")), () => _ = RestoreAsync(item, dispatch))
-                                .ToolTip("恢复")
-                                .AutomationName("恢复项目")
-                            : Button(Icon(FontIcon("\uE74D")), () => dispatch(new DeleteRequested(item, false)))
-                                .ToolTip("删除")
-                                .AutomationName("删除项目"),
-                        state.Filter == VaultFilter.Trash
-                            ? Button(Icon(FontIcon("\uE74D")), () => dispatch(new DeleteRequested(item, true)))
-                                .ToolTip("永久删除")
-                                .AutomationName("永久删除项目")
-                            : null))
-                .Padding(16)
-                .WithBorder(Theme.DividerStroke, 1)
-                .Flex(shrink: 0),
+                Component<DetailHeader, DetailHeaderProps>(
+                        new DetailHeaderProps(
+                            item,
+                            state.Filter == VaultFilter.Trash,
+                            () => dispatch(new EditorOpened(VaultItemDraft.FromItem(item))),
+                            () => dispatch(new DeleteRequested(item, false)),
+                            () => dispatch(new DeleteRequested(item, true)),
+                            () => _ = RestoreAsync(item, dispatch)))
+                    .Flex(shrink: 0),
                 ScrollView(
                     VStack(12,
-                        RenderItemHeader(item),
                         RenderItemFields(item, dispatch),
-                        string.IsNullOrWhiteSpace(item.Notes) ? null : RenderSection("备注", TextBlock(item.Notes).TextWrapping())))
+                        string.IsNullOrWhiteSpace(item.Notes) ? null : DetailSection("备注", [DetailText(item.Notes)])))
                 .Padding(20)
                 .Flex(grow: 1, basis: 0))
             .Background(Theme.LayerFill)
             .Flex(grow: 1, basis: 0);
     }
 
-    private static Element RenderItemHeader(BitwardenItem item) =>
-        HStack(14,
-            Border(Icon(FontIcon(IconService.GetItemTypeGlyph(item.Type), fontSize: 28)))
-                .Width(52)
-                .Height(52)
-                .CornerRadius(26)
-                .Background(Theme.SubtleFill),
-            VStack(2,
-                Heading(item.Name),
-                TextBlock(item.TypeLabel).Foreground(Theme.SecondaryText)),
-            item.Favorite ? Icon(FontIcon("\uE735", fontSize: 18)).Foreground(Theme.SystemCaution) : null);
-
     private static Element RenderItemFields(BitwardenItem item, Action<AppAction> dispatch)
     {
-        var fields = new List<Element>();
+        var sections = new List<Element>();
+        var primaryFields = new List<Element>();
+        Action<string> copyRequested = value => { _ = CopyAsync(value, dispatch); };
 
         switch (item.Type)
         {
             case BitwardenItemType.Login:
-                AddField(fields, "用户名", item.Login?.Username, dispatch);
-                AddField(fields, "密码", Mask("password"), dispatch, item.Login?.Password);
+                AddField(primaryFields, "用户名", item.Login?.Username, copyRequested);
+                AddSensitiveField(primaryFields, "密码", Mask("password"), item.Login?.Password, copyRequested);
                 foreach (var uri in item.Login?.Uris ?? [])
                 {
-                    AddField(fields, "网站", uri.Uri, dispatch);
+                    AddField(primaryFields, "网站", uri.Uri, copyRequested);
                 }
                 if (!string.IsNullOrWhiteSpace(item.Login?.Totp))
                 {
-                    fields.Add(RenderField("TOTP", "点击获取验证码", Button("获取", () => _ = CopyTotpAsync(item, dispatch)).AutomationName("复制TOTP")));
+                    primaryFields.Add(Component<TotpField, TotpFieldProps>(new TotpFieldProps(() => _ = CopyTotpAsync(item, dispatch))));
                 }
+                sections.Add(DetailSection("登录信息", primaryFields));
                 break;
             case BitwardenItemType.Card:
-                AddField(fields, "品牌", item.Card?.Brand, dispatch);
-                AddField(fields, "持卡人", item.Card?.CardholderName, dispatch);
-                AddField(fields, "卡号", MaskCard(item.Card?.Number), dispatch, item.Card?.Number);
-                AddField(fields, "有效期", FormatExpiry(item.Card), dispatch);
-                AddField(fields, "CVV", Mask("cvv"), dispatch, item.Card?.Code);
+                AddField(primaryFields, "品牌", item.Card?.Brand, copyRequested);
+                AddField(primaryFields, "持卡人", item.Card?.CardholderName, copyRequested);
+                AddSensitiveField(primaryFields, "卡号", MaskCard(item.Card?.Number), item.Card?.Number, copyRequested);
+                AddField(primaryFields, "有效期", FormatExpiry(item.Card), copyRequested);
+                AddSensitiveField(primaryFields, "CVV", Mask("cvv"), item.Card?.Code, copyRequested);
+                sections.Add(DetailSection("卡片信息", primaryFields));
                 break;
             case BitwardenItemType.Identity:
-                AddField(fields, "姓名", JoinParts(item.Identity?.FirstName, item.Identity?.LastName), dispatch);
-                AddField(fields, "邮箱", item.Identity?.Email, dispatch);
-                AddField(fields, "电话", item.Identity?.Phone, dispatch);
-                AddField(fields, "公司", item.Identity?.Company, dispatch);
-                AddField(fields, "地址", JoinParts(item.Identity?.Address1, item.Identity?.Address2, item.Identity?.Address3, item.Identity?.City, item.Identity?.State, item.Identity?.PostalCode, item.Identity?.Country), dispatch);
-                AddField(fields, "SSN", Mask("ssn"), dispatch, item.Identity?.Ssn);
-                AddField(fields, "护照", item.Identity?.PassportNumber, dispatch);
-                AddField(fields, "驾照", item.Identity?.LicenseNumber, dispatch);
+                AddField(primaryFields, "姓名", JoinParts(item.Identity?.FirstName, item.Identity?.LastName), copyRequested);
+                AddField(primaryFields, "邮箱", item.Identity?.Email, copyRequested);
+                AddField(primaryFields, "电话", item.Identity?.Phone, copyRequested);
+                AddField(primaryFields, "公司", item.Identity?.Company, copyRequested);
+                AddField(primaryFields, "地址", JoinParts(item.Identity?.Address1, item.Identity?.Address2, item.Identity?.Address3, item.Identity?.City, item.Identity?.State, item.Identity?.PostalCode, item.Identity?.Country), copyRequested);
+                AddSensitiveField(primaryFields, "SSN", Mask("ssn"), item.Identity?.Ssn, copyRequested);
+                AddField(primaryFields, "护照", item.Identity?.PassportNumber, copyRequested);
+                AddField(primaryFields, "驾照", item.Identity?.LicenseNumber, copyRequested);
+                sections.Add(DetailSection("身份信息", primaryFields));
                 break;
             case BitwardenItemType.SecureNote:
-                fields.Add(RenderSection("安全笔记", TextBlock("内容在备注区域显示。").Foreground(Theme.SecondaryText)));
+                sections.Add(DetailSection("安全笔记", [DetailText("内容在备注区域显示。").Foreground(Theme.SecondaryText)]));
                 break;
         }
 
         if (item.Fields?.Count > 0)
         {
-            fields.Add(RenderSection("自定义字段", VStack(8, item.Fields.Select(field =>
-                RenderField(
+            sections.Add(DetailSection("自定义字段", item.Fields.Select((field, index) =>
+                field.Type == CustomFieldType.Hidden
+                    ? Component<SensitiveField, SensitiveFieldProps>(
+                        new SensitiveFieldProps(field.Name, Mask("hidden"), field.Value, copyRequested))
+                    : DetailField(
                     field.Name,
-                    field.Type == CustomFieldType.Hidden ? Mask("hidden") : field.Value ?? string.Empty,
-                    CopyButton(field.Value, dispatch))
-                .WithKey(field.Name)).ToArray())));
+                    field.Value ?? string.Empty,
+                    field.Value,
+                    copyRequested))
+                .Select((element, index) => element.WithKey($"{item.Id}:field:{index}"))
+                .ToArray()));
         }
 
-        return VStack(10, fields.ToArray());
+        return VStack(14, sections.ToArray());
     }
 
-    private static void AddField(List<Element> fields, string label, string? value, Action<AppAction> dispatch, string? copyValue = null)
+    private static void AddField(List<Element> fields, string label, string? value, Action<string> copyRequested, string? copyValue = null)
     {
         if (string.IsNullOrWhiteSpace(value) && string.IsNullOrWhiteSpace(copyValue))
         {
             return;
         }
 
-        fields.Add(RenderField(label, value ?? string.Empty, CopyButton(copyValue ?? value, dispatch)));
+        fields.Add(DetailField(label, value ?? string.Empty, copyValue ?? value, copyRequested));
     }
 
-    private static Element RenderField(string label, string value, Element? trailing) =>
-        Border(
-                VStack(4,
-                    TextBlock(label).Foreground(Theme.SecondaryText),
-                    HStack(8,
-                        TextBlock(value).TextWrapping().Flex(grow: 1, basis: 0),
-                        trailing)))
-            .Padding(12)
-            .Background(Theme.CardBackground)
-            .CornerRadius(6)
-            .WithBorder(Theme.CardStroke, 1);
+    private static void AddSensitiveField(List<Element> fields, string label, string? maskedValue, string? value, Action<string> copyRequested)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
 
-    private static Element CopyButton(string? value, Action<AppAction> dispatch) =>
-        string.IsNullOrWhiteSpace(value)
-            ? Empty()
-            : Button(Icon(FontIcon("\uE8C8")), () => _ = CopyAsync(value, dispatch))
-                .ToolTip("复制")
-                .AutomationName("复制字段");
+        fields.Add(Component<SensitiveField, SensitiveFieldProps>(new SensitiveFieldProps(label, maskedValue ?? Mask("hidden"), value, copyRequested)));
+    }
 
-    private static Element RenderSection(string title, Element content) =>
-        VStack(8,
-            TextBlock(title).SemiBold(),
-            content);
+    private static Element DetailSection(string title, IReadOnlyList<Element> children) =>
+        Component<DetailSection, DetailSectionProps>(new DetailSectionProps(title, children));
+
+    private static Element DetailField(string label, string value, string? copyValue, Action<string> copyRequested) =>
+        Component<DetailFieldRow, DetailFieldRowProps>(new DetailFieldRowProps(label, value, copyValue, copyRequested));
+
+    private static Element DetailText(string value) =>
+        Border(TextBlock(value).TextWrapping())
+            .Padding(left: 12, top: 9, right: 10, bottom: 9)
+            .WithBorder(Theme.DividerStroke, 1);
 
     private static Element RenderSettings(AppState state, Action<AppAction> dispatch)
     {
