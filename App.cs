@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using BitwardenForReactor.Components;
 using BitwardenForReactor.Models;
 using BitwardenForReactor.Services;
 using BitwardenForReactor.State;
@@ -152,7 +153,7 @@ class App : Component
 
     private static Element RenderVault(AppState state, Action<AppAction> dispatch) =>
         FlexRow(
-                RenderListPane(state, dispatch).Flex(shrink: 0, basis: 360),
+                RenderListPane(state, dispatch).Flex(shrink: 0, basis: 390),
                 RenderDetailPane(state, dispatch).Flex(grow: 1, basis: 0))
             .Flex(grow: 1, basis: 0);
 
@@ -163,6 +164,10 @@ class App : Component
 
         return Border(
                 FlexColumn(
+                    VStack(4,
+                        TextBlock(FilterTitle(state.Filter)).SemiBold(),
+                        TextBlock(FilterDescription(state.Filter)).Foreground(Theme.SecondaryText))
+                    .Margin(left: 12, top: 12, right: 12, bottom: 0),
                     AutoSuggestBox(state.SearchQuery, query => dispatch(new SearchChanged(query)))
                         .PlaceholderText("搜索密码库...")
                         .QueryIcon(SymbolIcon("Find"))
@@ -170,7 +175,9 @@ class App : Component
                         .Margin(12),
                     items.Count == 0
                         ? RenderEmptyList(state)
-                        : (ListView(items, item => item.Id, (item, _) => RenderListItem(item, item.Id == selectedId))
+                        : (ListView(items, item => item.Id, (item, _) =>
+                            Component<VaultListItem, VaultListItemProps>(
+                                new VaultListItemProps(item, item.Id == selectedId, state.Filter == VaultFilter.Trash)))
                             with { SelectionMode = ListViewSelectionMode.Single })
                             .SelectionChanged<BitwardenItem>(selected =>
                             {
@@ -178,8 +185,13 @@ class App : Component
                                 dispatch(new ItemSelected(item?.Id));
                             })
                             .Flex(grow: 1, basis: 0),
-                    Border(TextBlock($"{items.Count} 个项目").Foreground(Theme.SecondaryText))
-                        .Padding(12)
+                    Border(
+                            HStack(8,
+                                TextBlock($"{items.Count} 个项目").Foreground(Theme.SecondaryText),
+                                !string.IsNullOrWhiteSpace(state.SearchQuery)
+                                    ? TextBlock($"搜索：{state.SearchQuery}").Foreground(Theme.SecondaryText).TextTrimming(TextTrimming.CharacterEllipsis)
+                                    : null))
+                        .Padding(left: 12, top: 8, right: 12, bottom: 8)
                         .Background(Theme.SubtleFill)
                         .Flex(shrink: 0))
                 .Flex(grow: 1, basis: 0))
@@ -191,34 +203,13 @@ class App : Component
         Border(
                 VStack(10,
                     Icon(FontIcon("\uE8F1", fontSize: 34)),
-                    TextBlock(state.Filter == VaultFilter.Trash ? "回收站为空" : "没有匹配的项目")
+                    TextBlock(EmptyListTitle(state))
+                        .SemiBold(),
+                    TextBlock(EmptyListDescription(state))
                         .Foreground(Theme.SecondaryText)))
             .Flex(grow: 1, basis: 0)
             .HorizontalAlignment(HorizontalAlignment.Center)
             .VerticalAlignment(VerticalAlignment.Center);
-
-    private static Element RenderListItem(BitwardenItem item, bool selected)
-    {
-        var subtitle = item.Username ?? item.PrimaryUri ?? item.TypeLabel;
-
-        return Border(
-                HStack(12,
-                    Border(Icon(FontIcon(IconService.GetItemTypeGlyph(item.Type), fontSize: 18)))
-                        .Width(40)
-                        .Height(40)
-                        .CornerRadius(20)
-                        .Background(Theme.SubtleFill),
-                    VStack(2,
-                        TextBlock(item.Name).TextTrimming(TextTrimming.CharacterEllipsis),
-                        TextBlock(subtitle).Foreground(Theme.SecondaryText).TextTrimming(TextTrimming.CharacterEllipsis))
-                    .Flex(grow: 1, basis: 0),
-                    item.Favorite
-                        ? Icon(FontIcon("\uE735", fontSize: 14)).Foreground(Theme.SystemCaution)
-                        : null)
-                .VerticalAlignment(VerticalAlignment.Center))
-            .Padding(left: 12, top: 8, right: 12, bottom: 8)
-            .Background(selected ? Theme.ControlFillSecondary : Theme.SolidBackground);
-    }
 
     private static Element RenderDetailPane(AppState state, Action<AppAction> dispatch)
     {
@@ -804,6 +795,64 @@ class App : Component
             VaultFilter.Trash => "Trash",
             _ => "AllItems"
         };
+
+    private static string FilterTitle(VaultFilter filter) =>
+        filter switch
+        {
+            VaultFilter.Logins => "登录",
+            VaultFilter.Cards => "卡片",
+            VaultFilter.Identities => "身份",
+            VaultFilter.Notes => "安全笔记",
+            VaultFilter.Favorites => "收藏",
+            VaultFilter.Trash => "回收站",
+            _ => "全部项目"
+        };
+
+    private static string FilterDescription(VaultFilter filter) =>
+        filter switch
+        {
+            VaultFilter.Logins => "网站账号、应用账号和通行密钥相关项目",
+            VaultFilter.Cards => "信用卡、借记卡和付款信息",
+            VaultFilter.Identities => "联系人、地址和身份信息",
+            VaultFilter.Notes => "加密保存的纯文本笔记",
+            VaultFilter.Favorites => "标记为收藏的常用项目",
+            VaultFilter.Trash => "已删除但仍可恢复的项目",
+            _ => "浏览当前密码库中的全部项目"
+        };
+
+    private static string EmptyListTitle(AppState state)
+    {
+        if (!string.IsNullOrWhiteSpace(state.SearchQuery))
+        {
+            return "没有搜索结果";
+        }
+
+        return state.Filter switch
+        {
+            VaultFilter.Favorites => "还没有收藏项目",
+            VaultFilter.Trash => "回收站为空",
+            VaultFilter.Logins => "没有登录项目",
+            VaultFilter.Cards => "没有卡片项目",
+            VaultFilter.Identities => "没有身份项目",
+            VaultFilter.Notes => "没有安全笔记",
+            _ => "密码库为空"
+        };
+    }
+
+    private static string EmptyListDescription(AppState state)
+    {
+        if (!string.IsNullOrWhiteSpace(state.SearchQuery))
+        {
+            return "换一个关键词，或清空搜索框后查看全部项目。";
+        }
+
+        return state.Filter switch
+        {
+            VaultFilter.Favorites => "在详情页或 Bitwarden 中为项目加星标后会显示在这里。",
+            VaultFilter.Trash => "删除的项目会先进入回收站，可以在这里恢复或永久删除。",
+            _ => "可以点击左侧底部的新建项目开始添加。"
+        };
+    }
 
     private static string Mask(string kind) =>
         kind switch
