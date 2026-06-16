@@ -7,6 +7,7 @@ using BitwardenForReactor.Components;
 using BitwardenForReactor.Models;
 using BitwardenForReactor.Services;
 using BitwardenForReactor.State;
+using CommunityToolkit.WinUI.Controls;
 using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
@@ -18,6 +19,8 @@ using Windows.System;
 using static BitwardenForReactor.Controls.Toolkit.ToolkitFactories;
 using static Microsoft.UI.Reactor.Factories;
 
+ReactorApp.RegisterControlAssembly(typeof(SettingsCard).Assembly);
+ReactorApp.RegisterControlAssembly(typeof(Segmented).Assembly);
 ReactorApp.Run<App>("BitwardenForReactor", width: 1120, height: 720);
 
 class App : Component
