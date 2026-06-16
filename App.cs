@@ -14,6 +14,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Windows.System;
+using static BitwardenForReactor.Controls.Toolkit.ToolkitFactories;
 using static Microsoft.UI.Reactor.Factories;
 
 ReactorApp.Run<App>("BitwardenForReactor", width: 1120, height: 720);
@@ -371,32 +372,90 @@ class App : Component
     private static Element RenderSettings(AppState state, Action<AppAction> dispatch)
     {
         var settings = state.Settings;
+        var status = state.Status;
 
         return ScrollView(
                 Border(
-                    VStack(14,
+                    VStack(18,
                         Heading("设置"),
-                        TextBox(settings.BwPath, value => dispatch(new SettingsChanged(settings with { BwPath = value })), header: "Bitwarden CLI 路径")
-                            .AutomationName("Bitwarden CLI 路径"),
-                        TextBox(settings.BwClientId, value => dispatch(new SettingsChanged(settings with { BwClientId = value })), header: "BW_CLIENTID")
-                            .AutomationName("BW_CLIENTID"),
-                        PasswordBox(settings.BwClientSecret, value => dispatch(new SettingsChanged(settings with { BwClientSecret = value })), "输入 Client Secret")
-                            .Header("BW_CLIENTSECRET")
-                            .AutomationName("BW_CLIENTSECRET"),
-                        TextBox(settings.CustomEnvironment, value => dispatch(new SettingsChanged(settings with { CustomEnvironment = value })), header: "自定义环境变量")
-                            .PlaceholderText("KEY1=VALUE1;KEY2=VALUE2")
-                            .AutomationName("自定义环境变量"),
-                        TextBox(settings.ClipboardClearSeconds.ToString(CultureInfo.InvariantCulture),
-                                value => dispatch(new SettingsChanged(settings with { ClipboardClearSeconds = ParsePositiveInt(value, settings.ClipboardClearSeconds) })),
-                                header: "剪贴板自动清除秒数")
-                            .AutomationName("剪贴板自动清除秒数"),
-                        TextBox(settings.AutoLockMinutes.ToString(CultureInfo.InvariantCulture),
-                                value => dispatch(new SettingsChanged(settings with { AutoLockMinutes = ParsePositiveInt(value, settings.AutoLockMinutes) })),
-                                header: "自动锁定分钟数")
-                            .AutomationName("自动锁定分钟数"),
+                        TextBlock("配置 Bitwarden CLI、剪贴板安全策略和认证环境。设置只在点击保存后写入本地文件。")
+                            .Foreground(Theme.SecondaryText)
+                            .TextWrapping(),
+                        VStack(8,
+                            SubHeading("基础设置"),
+                            SettingsCard(
+                                    "Bitwarden CLI 路径",
+                                    "默认使用 PATH 中的 bw。需要自定义位置时填写 bw.exe 的完整路径。",
+                                    TextBox(settings.BwPath, value => dispatch(new SettingsChanged(settings with { BwPath = value })))
+                                        .Width(320)
+                                        .AutomationName("Bitwarden CLI 路径"),
+                                    "\uE756"),
+                            SettingsCard(
+                                    "剪贴板自动清除",
+                                    "复制敏感字段后，应用会在指定秒数后清空剪贴板。0 表示不自动清除。",
+                                    TextBox(settings.ClipboardClearSeconds.ToString(CultureInfo.InvariantCulture),
+                                            value => dispatch(new SettingsChanged(settings with { ClipboardClearSeconds = ParsePositiveInt(value, settings.ClipboardClearSeconds) })))
+                                        .Width(120)
+                                        .AutomationName("剪贴板自动清除秒数"),
+                                    "\uE8C8"),
+                            SettingsCard(
+                                    "自动锁定",
+                                    "预留设置项。后续可用于空闲超时锁定密码库。",
+                                    TextBox(settings.AutoLockMinutes.ToString(CultureInfo.InvariantCulture),
+                                            value => dispatch(new SettingsChanged(settings with { AutoLockMinutes = ParsePositiveInt(value, settings.AutoLockMinutes) })))
+                                        .Width(120)
+                                        .AutomationName("自动锁定分钟数"),
+                                    "\uE72E")),
+                        VStack(8,
+                            SubHeading("认证与环境"),
+                            SettingsExpander(
+                                "Bitwarden CLI 环境",
+                                "配置 API Key 和自定义环境变量。普通使用场景仍建议先在终端执行 bw login。",
+                                TextBlock("高级").Foreground(Theme.SecondaryText),
+                                [
+                                    SettingsCard(
+                                        "BW_CLIENTID",
+                                        "用于 Bitwarden CLI API Key 登录的 Client ID。",
+                                        TextBox(settings.BwClientId, value => dispatch(new SettingsChanged(settings with { BwClientId = value })))
+                                            .Width(320)
+                                            .AutomationName("BW_CLIENTID"),
+                                        "\uE77B"),
+                                    SettingsCard(
+                                        "BW_CLIENTSECRET",
+                                        "用于 Bitwarden CLI API Key 登录的 Client Secret。",
+                                        PasswordBox(settings.BwClientSecret, value => dispatch(new SettingsChanged(settings with { BwClientSecret = value })), "输入 Client Secret")
+                                            .Width(320)
+                                            .AutomationName("BW_CLIENTSECRET"),
+                                        "\uE8D7"),
+                                    SettingsCard(
+                                        "自定义环境变量",
+                                        "格式为 KEY1=VALUE1;KEY2=VALUE2，会附加到每次 bw 命令执行环境。",
+                                        TextBox(settings.CustomEnvironment, value => dispatch(new SettingsChanged(settings with { CustomEnvironment = value })))
+                                            .PlaceholderText("KEY1=VALUE1;KEY2=VALUE2")
+                                            .Width(360)
+                                            .AutomationName("自定义环境变量"),
+                                        "\uE9D9")
+                                ],
+                                "\uE713",
+                                isExpanded: true)),
+                        VStack(8,
+                            SubHeading("诊断"),
+                            SettingsCard(
+                                "当前状态",
+                                "显示最近一次 bw status 的结果。",
+                                VStack(2,
+                                    TextBlock(status?.UserEmail ?? "未检测到账户").TextTrimming(TextTrimming.CharacterEllipsis),
+                                    TextBlock(FormatStatus(status)).Foreground(Theme.SecondaryText))
+                                .Width(280),
+                                "\uE946"),
+                            SettingsCard(
+                                "重新检测",
+                                "重新调用 bw status，确认 CLI 路径、登录状态和密码库锁定状态。",
+                                Button("检测状态", () => _ = InitializeAsync(dispatch)).AutomationName("检测状态"),
+                                "\uE895")),
                         HStack(8,
                             Button("保存设置", () => _ = SaveSettingsAsync(state.Settings, dispatch)).Background(Theme.Accent).AutomationName("保存设置"),
-                            Button("检测状态", () => _ = InitializeAsync(dispatch)).AutomationName("检测状态"))))
+                            Button("放弃更改", () => dispatch(new SettingsChanged(SettingsManager.Instance.Current))).AutomationName("放弃设置更改"))))
                 .Padding(24)
                 .MaxWidth(720))
             .Flex(grow: 1, basis: 0);
@@ -779,6 +838,17 @@ class App : Component
         var text = string.Join(" ", parts.Where(part => !string.IsNullOrWhiteSpace(part)));
         return string.IsNullOrWhiteSpace(text) ? null : text;
     }
+
+    private static string FormatStatus(BitwardenStatus? status) =>
+        status is null
+            ? "未检测到 Bitwarden CLI 或状态不可用"
+            : status.Status switch
+            {
+                "unlocked" => $"已解锁 · {status.ServerUrl ?? "默认服务器"}",
+                "locked" => $"已锁定 · {status.ServerUrl ?? "默认服务器"}",
+                "unauthenticated" => "尚未登录，请先在终端执行 bw login",
+                _ => $"{status.Status} · {status.ServerUrl ?? "默认服务器"}"
+            };
 
     private static int ParsePositiveInt(string value, int fallback) =>
         int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) && parsed >= 0
