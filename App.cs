@@ -48,6 +48,9 @@ class App : Component
 
     private static Element RenderTitleActions(AppState state, Action<AppAction> dispatch) =>
         HStack(8,
+            Button("新建项目", () => dispatch(new EditorOpened(VaultItemDraft.New())))
+                .IsEnabled(state.IsUnlocked && !state.IsBusy)
+                .AutomationName("新建项目"),
             Button("同步", () => _ = SyncAsync(dispatch)).IsEnabled(state.IsUnlocked && !state.IsBusy).AutomationName("同步密码库"),
             Button("锁定", () => _ = LockAsync(dispatch)).IsEnabled(state.IsUnlocked && !state.IsBusy).AutomationName("锁定密码库"));
 
@@ -122,7 +125,7 @@ class App : Component
             .PaneDisplayMode(NavigationViewPaneDisplayMode.Left)
             .SelectedTagChanged(tag =>
             {
-                if (tag == "Settings")
+                if (tag is null)
                 {
                     dispatch(new SettingsVisibilityChanged(true));
                     return;
@@ -135,20 +138,12 @@ class App : Component
                 }
 
                 dispatch(new FilterChanged(TagToFilter(tag ?? "AllItems")));
-            })
-            .PaneFooter(
-                VStack(8,
-                    Button("新建项目", () => dispatch(new EditorOpened(VaultItemDraft.New())))
-                        .AutomationName("新建项目"),
-                    Button("同步", () => _ = SyncAsync(dispatch)).AutomationName("同步密码库"),
-                    Button("锁定", () => _ = LockAsync(dispatch)).AutomationName("锁定密码库"))
-                .Padding(8))
-            .Set(ExpandNavigationGroups);
+            });
 
         return (nav with
         {
-            SelectedTag = SelectedNavigationTag(state),
-            IsSettingsVisible = false
+            SelectedTag = state.ShowSettings ? null : SelectedNavigationTag(state),
+            IsSettingsVisible = true
         }).Flex(grow: 1, basis: 0);
     }
 
@@ -191,33 +186,8 @@ class App : Component
                             : [NavItem("暂无文件夹", "Folder", "FoldersEmpty")]
                     }
                 ]
-            },
-            NavItem("设置", "Setting", "Settings")
+            }
         ];
-    }
-
-    private static void ExpandNavigationGroups(NavigationView navigationView)
-    {
-        foreach (var item in EnumerateNavigationItems(navigationView.MenuItems))
-        {
-            if (item.Tag is "VaultRoot" or "AllVaults" or "ItemTypes" or "Folders")
-            {
-                item.IsExpanded = true;
-            }
-        }
-    }
-
-    private static IEnumerable<NavigationViewItem> EnumerateNavigationItems(IList<object> items)
-    {
-        foreach (var item in items.OfType<NavigationViewItem>())
-        {
-            yield return item;
-
-            foreach (var child in EnumerateNavigationItems(item.MenuItems))
-            {
-                yield return child;
-            }
-        }
     }
 
     private static Element RenderVault(AppState state, Action<AppAction> dispatch) =>
@@ -980,7 +950,7 @@ class App : Component
             _ when !string.IsNullOrWhiteSpace(state.ActiveFolderId) => "这个文件夹下还没有项目。",
             VaultFilter.Favorites => "在详情页或 Bitwarden 中为项目加星标后会显示在这里。",
             VaultFilter.Trash => "删除的项目会先进入回收站，可以在这里恢复或永久删除。",
-            _ => "可以点击左侧底部的新建项目开始添加。"
+            _ => "可以点击标题栏的新建项目开始添加。"
         };
     }
 
