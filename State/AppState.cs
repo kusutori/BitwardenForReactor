@@ -19,6 +19,8 @@ public sealed record AppState
 
     public VaultFilter Filter { get; init; } = VaultFilter.AllItems;
 
+    public string? ActiveFolderId { get; init; }
+
     public string SearchQuery { get; init; } = string.Empty;
 
     public string? SelectedItemId { get; init; }
@@ -65,6 +67,11 @@ public sealed record AppState
                 _ => filtered
             };
 
+            if (!string.IsNullOrWhiteSpace(ActiveFolderId))
+            {
+                filtered = filtered.Where(item => item.FolderId == ActiveFolderId);
+            }
+
             if (!string.IsNullOrWhiteSpace(SearchQuery))
             {
                 var query = SearchQuery.Trim();
@@ -103,6 +110,8 @@ public sealed record VaultLoaded(
     string? SelectedItemId = null) : AppAction;
 
 public sealed record FilterChanged(VaultFilter Filter) : AppAction;
+
+public sealed record FolderChanged(string FolderId) : AppAction;
 
 public sealed record SearchChanged(string Query) : AppAction;
 
@@ -147,6 +156,14 @@ public static class AppReducer
             FilterChanged changed => state with
             {
                 Filter = changed.Filter,
+                ActiveFolderId = null,
+                ShowSettings = false,
+                SelectedItemId = null
+            },
+            FolderChanged changed => state with
+            {
+                Filter = VaultFilter.AllItems,
+                ActiveFolderId = changed.FolderId,
                 ShowSettings = false,
                 SelectedItemId = null
             },
@@ -175,6 +192,7 @@ public static class AppReducer
                 Folders = [],
                 SelectedItemId = null,
                 Filter = VaultFilter.AllItems,
+                ActiveFolderId = null,
                 SearchQuery = string.Empty,
                 ShowSettings = false
             },

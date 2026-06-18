@@ -115,25 +115,22 @@ class App : Component
     private static Element RenderMain(AppState state, Action<AppAction> dispatch)
     {
         var nav = NavigationView(
-                [
-                    NavItem("全部项目", "Library", "AllItems"),
-                    NavItem("登录", "Contact", "Logins"),
-                    NavItem("卡片", "ContactInfo", "Cards"),
-                    NavItem("身份", "People", "Identities"),
-                    NavItem("笔记", "Page", "Notes"),
-                    NavItem("收藏", "Favorite", "Favorites"),
-                    NavItem("回收站", "Delete", "Trash"),
-                    NavItem("设置", "Setting", "Settings")
-                ],
+                BuildNavigationItems(state),
                 state.ShowSettings ? RenderSettings(state, dispatch) : RenderVault(state, dispatch))
-            .PaneTitle("密码库")
-            .OpenPaneLength(210)
+            .PaneTitle("Bitwarden")
+            .OpenPaneLength(260)
             .PaneDisplayMode(NavigationViewPaneDisplayMode.Left)
             .SelectedTagChanged(tag =>
             {
                 if (tag == "Settings")
                 {
                     dispatch(new SettingsVisibilityChanged(true));
+                    return;
+                }
+
+                if (TryGetFolderId(tag, out var folderId))
+                {
+                    dispatch(new FolderChanged(folderId));
                     return;
                 }
 
@@ -145,13 +142,82 @@ class App : Component
                         .AutomationName("新建项目"),
                     Button("同步", () => _ = SyncAsync(dispatch)).AutomationName("同步密码库"),
                     Button("锁定", () => _ = LockAsync(dispatch)).AutomationName("锁定密码库"))
-                .Padding(8));
+                .Padding(8))
+            .Set(ExpandNavigationGroups);
 
         return (nav with
         {
-            SelectedTag = state.ShowSettings ? "Settings" : FilterToTag(state.Filter),
+            SelectedTag = SelectedNavigationTag(state),
             IsSettingsVisible = false
         }).Flex(grow: 1, basis: 0);
+    }
+
+    private static NavigationViewItemData[] BuildNavigationItems(AppState state)
+    {
+        var folderItems = state.Folders
+            .OrderBy(folder => folder.Name, StringComparer.CurrentCultureIgnoreCase)
+            .Select(folder => NavItem(folder.Name, "Folder", FolderToTag(folder.Id)))
+            .ToArray();
+
+        return
+        [
+            NavItem("密码库", "Library", "VaultRoot") with
+            {
+                Children =
+                [
+                    NavItem("所有密码库", "Library", "AllVaults") with
+                    {
+                        Children =
+                        [
+                            NavItem("我的密码库", "Contact", "AllItems")
+                        ]
+                    },
+                    NavItem("所有项目", "AllApps", "ItemTypes") with
+                    {
+                        Children =
+                        [
+                            NavItem("收藏夹", "Favorite", "Favorites"),
+                            NavItem("登录", "World", "Logins"),
+                            NavItem("支付卡", "ContactInfo", "Cards"),
+                            NavItem("身份", "People", "Identities"),
+                            NavItem("安全笔记", "Page", "Notes"),
+                            NavItem("回收站", "Delete", "Trash")
+                        ]
+                    },
+                    NavItem("文件夹", "Folder", "Folders") with
+                    {
+                        Children = folderItems.Length > 0
+                            ? folderItems
+                            : [NavItem("暂无文件夹", "Folder", "FoldersEmpty")]
+                    }
+                ]
+            },
+            NavItem("设置", "Setting", "Settings")
+        ];
+    }
+
+    private static void ExpandNavigationGroups(NavigationView navigationView)
+    {
+        foreach (var item in EnumerateNavigationItems(navigationView.MenuItems))
+        {
+            if (item.Tag is "VaultRoot" or "AllVaults" or "ItemTypes" or "Folders")
+            {
+                item.IsExpanded = true;
+            }
+        }
+    }
+
+    private static IEnumerable<NavigationViewItem> EnumerateNavigationItems(IList<object> items)
+    {
+        foreach (var item in items.OfType<NavigationViewItem>())
+        {
+            yield return item;
+
+            foreach (var child in EnumerateNavigationItems(item.MenuItems))
+            {
+                yield return child;
+            }
+        }
     }
 
     private static Element RenderVault(AppState state, Action<AppAction> dispatch) =>
@@ -168,8 +234,8 @@ class App : Component
         return Border(
                 FlexColumn(
                     VStack(4,
-                        TextBlock(FilterTitle(state.Filter)).SemiBold(),
-                        TextBlock(FilterDescription(state.Filter)).Foreground(Theme.SecondaryText))
+                        TextBlock(FilterTitle(state)).SemiBold(),
+                        TextBlock(FilterDescription(state)).Foreground(Theme.SecondaryText))
                     .Margin(left: 12, top: 12, right: 12, bottom: 0),
                     AutoSuggestBox(state.SearchQuery, query => dispatch(new SearchChanged(query)))
                         .PlaceholderText("搜索密码库...")
@@ -790,6 +856,12 @@ class App : Component
     private static VaultFilter TagToFilter(string tag) =>
         tag switch
         {
+            "VaultRoot" => VaultFilter.AllItems,
+            "AllVaults" => VaultFilter.AllItems,
+            "ItemTypes" => VaultFilter.AllItems,
+            "Folders" => VaultFilter.AllItems,
+            "FoldersEmpty" => VaultFilter.AllItems,
+            "AllItems" => VaultFilter.AllItems,
             "Logins" => VaultFilter.Logins,
             "Cards" => VaultFilter.Cards,
             "Identities" => VaultFilter.Identities,
@@ -811,8 +883,41 @@ class App : Component
             _ => "AllItems"
         };
 
-    private static string FilterTitle(VaultFilter filter) =>
-        filter switch
+    private static string SelectedNavigationTag(AppState state)
+    {
+        if (state.ShowSettings)
+        {
+            return "Settings";
+        }
+
+        return !string.IsNullOrWhiteSpace(state.ActiveFolderId)
+            ? FolderToTag(state.ActiveFolderId)
+            : FilterToTag(state.Filter);
+    }
+
+    private static string FolderToTag(string folderId) => $"Folder:{folderId}";
+
+    private static bool TryGetFolderId(string? tag, out string folderId)
+    {
+        const string prefix = "Folder:";
+        if (!string.IsNullOrWhiteSpace(tag) && tag.StartsWith(prefix, StringComparison.Ordinal))
+        {
+            folderId = tag[prefix.Length..];
+            return !string.IsNullOrWhiteSpace(folderId);
+        }
+
+        folderId = string.Empty;
+        return false;
+    }
+
+    private static string FilterTitle(AppState state)
+    {
+        if (!string.IsNullOrWhiteSpace(state.ActiveFolderId))
+        {
+            return state.Folders.FirstOrDefault(folder => folder.Id == state.ActiveFolderId)?.Name ?? "文件夹";
+        }
+
+        return state.Filter switch
         {
             VaultFilter.Logins => "登录",
             VaultFilter.Cards => "卡片",
@@ -822,9 +927,16 @@ class App : Component
             VaultFilter.Trash => "回收站",
             _ => "全部项目"
         };
+    }
 
-    private static string FilterDescription(VaultFilter filter) =>
-        filter switch
+    private static string FilterDescription(AppState state)
+    {
+        if (!string.IsNullOrWhiteSpace(state.ActiveFolderId))
+        {
+            return "当前文件夹中的密码库项目";
+        }
+
+        return state.Filter switch
         {
             VaultFilter.Logins => "网站账号、应用账号和通行密钥相关项目",
             VaultFilter.Cards => "信用卡、借记卡和付款信息",
@@ -834,6 +946,7 @@ class App : Component
             VaultFilter.Trash => "已删除但仍可恢复的项目",
             _ => "浏览当前密码库中的全部项目"
         };
+    }
 
     private static string EmptyListTitle(AppState state)
     {
@@ -844,6 +957,7 @@ class App : Component
 
         return state.Filter switch
         {
+            _ when !string.IsNullOrWhiteSpace(state.ActiveFolderId) => "文件夹为空",
             VaultFilter.Favorites => "还没有收藏项目",
             VaultFilter.Trash => "回收站为空",
             VaultFilter.Logins => "没有登录项目",
@@ -863,6 +977,7 @@ class App : Component
 
         return state.Filter switch
         {
+            _ when !string.IsNullOrWhiteSpace(state.ActiveFolderId) => "这个文件夹下还没有项目。",
             VaultFilter.Favorites => "在详情页或 Bitwarden 中为项目加星标后会显示在这里。",
             VaultFilter.Trash => "删除的项目会先进入回收站，可以在这里恢复或永久删除。",
             _ => "可以点击左侧底部的新建项目开始添加。"
