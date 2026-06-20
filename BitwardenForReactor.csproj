@@ -50,10 +50,6 @@
         <PackageReference Include="Microsoft.UI.Reactor" Version="$(MicrosoftUIReactorVersion)" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Compile Remove="skills\**\*.cs" />
-    </ItemGroup>
-
     <!--
         Debug-only: enable the Reactor devtools surface so the *devtools* flag
         (from Properties/launchSettings.json's default F5 args) lights up the
