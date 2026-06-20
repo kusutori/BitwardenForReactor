@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using BitwardenForReactor.Application;
 using BitwardenForReactor.Models;
 using BitwardenForReactor.Services;
@@ -10,6 +9,7 @@ using Microsoft.UI.Reactor.Layout;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using static Microsoft.UI.Reactor.Factories;
+using WinUI = Microsoft.UI.Xaml.Controls;
 
 namespace BitwardenForReactor.Components;
 
@@ -25,9 +25,6 @@ public sealed class VaultListItem : Component<VaultListItemProps>
     {
         var item = Props.Item;
         var secondary = BuildSecondaryText(item);
-        var stateText = Props.IsTrashView && item.DeletedDate is not null
-            ? $"已删除 · {item.DeletedDate:yyyy-MM-dd}"
-            : item.TypeLabel;
 
         return Border(
                 Grid(
@@ -49,15 +46,14 @@ public sealed class VaultListItem : Component<VaultListItemProps>
                             item.Favorite
                                 ? Icon(FontIcon("\uE735", fontSize: 13)).Foreground(Theme.SystemCaution)
                                 : null),
-                        HStack(8,
-                            TextBlock(secondary)
+                        TextBlock(secondary)
+                            .Foreground(Theme.SecondaryText)
+                            .TextTrimming(TextTrimming.CharacterEllipsis),
+                        Props.IsTrashView && item.DeletedDate is not null
+                            ? TextBlock($"已删除 · {item.DeletedDate:yyyy-MM-dd}")
                                 .Foreground(Theme.SecondaryText)
-                                .TextTrimming(TextTrimming.CharacterEllipsis)
-                                .Flex(grow: 1, basis: 0),
-                            Border(TextBlock(stateText).Foreground(Theme.SecondaryText))
-                                .Padding(left: 6, top: 2, right: 6, bottom: 2)
-                                .CornerRadius(4)
-                                .Background(Theme.SubtleFill)))
+                                .FontSize(11)
+                            : null)
                     .Margin(left: 12, right: 8)
                     .VerticalAlignment(VerticalAlignment.Center)
                     .Grid(column: 1),
@@ -68,29 +64,22 @@ public sealed class VaultListItem : Component<VaultListItemProps>
                     .VerticalAlignment(VerticalAlignment.Center)
                     .Grid(column: 2)))
             .Padding(left: 12, top: 9, right: 10, bottom: 9)
-            .WithBorder(Props.IsSelected ? Theme.Accent : Theme.CardStroke, Props.IsSelected ? 2 : 0);
+            .WithBorder(Props.IsSelected ? Theme.Accent : Theme.CardStroke, Props.IsSelected ? 2 : 0)
+            .HorizontalAlignment(HorizontalAlignment.Stretch);
     }
 
     private Element BuildOpenButton(BitwardenItem item) =>
-        Button(Icon(FontIcon("\uE8A7", fontSize: 14)),
+        CompactButton("\uE8A7", "前往项目网站",
                 () => _ = AppCommands.OpenUriAsync(item.PrimaryUri, Props.Dispatch))
-            .SubtleButton()
-            .Width(32)
-            .Height(32)
             .IsEnabled(!string.IsNullOrWhiteSpace(item.PrimaryUri))
-            .ToolTip("前往网站")
-            .AutomationName("前往项目网站");
+            .ToolTip("前往网站");
 
     private Element BuildCopyMenu(BitwardenItem item)
     {
         var canCopy = !string.IsNullOrWhiteSpace(item.Username) || !string.IsNullOrWhiteSpace(item.Password);
-        var anchor = Button(Icon(FontIcon("\uE8C8", fontSize: 14)))
-            .SubtleButton()
-            .Width(32)
-            .Height(32)
+        var anchor = CompactButton("\uE8C8", "打开复制菜单")
             .IsEnabled(canCopy)
-            .ToolTip("复制")
-            .AutomationName("打开复制菜单");
+            .ToolTip("复制");
 
         return MenuFlyout(
             anchor,
@@ -106,62 +95,74 @@ public sealed class VaultListItem : Component<VaultListItemProps>
 
     private Element BuildMoreMenu(BitwardenItem item)
     {
-        var anchor = Button(Icon(FontIcon("\uE712", fontSize: 14)))
-            .SubtleButton()
-            .Width(32)
-            .Height(32)
+        return CompactButton("\uE712", "打开更多操作菜单")
             .ToolTip("更多操作")
-            .AutomationName("打开更多操作菜单");
-
-        return MenuFlyout(anchor, BuildMoreItems(item).ToArray());
+            .Set(button => button.Flyout = BuildMoreFlyout(item));
     }
 
-    private List<MenuFlyoutItemBase> BuildMoreItems(BitwardenItem item)
+    private WinUI.MenuFlyout BuildMoreFlyout(BitwardenItem item)
     {
+        var flyout = new WinUI.MenuFlyout();
         if (Props.IsTrashView)
         {
-            return
-            [
-                MenuItem("恢复", () => { _ = AppCommands.RestoreAsync(item, Props.Dispatch); }, icon: "\uE7A7"),
-                MenuSeparator(),
-                MenuItem("永久删除", () => Props.Dispatch(new DeleteRequested(item, true)), icon: "\uE74D")
-            ];
+            flyout.Items.Add(NativeMenuItem("恢复", "\uE7A7", () => _ = AppCommands.RestoreAsync(item, Props.Dispatch)));
+            flyout.Items.Add(new WinUI.MenuFlyoutSeparator());
+            flyout.Items.Add(NativeMenuItem("永久删除", "\uE74D", () => Props.Dispatch(new DeleteRequested(item, true)), critical: true));
+            return flyout;
         }
 
-        return
-        [
-            MenuItem("前往", () => { _ = AppCommands.OpenUriAsync(item.PrimaryUri, Props.Dispatch); }, icon: "\uE8A7") with
+        flyout.Items.Add(NativeMenuItem("前往", "\uE8A7", () => _ = AppCommands.OpenUriAsync(item.PrimaryUri, Props.Dispatch), !string.IsNullOrWhiteSpace(item.PrimaryUri)));
+        flyout.Items.Add(NativeMenuItem("复制用户名", "\uE8C8", () => Copy(item.Username), !string.IsNullOrWhiteSpace(item.Username)));
+        flyout.Items.Add(NativeMenuItem("复制密码", "\uE8C8", () => Copy(item.Password), !string.IsNullOrWhiteSpace(item.Password)));
+        flyout.Items.Add(new WinUI.MenuFlyoutSeparator());
+        flyout.Items.Add(NativeMenuItem(item.Favorite ? "取消收藏" : "收藏", "\uE735", () => _ = AppCommands.ToggleFavoriteAsync(item, Props.Dispatch)));
+        flyout.Items.Add(NativeMenuItem("编辑", "\uE70F", () => Props.Dispatch(new EditorOpened(VaultItemDraft.FromItem(item)))));
+        flyout.Items.Add(NativeMenuItem("附件", "\uE723", null, enabled: false));
+        flyout.Items.Add(NativeMenuItem("克隆", "\uE8C8", () => _ = AppCommands.CloneItemAsync(item, Props.Dispatch)));
+        flyout.Items.Add(NativeMenuItem("归档", "\uE8DE", null, enabled: false));
+        flyout.Items.Add(new WinUI.MenuFlyoutSeparator());
+        flyout.Items.Add(NativeMenuItem("删除", "\uE74D", () => Props.Dispatch(new DeleteRequested(item, false)), critical: true));
+        return flyout;
+    }
+
+    private static ButtonElement CompactButton(string glyph, string automationName, Action? onClick = null) =>
+        Button(Icon(FontIcon(glyph, fontSize: 12)), onClick)
+            .SubtleButton()
+            .Width(28)
+            .Height(28)
+            .AutomationName(automationName)
+            .Set(button =>
             {
-                IsEnabled = !string.IsNullOrWhiteSpace(item.PrimaryUri)
-            },
-            MenuItem("复制用户名", () => Copy(item.Username), icon: "\uE8C8") with
-            {
-                IsEnabled = !string.IsNullOrWhiteSpace(item.Username)
-            },
-            MenuItem("复制密码", () => Copy(item.Password), icon: "\uE8C8") with
-            {
-                IsEnabled = !string.IsNullOrWhiteSpace(item.Password)
-            },
-            MenuSeparator(),
-            MenuItem(item.Favorite ? "取消收藏" : "收藏", () =>
-            {
-                _ = AppCommands.ToggleFavoriteAsync(item, Props.Dispatch);
-            }, icon: "\uE735"),
-            MenuItem("编辑", () => Props.Dispatch(new EditorOpened(VaultItemDraft.FromItem(item))), icon: "\uE70F"),
-            MenuItem("附件", icon: "\uE723") with
-            {
-                IsEnabled = false,
-                Description = "暂未支持附件管理"
-            },
-            MenuItem("克隆", () => { _ = AppCommands.CloneItemAsync(item, Props.Dispatch); }, icon: "\uE8C8"),
-            MenuItem("归档", icon: "\uE8DE") with
-            {
-                IsEnabled = false,
-                Description = "Bitwarden CLI 暂无归档能力"
-            },
-            MenuSeparator(),
-            MenuItem("删除", () => Props.Dispatch(new DeleteRequested(item, false)), icon: "\uE74D")
-        ];
+                button.MinWidth = 0;
+                button.MinHeight = 0;
+                button.Padding = new Thickness(0);
+                button.HorizontalContentAlignment = HorizontalAlignment.Center;
+                button.VerticalContentAlignment = VerticalAlignment.Center;
+            });
+
+    private static WinUI.MenuFlyoutItem NativeMenuItem(
+        string text,
+        string glyph,
+        Action? onClick,
+        bool enabled = true,
+        bool critical = false)
+    {
+        var item = new WinUI.MenuFlyoutItem
+        {
+            Text = text,
+            Icon = new WinUI.FontIcon { Glyph = glyph, FontSize = 14 },
+            IsEnabled = enabled
+        };
+        if (onClick is not null)
+        {
+            item.Click += (_, _) => onClick();
+        }
+        if (critical)
+        {
+            item.Foreground = Microsoft.UI.Xaml.Application.Current.Resources[Theme.SystemCritical.ResourceKey] as Brush
+                ?? new SolidColorBrush(Microsoft.UI.Colors.Red);
+        }
+        return item;
     }
 
     private void Copy(string? value)
