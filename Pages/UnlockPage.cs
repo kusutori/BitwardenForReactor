@@ -23,39 +23,67 @@ public sealed class UnlockPage : Component<UnlockPageProps>
     {
         var state = Props.State;
         var status = state.Status;
-        Element statusBanner = status is null
+        var title = status is null
+            ? "连接 Bitwarden CLI"
+            : !status.IsLoggedIn
+                ? "需要先登录"
+                : "密码库已锁定";
+        Element? statusBanner = status is null
             ? InfoBar("未检测到 Bitwarden CLI", "请安装 Bitwarden CLI，或在设置中配置 bw.exe 路径。")
                 .Severity(InfoBarSeverity.Error)
             : !status.IsLoggedIn
                 ? InfoBar("尚未登录", "请先在终端执行 bw login，然后回到此应用解锁。")
                     .Severity(InfoBarSeverity.Warning)
-                : TextBlock(status.UserEmail ?? "已登录").Foreground(Theme.SecondaryText);
+                : null;
 
         return Border(
-                FlexColumn(
-                    Icon(FontIcon("\uE72E", fontSize: 58)),
-                    Heading("Bitwarden"),
-                    statusBanner,
-                    PasswordBox(Props.MasterPassword, Props.SetMasterPassword, "输入主密码")
-                        .Header("主密码")
-                        .OnKeyDown((_, e) =>
-                        {
-                            if (e.Key == VirtualKey.Enter)
-                            {
-                                _ = AppCommands.UnlockAsync(Props.MasterPassword, Props.SetMasterPassword, Props.Dispatch);
-                            }
-                        })
-                        .IsEnabled(!state.IsBusy)
-                        .AutomationName("主密码"),
-                    Button("解锁", () => _ = AppCommands.UnlockAsync(Props.MasterPassword, Props.SetMasterPassword, Props.Dispatch))
-                        .IsEnabled(!state.IsBusy && !string.IsNullOrWhiteSpace(Props.MasterPassword))
-                        .Background(Theme.Accent)
-                        .AutomationName("解锁密码库"),
-                    HyperlinkButton("重新检测状态", onClick: () => _ = AppCommands.InitializeAsync(Props.Dispatch))
-                        .AutomationName("重新检测状态"))
-                with { RowGap = 16, AlignItems = FlexAlign.Center })
-            .Padding(32)
-            .MaxWidth(440)
+                Border(
+                        VStack(20,
+                            VStack(10,
+                                Border(Icon(FontIcon("\uE72E", fontSize: 30)))
+                                    .Width(56)
+                                    .Height(56)
+                                    .CornerRadius(8)
+                                    .Background(Theme.SubtleFill)
+                                    .HorizontalAlignment(HorizontalAlignment.Center),
+                                Heading(title).HorizontalAlignment(HorizontalAlignment.Center),
+                                TextBlock(status?.UserEmail ?? "Bitwarden 密码库")
+                                    .Foreground(Theme.SecondaryText)
+                                    .HorizontalAlignment(HorizontalAlignment.Center)),
+                            statusBanner,
+                            VStack(12,
+                                PasswordBox(Props.MasterPassword, Props.SetMasterPassword, "输入主密码")
+                                    .Header("主密码")
+                                    .Width(360)
+                                    .OnKeyDown((_, e) =>
+                                    {
+                                        if (e.Key == VirtualKey.Enter)
+                                        {
+                                            _ = AppCommands.UnlockAsync(Props.MasterPassword, Props.SetMasterPassword, Props.Dispatch);
+                                        }
+                                    })
+                                    .IsEnabled(!state.IsBusy)
+                                    .AutomationName("主密码"),
+                                Button("解锁密码库", () => _ = AppCommands.UnlockAsync(Props.MasterPassword, Props.SetMasterPassword, Props.Dispatch))
+                                    .AccentButton()
+                                    .Width(360)
+                                    .Height(40)
+                                    .IsEnabled(!state.IsBusy && !string.IsNullOrWhiteSpace(Props.MasterPassword))
+                                    .AutomationName("解锁密码库")),
+                            Border(VStack())
+                                .Height(1)
+                                .Background(Theme.DividerStroke),
+                            HStack(8,
+                                TextBlock("CLI 状态发生变化？").Foreground(Theme.SecondaryText),
+                                HyperlinkButton("重新检测", onClick: () => _ = AppCommands.InitializeAsync(Props.Dispatch))
+                                    .AutomationName("重新检测状态"))
+                            .HorizontalAlignment(HorizontalAlignment.Center)))
+                    .Padding(28)
+                    .Width(440)
+                    .CornerRadius(8)
+                    .Background(Theme.CardBackground)
+                    .WithBorder(Theme.CardStroke, 1))
+            .Padding(24)
             .HorizontalAlignment(HorizontalAlignment.Center)
             .VerticalAlignment(VerticalAlignment.Center)
             .Flex(grow: 1, basis: 0);
