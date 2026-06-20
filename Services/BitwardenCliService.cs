@@ -152,6 +152,25 @@ public sealed partial class BitwardenCliService
         return result.Success;
     }
 
+    public async Task<bool> CloneItemAsync(string itemId, string newName)
+    {
+        var getResult = await ExecuteCommandAsync(WithSession("get", "item", itemId));
+        if (!getResult.Success || JsonNode.Parse(getResult.Output)?.AsObject() is not { } source)
+        {
+            return false;
+        }
+
+        source.Remove("id");
+        source.Remove("creationDate");
+        source.Remove("revisionDate");
+        source.Remove("deletedDate");
+        source["name"] = newName;
+
+        var encodedJson = EncodeJson(source);
+        var result = await ExecuteCommandAsync(WithSession("create", "item", encodedJson));
+        return result.Success;
+    }
+
     public async Task<bool> EditItemAsync(string itemId, JsonObject updatedFields)
     {
         var getResult = await ExecuteCommandAsync(WithSession("get", "item", itemId));

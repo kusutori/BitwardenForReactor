@@ -1,9 +1,11 @@
 using System;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using BitwardenForReactor.Models;
 using BitwardenForReactor.Services;
 using BitwardenForReactor.State;
 using Microsoft.UI.Xaml.Controls;
+using Windows.System;
 
 namespace BitwardenForReactor.Application;
 
@@ -200,6 +202,62 @@ public static class AppCommands
     {
         await ClipboardService.CopyToClipboardWithTimeoutAsync(value, SettingsManager.Instance.Current.ClipboardClearSeconds);
         dispatch(new NoticeShown("已复制", "内容已复制到剪贴板，并会按设置自动清除。", InfoBarSeverity.Success));
+    }
+
+    public static async Task OpenUriAsync(string? uriText, Action<AppAction> dispatch)
+    {
+        if (string.IsNullOrWhiteSpace(uriText))
+        {
+            dispatch(new NoticeShown("无法打开网站", "该项目没有配置网站地址。", InfoBarSeverity.Warning));
+            return;
+        }
+
+        var normalized = uriText.Contains("://", StringComparison.Ordinal) ? uriText : $"https://{uriText}";
+        if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri) || !await Launcher.LaunchUriAsync(uri))
+        {
+            dispatch(new NoticeShown("无法打开网站", "系统未能打开该项目的网站地址。", InfoBarSeverity.Error));
+        }
+    }
+
+    public static async Task ToggleFavoriteAsync(BitwardenItem item, Action<AppAction> dispatch)
+    {
+        dispatch(new BusyChanged(true, item.Favorite ? "正在取消收藏..." : "正在收藏..."));
+        try
+        {
+            var update = new JsonObject { ["favorite"] = !item.Favorite };
+            var success = await BitwardenCliService.Instance.EditItemAsync(item.Id, update);
+            dispatch(success
+                ? new NoticeShown(item.Favorite ? "已取消收藏" : "已收藏", item.Name, InfoBarSeverity.Success)
+                : new NoticeShown("操作失败", "Bitwarden CLI 未能更新收藏状态。", InfoBarSeverity.Error));
+            if (success)
+            {
+                await LoadVaultAsync(dispatch, item.Id);
+            }
+        }
+        finally
+        {
+            dispatch(new BusyChanged(false));
+        }
+    }
+
+    public static async Task CloneItemAsync(BitwardenItem item, Action<AppAction> dispatch)
+    {
+        dispatch(new BusyChanged(true, "正在克隆项目..."));
+        try
+        {
+            var success = await BitwardenCliService.Instance.CloneItemAsync(item.Id, $"{item.Name} 副本");
+            dispatch(success
+                ? new NoticeShown("已克隆", $"已创建「{item.Name} 副本」。", InfoBarSeverity.Success)
+                : new NoticeShown("克隆失败", "Bitwarden CLI 未能克隆该项目。", InfoBarSeverity.Error));
+            if (success)
+            {
+                await LoadVaultAsync(dispatch);
+            }
+        }
+        finally
+        {
+            dispatch(new BusyChanged(false));
+        }
     }
 
     public static async Task SaveSettingsAsync(AppSettings settings, Action<AppAction> dispatch)

@@ -38,7 +38,7 @@ public sealed class VaultListPane : Component<VaultPaneProps>
                         ? RenderEmptyList()
                         : (ListView(items, item => item.Id, (item, _) =>
                             Component<VaultListItem, VaultListItemProps>(
-                                new VaultListItemProps(item, item.Id == selectedId, state.Filter == VaultFilter.Trash)))
+                                new VaultListItemProps(item, item.Id == selectedId, state.Filter == VaultFilter.Trash, Props.Dispatch)))
                             with { SelectionMode = ListViewSelectionMode.Single })
                             .SelectionChanged<BitwardenItem>(selected =>
                                 Props.Dispatch(new ItemSelected(selected.FirstOrDefault()?.Id)))
