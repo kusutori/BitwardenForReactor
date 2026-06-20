@@ -73,11 +73,8 @@ public sealed class ItemEditorDialog : Component<ItemEditorDialogProps>
                 [
                     TextBox(draft.Notes ?? string.Empty, value => Update(draft with { Notes = value }), header: "备注")
                         .TextWrapping()
-                        .Set(box =>
-                        {
-                            box.AcceptsReturn = true;
-                            box.MinHeight = 100;
-                        })
+                        .AcceptsReturn()
+                        .MinHeight(100)
                         .AutomationName("备注"),
                     CheckBox(draft.Favorite, value => Update(draft with { Favorite = value }), "收藏")
                         .AutomationName("收藏")

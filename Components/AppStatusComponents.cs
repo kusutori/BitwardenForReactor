@@ -23,7 +23,7 @@ public sealed class BusyIndicator : Component<AppState>
     public override Element Render() =>
         Border(
                 HStack(10,
-                    ProgressRing().Width(22).Height(22).Set(ring => ring.IsActive = true),
+                    ProgressRing().IsActive().Width(22).Height(22),
                     TextBlock(string.IsNullOrWhiteSpace(Props.BusyText) ? "处理中..." : Props.BusyText)
                         .Foreground(Theme.SecondaryText)))
             .Padding(12)

@@ -128,17 +128,17 @@ public sealed class VaultListItem : Component<VaultListItemProps>
     private static ButtonElement CompactButton(string glyph, string automationName, Action? onClick = null) =>
         Button(Icon(FontIcon(glyph, fontSize: 12)), onClick)
             .SubtleButton()
-            .Width(28)
-            .Height(28)
-            .AutomationName(automationName)
             .Set(button =>
             {
-                button.MinWidth = 0;
-                button.MinHeight = 0;
-                button.Padding = new Thickness(0);
                 button.HorizontalContentAlignment = HorizontalAlignment.Center;
                 button.VerticalContentAlignment = VerticalAlignment.Center;
-            });
+            })
+            .Width(28)
+            .Height(28)
+            .MinWidth(0)
+            .MinHeight(0)
+            .Padding(0)
+            .AutomationName(automationName);
 
     private static WinUI.MenuFlyoutItem NativeMenuItem(
         string text,

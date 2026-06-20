@@ -70,16 +70,9 @@ Reactor 当前没有为以下 Windows Community Toolkit 控件提供官方 Eleme
 
 ## 可立即清理
 
-以下原生访问并非当前 Reactor 的能力缺口：
+当前没有已知的可立即清理项。
 
-| 当前写法 | Reactor 已有 API | 代码位置 |
-| --- | --- | --- |
-| `ProgressRing().Set(ring => ring.IsActive = true)` | `.IsActive()` | [`Components/AppStatusComponents.cs`](../Components/AppStatusComponents.cs) |
-| `TextBox(...).Set(box => box.AcceptsReturn = true)` | `.AcceptsReturn()` | [`Dialogs/ItemEditorDialog.cs`](../Dialogs/ItemEditorDialog.cs) |
-| `button.Flyout = ...` | `.WithFlyout(...)` / `MenuFlyout(...)` | [`Components/VaultListItem.cs`](../Components/VaultListItem.cs) |
-| 在 `.Set(...)` 中设置 `MinWidth`、`MinHeight`、`Padding` | 通用 `.MinWidth(...)`、`.MinHeight(...)`、`.Padding(...)` | [`Components/VaultListItem.cs`](../Components/VaultListItem.cs) |
-
-这些项目应在后续相关代码改动时迁移到 Reactor DSL。迁移 Flyout 时需先解决 RNC-001，否则“更多”菜单仍必须保留原生实现。
+`button.Flyout = BuildMoreFlyout(...)` 仍需保留：虽然 Reactor 提供 `.WithFlyout(...)`，但它接收 Reactor `Element`，不能包装当前为实现危险色而创建的原生 `MenuFlyout`。应与 RNC-001 一并迁移。
 
 ## 观察项
 
@@ -116,4 +109,8 @@ rg -n "\.Set\(|new WinUI\.|ControlRegistry\.Register|RegisterControlAssembly" .
 
 ## 已解决记录
 
-目前没有因 Reactor 升级而移除的回退项。
+| 日期 | 清理内容 | 替代 API |
+| --- | --- | --- |
+| 2026-06-20 | `ProgressRing.IsActive` 原生设置 | `.IsActive()` |
+| 2026-06-20 | `TextBox.AcceptsReturn` 和 `MinHeight` 原生设置 | `.AcceptsReturn()`、`.MinHeight(...)` |
+| 2026-06-20 | 紧凑按钮的 `MinWidth`、`MinHeight` 和 `Padding` 原生设置 | 通用尺寸和 `.Padding(...)` modifier |
