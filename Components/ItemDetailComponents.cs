@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BitwardenForReactor.Models;
 using BitwardenForReactor.Services;
 using Microsoft.UI.Reactor;
@@ -26,46 +27,59 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
         var item = Props.Item;
 
         return Border(
-                HStack(14,
-                    Border(Icon(FontIcon(IconService.GetItemTypeGlyph(item.Type), fontSize: 24)))
-                        .Width(48)
-                        .Height(48)
-                        .CornerRadius(24)
-                        .Background(Theme.SubtleFill),
-                    VStack(3,
+                HStack(16,
+                    Border(Icon(FontIcon(IconService.GetItemTypeGlyph(item.Type), fontSize: 26)))
+                        .Width(52)
+                        .Height(52)
+                        .CornerRadius(8)
+                        .Background(Theme.SubtleFill)
+                        .VerticalAlignment(VerticalAlignment.Center),
+                    VStack(6,
                         HStack(8,
                             TextBlock(item.Name)
+                                .FontSize(22)
                                 .SemiBold()
-                                .TextTrimming(TextTrimming.CharacterEllipsis)
-                                .Flex(grow: 1, basis: 0),
+                                .TextTrimming(TextTrimming.CharacterEllipsis),
                             item.Favorite
                                 ? Icon(FontIcon("\uE735", fontSize: 16)).Foreground(Theme.SystemCaution)
                                 : null),
                         HStack(8,
-                            TextBlock(item.TypeLabel).Foreground(Theme.SecondaryText),
+                            Border(TextBlock(item.TypeLabel).Foreground(Theme.SecondaryText))
+                                .Padding(left: 8, top: 3, right: 8, bottom: 3)
+                                .CornerRadius(4)
+                                .Background(Theme.SubtleFill),
                             item.DeletedDate is not null
                                 ? TextBlock($"已删除 {item.DeletedDate:yyyy-MM-dd}").Foreground(Theme.SecondaryText)
                                 : null))
                     .Flex(grow: 1, basis: 0),
-                    Button(Icon(FontIcon("\uE70F")), Props.Edit)
-                        .ToolTip("编辑")
-                        .AutomationName("编辑项目"),
-                    Props.IsTrashView
-                        ? Button(Icon(FontIcon("\uE845")), Props.Restore)
-                            .ToolTip("恢复")
-                            .AutomationName("恢复项目")
-                        : Button(Icon(FontIcon("\uE74D")), Props.Delete)
-                            .ToolTip("删除")
-                            .AutomationName("删除项目"),
-                    Props.IsTrashView
-                        ? Button(Icon(FontIcon("\uE74D")), Props.PermanentDelete)
-                            .ToolTip("永久删除")
-                            .AutomationName("永久删除项目")
-                        : null)
+                    HStack(8,
+                        Button(HStack(6,
+                                Icon(FontIcon("\uE70F", fontSize: 14)),
+                                TextBlock("编辑")), Props.Edit)
+                            .SubtleButton()
+                            .ToolTip("编辑")
+                            .AutomationName("编辑项目"),
+                        Props.IsTrashView
+                            ? Button(Icon(FontIcon("\uE845")), Props.Restore)
+                                .SubtleButton()
+                                .ToolTip("恢复")
+                                .AutomationName("恢复项目")
+                            : Button(Icon(FontIcon("\uE74D")), Props.Delete)
+                                .SubtleButton()
+                                .ToolTip("删除")
+                                .AutomationName("删除项目"),
+                        Props.IsTrashView
+                            ? Button(Icon(FontIcon("\uE74D")), Props.PermanentDelete)
+                                .SubtleButton()
+                                .ToolTip("永久删除")
+                                .AutomationName("永久删除项目")
+                            : null)
+                    .VerticalAlignment(VerticalAlignment.Center))
                 .VerticalAlignment(VerticalAlignment.Center))
-            .Padding(left: 18, top: 14, right: 18, bottom: 14)
-            .Background(Theme.LayerFill)
-            .WithBorder(Theme.DividerStroke, 1);
+            .Padding(18)
+            .CornerRadius(8)
+            .Background(Theme.CardBackground)
+            .WithBorder(Theme.CardStroke, 1);
     }
 }
 
@@ -74,9 +88,26 @@ public sealed record DetailSectionProps(string Title, IReadOnlyList<Element> Chi
 public sealed class DetailSection : Component<DetailSectionProps>
 {
     public override Element Render() =>
-        VStack(8,
-            TextBlock(Props.Title).SemiBold(),
-            VStack(0, [.. Props.Children]));
+        Border(
+                VStack(0,
+                    Border(TextBlock(Props.Title).SemiBold())
+                        .Padding(left: 16, top: 13, right: 16, bottom: 12),
+                    Border(VStack()).Height(1).Background(Theme.DividerStroke),
+                    VStack(0, BuildRows())))
+            .CornerRadius(8)
+            .Background(Theme.CardBackground)
+            .WithBorder(Theme.CardStroke, 1);
+
+    private Element[] BuildRows() =>
+        Props.Children
+            .SelectMany((child, index) => index == 0
+                ? [child]
+                : new Element[]
+                {
+                    Border(VStack()).Height(1).Background(Theme.DividerStroke),
+                    child
+                })
+            .ToArray();
 }
 
 public sealed record DetailFieldRowProps(
@@ -90,18 +121,19 @@ public sealed class DetailFieldRow : Component<DetailFieldRowProps>
     public override Element Render() =>
         Border(
                 HStack(12,
-                    VStack(3,
+                    VStack(4,
                         TextBlock(Props.Label).Foreground(Theme.SecondaryText),
                         TextBlock(Props.Value).TextWrapping())
                     .Flex(grow: 1, basis: 0),
-                    BuildCopyButton()))
-            .Padding(left: 12, top: 9, right: 10, bottom: 9)
-            .WithBorder(Theme.DividerStroke, 1);
+                    BuildCopyButton())
+                .VerticalAlignment(VerticalAlignment.Center))
+            .Padding(left: 16, top: 12, right: 12, bottom: 12);
 
     private Element BuildCopyButton() =>
         string.IsNullOrWhiteSpace(Props.CopyValue) || Props.CopyRequested is null
             ? Empty()
             : Button(Icon(FontIcon("\uE8C8")), () => Props.CopyRequested(Props.CopyValue))
+                .SubtleButton()
                 .ToolTip("复制")
                 .AutomationName($"复制{Props.Label}");
 }
@@ -126,12 +158,12 @@ public sealed class TotpField : Component<TotpFieldProps>
     public override Element Render() =>
         Border(
                 HStack(12,
-                    VStack(3,
+                    VStack(4,
                         TextBlock("TOTP").Foreground(Theme.SecondaryText),
                         TextBlock("点击获取一次性验证码").TextWrapping())
                     .Flex(grow: 1, basis: 0),
                     Button("获取", Props.CopyRequested)
+                        .SubtleButton()
                         .AutomationName("复制TOTP")))
-            .Padding(left: 12, top: 9, right: 10, bottom: 9)
-            .WithBorder(Theme.DividerStroke, 1);
+            .Padding(left: 16, top: 12, right: 12, bottom: 12);
 }

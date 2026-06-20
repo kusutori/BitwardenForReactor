@@ -30,22 +30,22 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
                 .Flex(grow: 1, basis: 0);
         }
 
-        return FlexColumn(
-                Component<DetailHeader, DetailHeaderProps>(
+        return ScrollView(
+                VStack(14,
+                    Component<DetailHeader, DetailHeaderProps>(
                         new DetailHeaderProps(
                             item,
                             state.Filter == VaultFilter.Trash,
                             () => Props.Dispatch(new EditorOpened(VaultItemDraft.FromItem(item))),
                             () => Props.Dispatch(new DeleteRequested(item, false)),
                             () => Props.Dispatch(new DeleteRequested(item, true)),
-                            () => _ = AppCommands.RestoreAsync(item, Props.Dispatch)))
-                    .Flex(shrink: 0),
-                ScrollView(
-                    VStack(12,
+                            () => _ = AppCommands.RestoreAsync(item, Props.Dispatch))),
                         RenderItemFields(item),
-                        string.IsNullOrWhiteSpace(item.Notes) ? null : DetailSection("备注", [DetailText(item.Notes)])))
+                    string.IsNullOrWhiteSpace(item.Notes) ? null : RenderNotes(item.Notes),
+                    RenderMetadata(item))
+                .MaxWidth(760))
                 .Padding(20)
-                .Flex(grow: 1, basis: 0))
+                .Flex(grow: 1, basis: 0)
             .Background(Theme.LayerFill)
             .Flex(grow: 1, basis: 0);
     }
@@ -89,7 +89,6 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
                 sections.Add(DetailSection("身份信息", primaryFields));
                 break;
             case BitwardenItemType.SecureNote:
-                sections.Add(DetailSection("安全笔记", [DetailText("内容在备注区域显示。").Foreground(Theme.SecondaryText)]));
                 break;
         }
 
@@ -126,8 +125,20 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
     private static Element DetailField(string label, string value, string? copyValue, Action<string> copyRequested) =>
         Component<DetailFieldRow, DetailFieldRowProps>(new DetailFieldRowProps(label, value, copyValue, copyRequested));
 
-    private static Element DetailText(string value) =>
-        Border(TextBlock(value).TextWrapping())
-            .Padding(left: 12, top: 9, right: 10, bottom: 9)
-            .WithBorder(Theme.DividerStroke, 1);
+    private Element RenderNotes(string notes) =>
+        DetailSection("备注",
+        [
+            DetailField("内容", notes, notes, value => { _ = AppCommands.CopyAsync(value, Props.Dispatch); })
+        ]);
+
+    private Element RenderMetadata(BitwardenItem item)
+    {
+        Action<string> copyRequested = value => { _ = AppCommands.CopyAsync(value, Props.Dispatch); };
+        return DetailSection("项目记录",
+        [
+            DetailField("修改时间", item.RevisionDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture), null, copyRequested),
+            DetailField("创建时间", item.CreationDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture), null, copyRequested),
+            DetailField("项目 ID", item.Id, item.Id, copyRequested)
+        ]);
+    }
 }
