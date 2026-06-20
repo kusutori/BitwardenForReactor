@@ -55,6 +55,7 @@ public sealed class UnlockPage : Component<UnlockPageProps>
                                 PasswordBox(Props.MasterPassword, Props.SetMasterPassword, "输入主密码")
                                     .Header("主密码")
                                     .Width(360)
+                                    .HorizontalAlignment(HorizontalAlignment.Center)
                                     .OnKeyDown((_, e) =>
                                     {
                                         if (e.Key == VirtualKey.Enter)
@@ -68,6 +69,7 @@ public sealed class UnlockPage : Component<UnlockPageProps>
                                     .AccentButton()
                                     .Width(360)
                                     .Height(40)
+                                    .HorizontalAlignment(HorizontalAlignment.Center)
                                     .IsEnabled(!state.IsBusy && !string.IsNullOrWhiteSpace(Props.MasterPassword))
                                     .AutomationName("解锁密码库")),
                             Border(VStack())

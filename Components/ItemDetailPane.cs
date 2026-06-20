@@ -9,6 +9,7 @@ using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using static Microsoft.UI.Reactor.Factories;
 
 namespace BitwardenForReactor.Components;
@@ -39,11 +40,14 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
                             () => Props.Dispatch(new EditorOpened(VaultItemDraft.FromItem(item))),
                             () => Props.Dispatch(new DeleteRequested(item, false)),
                             () => Props.Dispatch(new DeleteRequested(item, true)),
-                            () => _ = AppCommands.RestoreAsync(item, Props.Dispatch))),
-                        RenderItemFields(item),
+                            () => _ = AppCommands.RestoreAsync(item, Props.Dispatch)))
+                        .HorizontalAlignment(HorizontalAlignment.Stretch),
+                    RenderItemFields(item),
                     string.IsNullOrWhiteSpace(item.Notes) ? null : RenderNotes(item.Notes),
                     RenderMetadata(item))
-                .MaxWidth(760))
+                .MaxWidth(760)
+                .HorizontalAlignment(HorizontalAlignment.Stretch))
+                .HorizontalScrollMode(ScrollingScrollMode.Disabled)
                 .Padding(20)
                 .Flex(grow: 1, basis: 0)
             .Background(Theme.LayerFill)
@@ -65,7 +69,8 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
                 if (!string.IsNullOrWhiteSpace(item.Login?.Totp))
                 {
                     primaryFields.Add(Component<TotpField, TotpFieldProps>(
-                        new TotpFieldProps(() => _ = AppCommands.CopyTotpAsync(item, Props.Dispatch))));
+                            new TotpFieldProps(() => _ = AppCommands.CopyTotpAsync(item, Props.Dispatch)))
+                        .HorizontalAlignment(HorizontalAlignment.Stretch));
                 }
                 sections.Add(DetailSection("登录信息", primaryFields));
                 break;
@@ -97,13 +102,15 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
             sections.Add(DetailSection("自定义字段", item.Fields.Select(field =>
                     field.Type == CustomFieldType.Hidden
                         ? Component<SensitiveField, SensitiveFieldProps>(
-                            new SensitiveFieldProps(field.Name, VaultDisplay.Mask("hidden"), field.Value, copyRequested))
+                                new SensitiveFieldProps(field.Name, VaultDisplay.Mask("hidden"), field.Value, copyRequested))
+                            .HorizontalAlignment(HorizontalAlignment.Stretch)
                         : DetailField(field.Name, field.Value ?? string.Empty, field.Value, copyRequested))
                 .Select((element, index) => element.WithKey($"{item.Id}:field:{index}"))
                 .ToArray()));
         }
 
-        return VStack(14, sections.ToArray());
+        return VStack(14, sections.ToArray())
+            .HorizontalAlignment(HorizontalAlignment.Stretch);
     }
 
     private static void AddField(List<Element> fields, string label, string? value, Action<string> copyRequested, string? copyValue = null)
@@ -116,14 +123,17 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
     {
         if (string.IsNullOrWhiteSpace(value)) return;
         fields.Add(Component<SensitiveField, SensitiveFieldProps>(
-            new SensitiveFieldProps(label, maskedValue ?? VaultDisplay.Mask("hidden"), value, copyRequested)));
+                new SensitiveFieldProps(label, maskedValue ?? VaultDisplay.Mask("hidden"), value, copyRequested))
+            .HorizontalAlignment(HorizontalAlignment.Stretch));
     }
 
     private static Element DetailSection(string title, IReadOnlyList<Element> children) =>
-        Component<DetailSection, DetailSectionProps>(new DetailSectionProps(title, children));
+        Component<DetailSection, DetailSectionProps>(new DetailSectionProps(title, children))
+            .HorizontalAlignment(HorizontalAlignment.Stretch);
 
     private static Element DetailField(string label, string value, string? copyValue, Action<string> copyRequested) =>
-        Component<DetailFieldRow, DetailFieldRowProps>(new DetailFieldRowProps(label, value, copyValue, copyRequested));
+        Component<DetailFieldRow, DetailFieldRowProps>(new DetailFieldRowProps(label, value, copyValue, copyRequested))
+            .HorizontalAlignment(HorizontalAlignment.Stretch);
 
     private Element RenderNotes(string notes) =>
         DetailSection("备注",

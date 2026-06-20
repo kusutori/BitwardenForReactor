@@ -27,13 +27,16 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
         var item = Props.Item;
 
         return Border(
-                HStack(16,
+                Grid(
+                    columns: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
+                    rows: [GridSize.Auto],
                     Border(Icon(FontIcon(IconService.GetItemTypeGlyph(item.Type), fontSize: 26)))
                         .Width(52)
                         .Height(52)
                         .CornerRadius(8)
                         .Background(Theme.SubtleFill)
-                        .VerticalAlignment(VerticalAlignment.Center),
+                        .VerticalAlignment(VerticalAlignment.Center)
+                        .Grid(column: 0),
                     VStack(6,
                         HStack(8,
                             TextBlock(item.Name)
@@ -51,7 +54,9 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                             item.DeletedDate is not null
                                 ? TextBlock($"已删除 {item.DeletedDate:yyyy-MM-dd}").Foreground(Theme.SecondaryText)
                                 : null))
-                    .Flex(grow: 1, basis: 0),
+                    .Margin(left: 16, right: 16)
+                    .VerticalAlignment(VerticalAlignment.Center)
+                    .Grid(column: 1),
                     HStack(8,
                         Button(HStack(6,
                                 Icon(FontIcon("\uE70F", fontSize: 14)),
@@ -74,12 +79,13 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                                 .ToolTip("永久删除")
                                 .AutomationName("永久删除项目")
                             : null)
-                    .VerticalAlignment(VerticalAlignment.Center))
-                .VerticalAlignment(VerticalAlignment.Center))
+                    .VerticalAlignment(VerticalAlignment.Center)
+                    .Grid(column: 2)))
             .Padding(18)
             .CornerRadius(8)
             .Background(Theme.CardBackground)
-            .WithBorder(Theme.CardStroke, 1);
+            .WithBorder(Theme.CardStroke, 1)
+            .HorizontalAlignment(HorizontalAlignment.Stretch);
     }
 }
 
@@ -96,7 +102,8 @@ public sealed class DetailSection : Component<DetailSectionProps>
                     VStack(0, BuildRows())))
             .CornerRadius(8)
             .Background(Theme.CardBackground)
-            .WithBorder(Theme.CardStroke, 1);
+            .WithBorder(Theme.CardStroke, 1)
+            .HorizontalAlignment(HorizontalAlignment.Stretch);
 
     private Element[] BuildRows() =>
         Props.Children
@@ -120,14 +127,20 @@ public sealed class DetailFieldRow : Component<DetailFieldRowProps>
 {
     public override Element Render() =>
         Border(
-                HStack(12,
+                Grid(
+                    columns: [GridSize.Star(), GridSize.Auto],
+                    rows: [GridSize.Auto],
                     VStack(4,
                         TextBlock(Props.Label).Foreground(Theme.SecondaryText),
                         TextBlock(Props.Value).TextWrapping())
-                    .Flex(grow: 1, basis: 0),
-                    BuildCopyButton())
-                .VerticalAlignment(VerticalAlignment.Center))
-            .Padding(left: 16, top: 12, right: 12, bottom: 12);
+                    .VerticalAlignment(VerticalAlignment.Center)
+                    .Grid(column: 0),
+                    BuildCopyButton()
+                        .Margin(left: 12)
+                        .VerticalAlignment(VerticalAlignment.Center)
+                        .Grid(column: 1)))
+            .Padding(left: 16, top: 12, right: 12, bottom: 12)
+            .HorizontalAlignment(HorizontalAlignment.Stretch);
 
     private Element BuildCopyButton() =>
         string.IsNullOrWhiteSpace(Props.CopyValue) || Props.CopyRequested is null
@@ -157,13 +170,20 @@ public sealed class TotpField : Component<TotpFieldProps>
 {
     public override Element Render() =>
         Border(
-                HStack(12,
+                Grid(
+                    columns: [GridSize.Star(), GridSize.Auto],
+                    rows: [GridSize.Auto],
                     VStack(4,
                         TextBlock("TOTP").Foreground(Theme.SecondaryText),
                         TextBlock("点击获取一次性验证码").TextWrapping())
-                    .Flex(grow: 1, basis: 0),
+                    .VerticalAlignment(VerticalAlignment.Center)
+                    .Grid(column: 0),
                     Button("获取", Props.CopyRequested)
                         .SubtleButton()
-                        .AutomationName("复制TOTP")))
-            .Padding(left: 16, top: 12, right: 12, bottom: 12);
+                        .AutomationName("复制TOTP")
+                        .Margin(left: 12)
+                        .VerticalAlignment(VerticalAlignment.Center)
+                        .Grid(column: 1)))
+            .Padding(left: 16, top: 12, right: 12, bottom: 12)
+            .HorizontalAlignment(HorizontalAlignment.Stretch);
 }
