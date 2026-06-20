@@ -4,7 +4,7 @@
 
 当前依赖版本：
 
-- `Microsoft.UI.Reactor 0.0.0-local`（来自同级 `microsoft-ui-reactor` 源码仓库）
+- `Microsoft.UI.Reactor 0.1.0-preview.11`
 - `CommunityToolkit.WinUI.Controls.SettingsControls 8.2.251219`
 - `CommunityToolkit.WinUI.Controls.Segmented 8.2.251219`
 

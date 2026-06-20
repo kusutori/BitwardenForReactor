@@ -31,8 +31,8 @@
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
         <Nullable>enable</Nullable>
-        <!-- Core and optional sibling packages must stay on the same local snapshot. -->
-        <MicrosoftUIReactorVersion>0.0.0-local</MicrosoftUIReactorVersion>
+        <!-- Core and optional sibling packages must stay on the same preview version. -->
+        <MicrosoftUIReactorVersion>0.1.0-preview.11</MicrosoftUIReactorVersion>
         <!--
             Auto-resolve RuntimeIdentifier from the host SDK when the caller hasn't pinned
             Platform / RuntimeIdentifier explicitly. Lets `dotnet build` / `dotnet run`
