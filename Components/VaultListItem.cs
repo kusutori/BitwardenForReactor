@@ -1,7 +1,6 @@
 using System;
 using BitwardenForReactor.Application;
 using BitwardenForReactor.Models;
-using BitwardenForReactor.Services;
 using BitwardenForReactor.State;
 using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
@@ -30,7 +29,7 @@ public sealed class VaultListItem : Component<VaultListItemProps>
                 Grid(
                     columns: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
                     rows: [GridSize.Auto],
-                    Border(Icon(FontIcon(IconService.GetItemTypeGlyph(item.Type), fontSize: 17)))
+                    Border(Component<ItemIcon, ItemIconProps>(new ItemIconProps(item, 20)))
                         .Width(36)
                         .Height(36)
                         .CornerRadius(18)

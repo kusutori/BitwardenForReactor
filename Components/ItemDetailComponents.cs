@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BitwardenForReactor.Models;
-using BitwardenForReactor.Services;
 using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
@@ -30,7 +29,7 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                 Grid(
                     columns: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
                     rows: [GridSize.Auto],
-                    Border(Icon(FontIcon(IconService.GetItemTypeGlyph(item.Type), fontSize: 26)))
+                    Border(Component<ItemIcon, ItemIconProps>(new ItemIconProps(item, 32)))
                         .Width(52)
                         .Height(52)
                         .CornerRadius(8)
