@@ -34,7 +34,8 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
             state.IsUnlocked
                 ? RenderMain()
                 : Component<UnlockPage, UnlockPageProps>(
-                    new UnlockPageProps(state, Props.Dispatch, Props.MasterPassword, Props.SetMasterPassword)));
+                        new UnlockPageProps(state, Props.Dispatch, Props.MasterPassword, Props.SetMasterPassword))
+                    .Flex(grow: 1, basis: 0));
     }
 
     private Element RenderTitleActions() =>

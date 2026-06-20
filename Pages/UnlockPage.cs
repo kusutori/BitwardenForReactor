@@ -82,10 +82,10 @@ public sealed class UnlockPage : Component<UnlockPageProps>
                     .Width(440)
                     .CornerRadius(8)
                     .Background(Theme.CardBackground)
-                    .WithBorder(Theme.CardStroke, 1))
+                    .WithBorder(Theme.CardStroke, 1)
+                    .HorizontalAlignment(HorizontalAlignment.Center)
+                    .VerticalAlignment(VerticalAlignment.Center))
             .Padding(24)
-            .HorizontalAlignment(HorizontalAlignment.Center)
-            .VerticalAlignment(VerticalAlignment.Center)
             .Flex(grow: 1, basis: 0);
     }
 }
