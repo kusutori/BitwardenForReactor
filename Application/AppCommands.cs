@@ -78,14 +78,33 @@ public static class AppCommands
         try
         {
             var service = BitwardenApplicationService.Instance;
-            var itemsTask = service.GetItemsAsync(cancellationToken);
-            var trashTask = service.GetTrashItemsAsync(cancellationToken);
-            var foldersTask = service.GetFoldersAsync(cancellationToken);
+            var itemsTask = service.GetItemsResultAsync(cancellationToken);
+            var trashTask = service.GetTrashItemsResultAsync(cancellationToken);
+            var foldersTask = service.GetFoldersResultAsync(cancellationToken);
             await Task.WhenAll(itemsTask, trashTask, foldersTask);
             cancellationToken.ThrowIfCancellationRequested();
-            var items = await itemsTask ?? [];
-            var trash = await trashTask ?? [];
-            var folders = await foldersTask ?? [];
+            var itemsResult = await itemsTask;
+            var trashResult = await trashTask;
+            var foldersResult = await foldersTask;
+            if (!itemsResult.IsSuccess)
+            {
+                dispatch(new NoticeShown(
+                    "密码库加载失败",
+                    BitwardenApplicationService.DescribeError(itemsResult.Error, "无法解析 Bitwarden CLI 返回的项目数据。"),
+                    InfoBarSeverity.Error));
+                return;
+            }
+
+            var items = itemsResult.Value ?? [];
+            var trash = trashResult.Value ?? [];
+            var folders = foldersResult.Value ?? [];
+            if (!trashResult.IsSuccess || !foldersResult.IsSuccess)
+            {
+                dispatch(new NoticeShown(
+                    "部分数据加载失败",
+                    "普通项目已加载，但回收站或文件夹暂时不可用。",
+                    InfoBarSeverity.Warning));
+            }
             dispatch(new VaultLoaded(items, trash, folders, selectedItemId));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

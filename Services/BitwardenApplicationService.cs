@@ -9,6 +9,7 @@ using BitwardenCli.Core;
 using BitwardenCli.Core.Accounts;
 using BitwardenCli.Core.Authentication;
 using BitwardenCli.Core.Models;
+using BitwardenCli.Core.Results;
 using BitwardenForReactor.Models;
 
 namespace BitwardenForReactor.Services;
@@ -89,23 +90,17 @@ public sealed class BitwardenApplicationService
 
     public async Task<bool> SyncAsync() => (await ActiveClient.Synchronization.SyncAsync()).IsSuccess;
 
-    public async Task<BitwardenItem[]?> GetItemsAsync(CancellationToken cancellationToken = default)
-    {
-        var result = await ActiveClient.Vault.ListItemsAsync(cancellationToken: cancellationToken);
-        return result.IsSuccess ? result.Value?.ToArray() : null;
-    }
+    public Task<CliResult<IReadOnlyList<BitwardenItem>>> GetItemsResultAsync(CancellationToken cancellationToken = default) =>
+        ActiveClient.Vault.ListItemsAsync(cancellationToken: cancellationToken);
 
-    public async Task<BitwardenItem[]?> GetTrashItemsAsync(CancellationToken cancellationToken = default)
-    {
-        var result = await ActiveClient.Vault.ListItemsAsync(new VaultItemQuery { Trash = true }, cancellationToken);
-        return result.IsSuccess ? result.Value?.ToArray() : null;
-    }
+    public Task<CliResult<IReadOnlyList<BitwardenItem>>> GetTrashItemsResultAsync(CancellationToken cancellationToken = default) =>
+        ActiveClient.Vault.ListItemsAsync(new VaultItemQuery { Trash = true }, cancellationToken);
 
-    public async Task<BitwardenFolder[]?> GetFoldersAsync(CancellationToken cancellationToken = default)
-    {
-        var result = await ActiveClient.Folders.ListAsync(cancellationToken: cancellationToken);
-        return result.IsSuccess ? result.Value?.ToArray() : null;
-    }
+    public Task<CliResult<IReadOnlyList<BitwardenFolder>>> GetFoldersResultAsync(CancellationToken cancellationToken = default) =>
+        ActiveClient.Folders.ListAsync(cancellationToken: cancellationToken);
+
+    public static string DescribeError(CliError? error, string fallback) =>
+        ToChineseError(error?.Code, error?.Message, fallback);
 
     public async Task<string?> GetTotpAsync(string itemId)
     {
