@@ -40,14 +40,7 @@ public sealed class SettingsManager
             }
 
             var json = File.ReadAllText(_settingsPath);
-            var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
-            return settings.LegacyIsDarkMode is { } wasDarkMode
-                ? settings with
-                {
-                    ThemeMode = wasDarkMode ? AppThemeMode.Dark : AppThemeMode.Light,
-                    LegacyIsDarkMode = null
-                }
-                : settings;
+            return JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
         }
         catch
         {

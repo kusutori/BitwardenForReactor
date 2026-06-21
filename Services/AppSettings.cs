@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace BitwardenForReactor.Services;
 
@@ -13,10 +12,6 @@ public enum AppThemeMode
 public sealed record AppSettings
 {
     public AppThemeMode ThemeMode { get; init; } = AppThemeMode.System;
-
-    [JsonPropertyName("isDarkMode")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public bool? LegacyIsDarkMode { get; init; }
 
     public string BwPath { get; init; } = "bw";
 
