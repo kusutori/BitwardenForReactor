@@ -5,6 +5,7 @@ using BitwardenForReactor.State;
 using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
+using Microsoft.UI.Xaml;
 using static Microsoft.UI.Reactor.Factories;
 
 namespace BitwardenForReactor;
@@ -29,6 +30,7 @@ public sealed class App : Component
                     ? Component<DeleteConfirmationDialog, DeleteConfirmationDialogProps>(
                         new DeleteConfirmationDialogProps(target, state.DeletePermanently, dispatch))
                     : null)
-            .Backdrop(BackdropKind.Mica);
+            .Backdrop(BackdropKind.Mica)
+            .RequestedTheme(state.Settings.IsDarkMode ? ElementTheme.Dark : ElementTheme.Light);
     }
 }

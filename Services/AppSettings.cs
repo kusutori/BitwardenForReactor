@@ -4,6 +4,8 @@ namespace BitwardenForReactor.Services;
 
 public sealed record AppSettings
 {
+    public bool IsDarkMode { get; init; }
+
     public string BwPath { get; init; } = "bw";
 
     public string CustomEnvironment { get; init; } = string.Empty;

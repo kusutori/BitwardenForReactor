@@ -31,6 +31,18 @@ public sealed class SettingsPage : Component<SettingsPageProps>
                             .Foreground(Theme.SecondaryText)
                             .TextWrapping(),
                         VStack(8,
+                            SubHeading("外观"),
+                            SettingsCard(
+                                "深色模式",
+                                "使用深色主题显示应用界面。",
+                                ToggleSwitch(
+                                        settings.IsDarkMode,
+                                        value => Change(settings with { IsDarkMode = value }),
+                                        onContent: "已开启",
+                                        offContent: "已关闭")
+                                    .AutomationName("深色模式"),
+                                "\uE708")),
+                        VStack(8,
                             SubHeading("基础设置"),
                             SettingsCard(
                                 "Bitwarden CLI 路径",
