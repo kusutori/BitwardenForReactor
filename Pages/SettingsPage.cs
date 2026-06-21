@@ -33,14 +33,17 @@ public sealed class SettingsPage : Component<SettingsPageProps>
                         VStack(8,
                             SubHeading("外观"),
                             SettingsCard(
-                                "深色模式",
-                                "使用深色主题显示应用界面。",
-                                ToggleSwitch(
-                                        settings.IsDarkMode,
-                                        value => Change(settings with { IsDarkMode = value }),
-                                        onContent: "已开启",
-                                        offContent: "已关闭")
-                                    .AutomationName("深色模式"),
+                                "应用主题",
+                                "选择应用界面的颜色模式。",
+                                ComboBox(
+                                        ["跟随系统", "浅色", "深色"],
+                                        Math.Clamp((int)settings.ThemeMode, 0, 2),
+                                        index => Change(settings with
+                                        {
+                                            ThemeMode = (AppThemeMode)Math.Clamp(index, 0, 2)
+                                        }))
+                                    .Width(160)
+                                    .AutomationName("应用主题"),
                                 "\uE708")),
                         VStack(8,
                             SubHeading("基础设置"),

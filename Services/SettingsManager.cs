@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BitwardenForReactor.Services;
@@ -9,7 +10,8 @@ public sealed class SettingsManager
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
-        WriteIndented = true
+        WriteIndented = true,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
 
     public static SettingsManager Instance { get; } = new();
@@ -38,7 +40,14 @@ public sealed class SettingsManager
             }
 
             var json = File.ReadAllText(_settingsPath);
-            return JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+            var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();
+            return settings.LegacyIsDarkMode is { } wasDarkMode
+                ? settings with
+                {
+                    ThemeMode = wasDarkMode ? AppThemeMode.Dark : AppThemeMode.Light,
+                    LegacyIsDarkMode = null
+                }
+                : settings;
         }
         catch
         {
