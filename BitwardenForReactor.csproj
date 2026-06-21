@@ -44,7 +44,7 @@
     <!-- </snippet:template-shape> -->
 
     <ItemGroup>
-        <PackageReference Include="BitwardenCli.Core" Version="0.1.0" />
+        <PackageReference Include="BitwardenCli.Core" Version="0.1.1" />
         <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
         <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.2.251219" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.1" />
