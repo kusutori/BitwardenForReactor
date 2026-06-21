@@ -47,7 +47,7 @@ public sealed record AppState
 
     public bool HasNotice => !string.IsNullOrWhiteSpace(NoticeTitle) || !string.IsNullOrWhiteSpace(NoticeMessage);
 
-    public bool IsUnlocked => Status?.IsUnlocked == true || BitwardenCliService.Instance.IsUnlocked;
+    public bool IsUnlocked => Status?.IsUnlocked == true || BitwardenApplicationService.Instance.IsUnlocked;
 
     public IReadOnlyList<BitwardenItem> VisibleItems
     {
