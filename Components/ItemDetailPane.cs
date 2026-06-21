@@ -102,9 +102,9 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
             sections.Add(DetailSection("自定义字段", item.Fields.Select(field =>
                     field.Type == CustomFieldType.Hidden
                         ? Component<SensitiveField, SensitiveFieldProps>(
-                                new SensitiveFieldProps(field.Name, VaultDisplay.Mask("hidden"), field.Value, copyRequested))
+                                new SensitiveFieldProps(field.Name ?? "未命名字段", VaultDisplay.Mask("hidden"), field.Value, copyRequested))
                             .HorizontalAlignment(HorizontalAlignment.Stretch)
-                        : DetailField(field.Name, field.Value ?? string.Empty, field.Value, copyRequested))
+                        : DetailField(field.Name ?? "未命名字段", field.Value ?? string.Empty, field.Value, copyRequested))
                 .Select((element, index) => element.WithKey($"{item.Id}:field:{index}"))
                 .ToArray()));
         }
@@ -146,8 +146,8 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
         Action<string> copyRequested = value => { _ = AppCommands.CopyAsync(value, Props.Dispatch); };
         return DetailSection("项目记录",
         [
-            DetailField("修改时间", item.RevisionDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture), null, copyRequested),
-            DetailField("创建时间", item.CreationDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture), null, copyRequested),
+            DetailField("修改时间", item.RevisionDate?.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture) ?? "未知", null, copyRequested),
+            DetailField("创建时间", item.CreationDate?.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture) ?? "未知", null, copyRequested),
             DetailField("项目 ID", item.Id, item.Id, copyRequested)
         ]);
     }

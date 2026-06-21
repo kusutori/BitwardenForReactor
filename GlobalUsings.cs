@@ -1,0 +1,12 @@
+global using BitwardenStatus = BitwardenCli.Core.Models.BitwardenStatus;
+global using BitwardenItem = BitwardenCli.Core.Models.VaultItem;
+global using BitwardenFolder = BitwardenCli.Core.Models.VaultFolder;
+global using BitwardenItemType = BitwardenCli.Core.Models.VaultItemType;
+global using LoginData = BitwardenCli.Core.Models.VaultLogin;
+global using UriEntry = BitwardenCli.Core.Models.VaultUri;
+global using SecureNoteData = BitwardenCli.Core.Models.VaultSecureNote;
+global using CardData = BitwardenCli.Core.Models.VaultCard;
+global using IdentityData = BitwardenCli.Core.Models.VaultIdentity;
+global using CustomField = BitwardenCli.Core.Models.VaultField;
+global using CustomFieldType = BitwardenCli.Core.Models.VaultFieldType;
+global using PasswordHistoryEntry = BitwardenCli.Core.Models.VaultPasswordHistoryEntry;

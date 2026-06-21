@@ -50,7 +50,7 @@ public sealed class SettingsPage : Component<SettingsPageProps>
                             SettingsCard(
                                 "Bitwarden CLI 路径",
                                 "默认使用 PATH 中的 bw。需要自定义位置时填写 bw.exe 的完整路径。",
-                                TextBox(settings.BwPath, value => Change(settings with { BwPath = value }))
+                                TextBox(settings.Cli.ExecutablePath, value => Change(settings with { Cli = settings.Cli with { ExecutablePath = value } }))
                                     .Width(320)
                                     .AutomationName("Bitwarden CLI 路径"),
                                 "\uE756"),
@@ -86,7 +86,7 @@ public sealed class SettingsPage : Component<SettingsPageProps>
                                     SettingsCard(
                                         "自定义环境变量",
                                         "格式为 KEY1=VALUE1;KEY2=VALUE2。请勿在此保存密码、Session 或 API Secret。",
-                                        TextBox(settings.CustomEnvironment, value => Change(settings with { CustomEnvironment = value }))
+                                        TextBox(settings.Cli.CustomEnvironment, value => Change(settings with { Cli = settings.Cli with { CustomEnvironment = value } }))
                                             .PlaceholderText("KEY1=VALUE1;KEY2=VALUE2")
                                             .Width(360)
                                             .AutomationName("自定义环境变量"),

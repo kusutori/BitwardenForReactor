@@ -14,9 +14,7 @@ public sealed record AppSettings
 {
     public AppThemeMode ThemeMode { get; init; } = AppThemeMode.System;
 
-    public string BwPath { get; init; } = "bw";
-
-    public string CustomEnvironment { get; init; } = string.Empty;
+    public CliConfiguration Cli { get; init; } = new();
 
     public int ClipboardClearSeconds { get; init; } = 30;
 
@@ -25,6 +23,14 @@ public sealed record AppSettings
     public Guid ActiveAccountId { get; init; }
 
     public IReadOnlyList<AccountSettings> Accounts { get; init; } = [];
+
+}
+
+public sealed record CliConfiguration
+{
+    public string ExecutablePath { get; init; } = "bw";
+
+    public string CustomEnvironment { get; init; } = string.Empty;
 
     public Dictionary<string, string> GetEnvironmentVariables()
     {

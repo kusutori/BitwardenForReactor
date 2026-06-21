@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BitwardenForReactor.Models;
+using BitwardenForReactor.Application;
 using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
@@ -46,7 +47,7 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                                 ? Icon(FontIcon("\uE735", fontSize: 16)).Foreground(Theme.SystemCaution)
                                 : null),
                         HStack(8,
-                            Border(TextBlock(item.TypeLabel).Foreground(Theme.SecondaryText))
+                            Border(TextBlock(VaultDisplay.TypeLabel(item)).Foreground(Theme.SecondaryText))
                                 .Padding(left: 8, top: 3, right: 8, bottom: 3)
                                 .CornerRadius(4)
                                 .Background(Theme.SubtleFill),

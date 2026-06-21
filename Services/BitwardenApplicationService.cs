@@ -10,9 +10,6 @@ using BitwardenCli.Core.Accounts;
 using BitwardenCli.Core.Authentication;
 using BitwardenCli.Core.Models;
 using BitwardenForReactor.Models;
-using CoreItem = BitwardenCli.Core.Models.VaultItem;
-using CoreStatus = BitwardenCli.Core.Models.BitwardenStatus;
-using AppStatus = BitwardenForReactor.Models.BitwardenStatus;
 
 namespace BitwardenForReactor.Services;
 
@@ -37,13 +34,13 @@ public sealed class BitwardenApplicationService
 
     public void Reconfigure(AppSettings settings)
     {
-        var environment = settings.GetEnvironmentVariables();
-        var fingerprint = settings.BwPath + "\n" + string.Join("\n", environment.OrderBy(pair => pair.Key).Select(pair => $"{pair.Key}={pair.Value}"));
+        var environment = settings.Cli.GetEnvironmentVariables();
+        var fingerprint = settings.Cli.ExecutablePath + "\n" + string.Join("\n", environment.OrderBy(pair => pair.Key).Select(pair => $"{pair.Key}={pair.Value}"));
         if (_factory is null || !string.Equals(_optionsFingerprint, fingerprint, StringComparison.Ordinal))
         {
             _factory = new BitwardenCliClientFactory(new BitwardenCliOptions
             {
-                ExecutablePath = settings.BwPath,
+                ExecutablePath = settings.Cli.ExecutablePath,
                 AdditionalEnvironment = environment
             });
             _clients.Clear();
@@ -74,10 +71,10 @@ public sealed class BitwardenApplicationService
         return true;
     }
 
-    public async Task<AppStatus?> GetStatusAsync(CancellationToken cancellationToken = default)
+    public async Task<BitwardenStatus?> GetStatusAsync(CancellationToken cancellationToken = default)
     {
         var result = await ActiveClient.GetStatusAsync(cancellationToken);
-        return result.IsSuccess && result.Value is not null ? Map(result.Value) : null;
+        return result.IsSuccess ? result.Value : null;
     }
 
     public async Task<(bool Success, string Message)> UnlockAsync(string masterPassword)
@@ -95,19 +92,19 @@ public sealed class BitwardenApplicationService
     public async Task<BitwardenItem[]?> GetItemsAsync(CancellationToken cancellationToken = default)
     {
         var result = await ActiveClient.Vault.ListItemsAsync(cancellationToken: cancellationToken);
-        return result.IsSuccess ? result.Value?.Select(Map).ToArray() : null;
+        return result.IsSuccess ? result.Value?.ToArray() : null;
     }
 
     public async Task<BitwardenItem[]?> GetTrashItemsAsync(CancellationToken cancellationToken = default)
     {
         var result = await ActiveClient.Vault.ListItemsAsync(new VaultItemQuery { Trash = true }, cancellationToken);
-        return result.IsSuccess ? result.Value?.Select(Map).ToArray() : null;
+        return result.IsSuccess ? result.Value?.ToArray() : null;
     }
 
     public async Task<BitwardenFolder[]?> GetFoldersAsync(CancellationToken cancellationToken = default)
     {
         var result = await ActiveClient.Folders.ListAsync(cancellationToken: cancellationToken);
-        return result.IsSuccess ? result.Value?.Select(folder => new BitwardenFolder { Object = folder.Object, Id = folder.Id, Name = folder.Name }).ToArray() : null;
+        return result.IsSuccess ? result.Value?.ToArray() : null;
     }
 
     public async Task<string?> GetTotpAsync(string itemId)
@@ -183,63 +180,6 @@ public sealed class BitwardenApplicationService
             _ => BitwardenAuthenticationKind.Password
         },
         LastUsedAt = account.LastUsedAt
-    };
-
-    private static AppStatus Map(CoreStatus status) => new()
-    {
-        ServerUrl = status.ServerUrl,
-        LastSync = status.LastSync,
-        UserEmail = status.UserEmail,
-        UserId = status.UserId,
-        Status = status.Status
-    };
-
-    private static BitwardenItem Map(CoreItem item) => new()
-    {
-        Id = item.Id,
-        OrganizationId = item.OrganizationId,
-        FolderId = item.FolderId,
-        Type = (BitwardenItemType)(int)item.Type,
-        Reprompt = item.Reprompt,
-        Name = item.Name,
-        Notes = item.Notes,
-        Favorite = item.Favorite,
-        CollectionIds = item.CollectionIds,
-        RevisionDate = item.RevisionDate?.DateTime ?? default,
-        CreationDate = item.CreationDate?.DateTime ?? default,
-        DeletedDate = item.DeletedDate?.DateTime,
-        Login = item.Login is null ? null : new LoginData
-        {
-            Username = item.Login.Username,
-            Password = item.Login.Password,
-            Totp = item.Login.Totp,
-            PasswordRevisionDate = item.Login.PasswordRevisionDate?.DateTime,
-            Uris = item.Login.Uris.Select(uri => new UriEntry { Match = uri.Match, Uri = uri.Uri }).ToArray()
-        },
-        SecureNote = item.SecureNote is null ? null : new SecureNoteData { Type = item.SecureNote.Type },
-        Card = item.Card is null ? null : new CardData
-        {
-            CardholderName = item.Card.CardholderName, Brand = item.Card.Brand, Number = item.Card.Number,
-            ExpMonth = item.Card.ExpMonth, ExpYear = item.Card.ExpYear, Code = item.Card.Code
-        },
-        Identity = item.Identity is null ? null : new IdentityData
-        {
-            Title = item.Identity.Title, FirstName = item.Identity.FirstName, MiddleName = item.Identity.MiddleName,
-            LastName = item.Identity.LastName, Address1 = item.Identity.Address1, Address2 = item.Identity.Address2,
-            Address3 = item.Identity.Address3, City = item.Identity.City, State = item.Identity.State,
-            PostalCode = item.Identity.PostalCode, Country = item.Identity.Country, Company = item.Identity.Company,
-            Email = item.Identity.Email, Phone = item.Identity.Phone, Ssn = item.Identity.Ssn,
-            Username = item.Identity.Username, PassportNumber = item.Identity.PassportNumber,
-            LicenseNumber = item.Identity.LicenseNumber
-        },
-        Fields = item.Fields.Select(field => new CustomField
-        {
-            Name = field.Name ?? string.Empty, Value = field.Value, Type = (CustomFieldType)(int)field.Type, LinkedId = field.LinkedId
-        }).ToArray(),
-        PasswordHistory = item.PasswordHistory.Select(entry => new PasswordHistoryEntry
-        {
-            LastUsedDate = entry.LastUsedDate?.DateTime ?? default, Password = entry.Password
-        }).ToArray()
     };
 
     private static string ToChineseError(BitwardenCli.Core.Results.CliErrorCode? code, string? message, string fallback) => code switch

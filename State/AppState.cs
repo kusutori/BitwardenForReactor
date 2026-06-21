@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BitwardenForReactor.Models;
 using BitwardenForReactor.Services;
+using BitwardenForReactor.Application;
 using Microsoft.UI.Xaml.Controls;
 
 namespace BitwardenForReactor.State;
@@ -30,6 +31,10 @@ public sealed record AppState
     public string BusyText { get; init; } = string.Empty;
 
     public AppSettings Settings { get; init; } = SettingsManager.Instance.Current;
+
+    public IReadOnlyList<AccountSettings> Accounts => Settings.Accounts;
+
+    public Guid ActiveAccountId => Settings.ActiveAccountId;
 
     public bool ShowSettings { get; init; }
 
@@ -79,8 +84,8 @@ public sealed record AppState
                 var query = SearchQuery.Trim();
                 filtered = filtered.Where(item =>
                     Contains(item.Name, query) ||
-                    Contains(item.Username, query) ||
-                    Contains(item.PrimaryUri, query) ||
+                    Contains(VaultDisplay.Username(item), query) ||
+                    Contains(VaultDisplay.PrimaryUri(item), query) ||
                     Contains(item.Notes, query));
             }
 

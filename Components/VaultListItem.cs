@@ -69,26 +69,26 @@ public sealed class VaultListItem : Component<VaultListItemProps>
 
     private Element BuildOpenButton(BitwardenItem item) =>
         CompactButton("\uE8A7", "前往项目网站",
-                () => _ = AppCommands.OpenUriAsync(item.PrimaryUri, Props.Dispatch))
-            .IsEnabled(!string.IsNullOrWhiteSpace(item.PrimaryUri))
+                () => _ = AppCommands.OpenUriAsync(VaultDisplay.PrimaryUri(item), Props.Dispatch))
+            .IsEnabled(!string.IsNullOrWhiteSpace(VaultDisplay.PrimaryUri(item)))
             .ToolTip("前往网站");
 
     private Element BuildCopyMenu(BitwardenItem item)
     {
-        var canCopy = !string.IsNullOrWhiteSpace(item.Username) || !string.IsNullOrWhiteSpace(item.Password);
+        var canCopy = !string.IsNullOrWhiteSpace(VaultDisplay.Username(item)) || !string.IsNullOrWhiteSpace(item.Login?.Password);
         var anchor = CompactButton("\uE8C8", "打开复制菜单")
             .IsEnabled(canCopy)
             .ToolTip("复制");
 
         return MenuFlyout(
             anchor,
-            MenuItem("复制用户名", () => Copy(item.Username), icon: "\uE8C8") with
+            MenuItem("复制用户名", () => Copy(VaultDisplay.Username(item)), icon: "\uE8C8") with
             {
-                IsEnabled = !string.IsNullOrWhiteSpace(item.Username)
+                IsEnabled = !string.IsNullOrWhiteSpace(VaultDisplay.Username(item))
             },
-            MenuItem("复制密码", () => Copy(item.Password), icon: "\uE8C8") with
+            MenuItem("复制密码", () => Copy(item.Login?.Password), icon: "\uE8C8") with
             {
-                IsEnabled = !string.IsNullOrWhiteSpace(item.Password)
+                IsEnabled = !string.IsNullOrWhiteSpace(item.Login?.Password)
             });
     }
 
@@ -110,9 +110,9 @@ public sealed class VaultListItem : Component<VaultListItemProps>
             return flyout;
         }
 
-        flyout.Items.Add(NativeMenuItem("前往", "\uE8A7", () => _ = AppCommands.OpenUriAsync(item.PrimaryUri, Props.Dispatch), !string.IsNullOrWhiteSpace(item.PrimaryUri)));
-        flyout.Items.Add(NativeMenuItem("复制用户名", "\uE8C8", () => Copy(item.Username), !string.IsNullOrWhiteSpace(item.Username)));
-        flyout.Items.Add(NativeMenuItem("复制密码", "\uE8C8", () => Copy(item.Password), !string.IsNullOrWhiteSpace(item.Password)));
+        flyout.Items.Add(NativeMenuItem("前往", "\uE8A7", () => _ = AppCommands.OpenUriAsync(VaultDisplay.PrimaryUri(item), Props.Dispatch), !string.IsNullOrWhiteSpace(VaultDisplay.PrimaryUri(item))));
+        flyout.Items.Add(NativeMenuItem("复制用户名", "\uE8C8", () => Copy(VaultDisplay.Username(item)), !string.IsNullOrWhiteSpace(VaultDisplay.Username(item))));
+        flyout.Items.Add(NativeMenuItem("复制密码", "\uE8C8", () => Copy(item.Login?.Password), !string.IsNullOrWhiteSpace(item.Login?.Password)));
         flyout.Items.Add(new WinUI.MenuFlyoutSeparator());
         flyout.Items.Add(NativeMenuItem(item.Favorite ? "取消收藏" : "收藏", "\uE735", () => _ = AppCommands.ToggleFavoriteAsync(item, Props.Dispatch)));
         flyout.Items.Add(NativeMenuItem("编辑", "\uE70F", () => Props.Dispatch(new EditorOpened(VaultItemDraft.FromItem(item)))));
@@ -174,14 +174,14 @@ public sealed class VaultListItem : Component<VaultListItemProps>
 
     private static string BuildSecondaryText(BitwardenItem item)
     {
-        if (!string.IsNullOrWhiteSpace(item.Username))
+        if (!string.IsNullOrWhiteSpace(VaultDisplay.Username(item)))
         {
-            return item.Username;
+            return VaultDisplay.Username(item)!;
         }
 
-        if (!string.IsNullOrWhiteSpace(item.PrimaryUri))
+        if (!string.IsNullOrWhiteSpace(VaultDisplay.PrimaryUri(item)))
         {
-            return TryGetHost(item.PrimaryUri) ?? item.PrimaryUri;
+            return TryGetHost(VaultDisplay.PrimaryUri(item)!) ?? VaultDisplay.PrimaryUri(item)!;
         }
 
         if (!string.IsNullOrWhiteSpace(item.Notes))

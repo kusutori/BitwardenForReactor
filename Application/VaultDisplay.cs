@@ -8,6 +8,19 @@ namespace BitwardenForReactor.Application;
 
 public static class VaultDisplay
 {
+    public static string? Username(BitwardenItem item) => item.Login?.Username ?? item.Identity?.Username;
+
+    public static string? PrimaryUri(BitwardenItem item) => item.Login?.Uris.FirstOrDefault()?.Uri;
+
+    public static string TypeLabel(BitwardenItem item) => item.Type switch
+    {
+        BitwardenItemType.Login => "登录",
+        BitwardenItemType.SecureNote => "笔记",
+        BitwardenItemType.Card => "卡片",
+        BitwardenItemType.Identity => "身份",
+        _ => "项目"
+    };
+
     public static string FilterTitle(AppState state)
     {
         if (!string.IsNullOrWhiteSpace(state.ActiveFolderId))
@@ -110,7 +123,7 @@ public static class VaultDisplay
         {
             "unlocked" => $"已解锁 · {status.ServerUrl ?? "默认服务器"}",
             "locked" => $"已锁定 · {status.ServerUrl ?? "默认服务器"}",
-            "unauthenticated" => "尚未登录，请先在终端执行 bw login",
+            "unauthenticated" => "尚未登录",
             _ => $"{status.Status} · {status.ServerUrl ?? "默认服务器"}"
         };
 
