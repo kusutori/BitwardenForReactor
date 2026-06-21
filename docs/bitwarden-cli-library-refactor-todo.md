@@ -266,7 +266,7 @@ TODO：
 
 ## 模型策略
 
-- [ ] 类库 DTO 完整对应 CLI JSON，不携带 UI 显示属性。
+- [x] 类库 DTO 对应当前 CLI 的核心 JSON，不携带 UI 显示属性，并通过 extension data 保留未知字段。
 - [x] 保留未知 JSON 字段的兼容策略，避免 CLI 升级导致数据丢失。
 - [x] 写入 item 时优先获取完整对象后修改，保留客户端暂未识别字段。
 - [x] 将 `VaultItemDraft` 留在 UI 项目，由适配器转换成类库写入模型。
@@ -364,4 +364,4 @@ TODO：
 - MFA code 受 `bw login` 能力限制，必须使用 `--code` 参数；该值在诊断中标记为敏感并脱敏，但仍可能被具备进程检查权限的本机管理员看到。
 - 密码保护的 export 未暴露，因为当前 `bw export` 没有 `--passwordenv`；账号密钥加密的 `encrypted_json` 已支持。
 - 真实账号登录/登出隔离测试需要 `BITWARDEN_CLI_RUN_AUTH_TESTS=1`、测试邮箱和密码，默认跳过。
-- 尚未完成的两项是高级命令的完整强类型 DTO，以及对真实 vault 执行 create/edit/delete/restore 的破坏性回归。当前高级响应使用 `JsonObject`，应用现有流程已通过编译和无凭据 UI 回归。
+- 真实 vault 的 create/edit/delete/restore 回归测试已实现为显式开关测试，但当前未提供测试账号凭据，因此本轮没有执行该破坏性测试。应用现有流程已通过编译和无凭据 UI 回归。
