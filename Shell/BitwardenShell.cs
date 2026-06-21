@@ -9,6 +9,7 @@ using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
 using Microsoft.UI.Xaml.Controls;
 using static Microsoft.UI.Reactor.Factories;
+using System.Linq;
 
 namespace BitwardenForReactor.Shell;
 
@@ -35,11 +36,26 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
                 ? RenderMain()
                 : Component<UnlockPage, UnlockPageProps>(
                         new UnlockPageProps(state, Props.Dispatch, Props.MasterPassword, Props.SetMasterPassword))
+                    .WithKey(state.Settings.ActiveAccountId.ToString("D"))
                     .Flex(grow: 1, basis: 0));
     }
 
     private Element RenderTitleActions() =>
         HStack(8,
+            ComboBox(
+                    Props.State.Settings.Accounts.Select(account => account.DisplayName).ToArray(),
+                    Math.Max(0, Props.State.Settings.Accounts.ToList().FindIndex(account => account.Id == Props.State.Settings.ActiveAccountId)),
+                    index =>
+                    {
+                        if (index >= 0 && index < Props.State.Settings.Accounts.Count)
+                        {
+                            _ = AppCommands.SwitchAccountAsync(Props.State.Settings.Accounts[index].Id, Props.Dispatch);
+                        }
+                    })
+                .Width(150)
+                .AutomationName("当前账号"),
+            Button("管理账号", () => Props.Dispatch(new AccountManagerVisibilityChanged(true)))
+                .AutomationName("管理账号"),
             Button("新建项目", () => Props.Dispatch(new EditorOpened(VaultItemDraft.New())))
                 .IsEnabled(Props.State.IsUnlocked && !Props.State.IsBusy)
                 .AutomationName("新建项目"),

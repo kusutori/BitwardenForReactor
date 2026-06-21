@@ -30,6 +30,10 @@ public sealed class App : Component
                 state.DeleteTarget is { } target
                     ? Component<DeleteConfirmationDialog, DeleteConfirmationDialogProps>(
                         new DeleteConfirmationDialogProps(target, state.DeletePermanently, dispatch))
+                    : null,
+                state.ShowAccountManager
+                    ? Component<AccountManagerDialog, AccountManagerDialogProps>(
+                        new AccountManagerDialogProps(state, dispatch))
                     : null)
             .Backdrop(BackdropKind.Mica)
             .RequestedTheme(state.Settings.ThemeMode switch

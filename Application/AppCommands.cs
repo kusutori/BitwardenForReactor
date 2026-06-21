@@ -1,6 +1,9 @@
 using System;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using System.Threading;
+using System.IO;
+using System.Linq;
 using BitwardenForReactor.Models;
 using BitwardenForReactor.Services;
 using BitwardenForReactor.State;
@@ -11,21 +14,31 @@ namespace BitwardenForReactor.Application;
 
 public static class AppCommands
 {
-    public static async Task InitializeAsync(Action<AppAction> dispatch)
+    private static CancellationTokenSource _accountOperations = new();
+
+    public static async Task InitializeAsync(Action<AppAction> dispatch, CancellationToken cancellationToken = default)
     {
         dispatch(new BusyChanged(true, "检测 Bitwarden 状态..."));
         try
         {
-            var status = await BitwardenApplicationService.Instance.GetStatusAsync();
+            var status = await BitwardenApplicationService.Instance.GetStatusAsync(cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             dispatch(new StatusLoaded(status));
+            if (status is not null)
+            {
+                await UpdateActiveAccountMetadataAsync(status, dispatch);
+            }
             if (status?.IsUnlocked == true)
             {
-                await LoadVaultAsync(dispatch);
+                await LoadVaultAsync(dispatch, cancellationToken: cancellationToken);
             }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
         }
         finally
         {
-            dispatch(new BusyChanged(false));
+            if (!cancellationToken.IsCancellationRequested) dispatch(new BusyChanged(false));
         }
     }
 
@@ -59,20 +72,28 @@ public static class AppCommands
         }
     }
 
-    public static async Task LoadVaultAsync(Action<AppAction> dispatch, string? selectedItemId = null)
+    public static async Task LoadVaultAsync(Action<AppAction> dispatch, string? selectedItemId = null, CancellationToken cancellationToken = default)
     {
         dispatch(new BusyChanged(true, "正在加载密码库..."));
         try
         {
             var service = BitwardenApplicationService.Instance;
-            var items = await service.GetItemsAsync() ?? [];
-            var trash = await service.GetTrashItemsAsync() ?? [];
-            var folders = await service.GetFoldersAsync() ?? [];
+            var itemsTask = service.GetItemsAsync(cancellationToken);
+            var trashTask = service.GetTrashItemsAsync(cancellationToken);
+            var foldersTask = service.GetFoldersAsync(cancellationToken);
+            await Task.WhenAll(itemsTask, trashTask, foldersTask);
+            cancellationToken.ThrowIfCancellationRequested();
+            var items = await itemsTask ?? [];
+            var trash = await trashTask ?? [];
+            var folders = await foldersTask ?? [];
             dispatch(new VaultLoaded(items, trash, folders, selectedItemId));
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
         }
         finally
         {
-            dispatch(new BusyChanged(false));
+            if (!cancellationToken.IsCancellationRequested) dispatch(new BusyChanged(false));
         }
     }
 
@@ -266,5 +287,154 @@ public static class AppCommands
         BitwardenApplicationService.Instance.Reconfigure(settings);
         dispatch(new SettingsSaved(settings));
         dispatch(new NoticeShown("设置已保存", "新设置已生效。", InfoBarSeverity.Success));
+    }
+
+    public static async Task SwitchAccountAsync(Guid accountId, Action<AppAction> dispatch)
+    {
+        var current = SettingsManager.Instance.Current;
+        if (accountId == current.ActiveAccountId) return;
+        CancelAccountOperations();
+        var settings = current with { ActiveAccountId = accountId };
+        await SettingsManager.Instance.SaveAsync(settings);
+        BitwardenApplicationService.Instance.Reconfigure(settings);
+        BitwardenApplicationService.Instance.SwitchAccount(accountId);
+        dispatch(new AccountSwitched(settings));
+        await InitializeAsync(dispatch, _accountOperations.Token);
+    }
+
+    public static async Task AddAccountAsync(
+        string displayName,
+        string? serverUrl,
+        AccountAuthenticationMode authenticationMode,
+        Action<AppAction> dispatch)
+    {
+        if (string.IsNullOrWhiteSpace(displayName))
+        {
+            dispatch(new NoticeShown("无法添加账号", "请输入账号名称。", InfoBarSeverity.Warning));
+            return;
+        }
+
+        var id = Guid.NewGuid();
+        var account = new AccountSettings
+        {
+            Id = id,
+            DisplayName = displayName.Trim(),
+            ServerUrl = string.IsNullOrWhiteSpace(serverUrl) ? null : serverUrl.Trim(),
+            AuthenticationMode = authenticationMode,
+            CliDataDirectory = Path.Combine(SettingsManager.GetAccountsRoot(), id.ToString("D"), "cli")
+        };
+        var current = SettingsManager.Instance.Current;
+        var settings = current with { Accounts = [.. current.Accounts, account], ActiveAccountId = id };
+        await SettingsManager.Instance.SaveAsync(settings);
+        BitwardenApplicationService.Instance.Reconfigure(settings);
+        dispatch(new AccountSwitched(settings));
+        await InitializeAsync(dispatch, _accountOperations.Token);
+    }
+
+    public static async Task RemoveAccountAsync(Guid accountId, Action<AppAction> dispatch)
+    {
+        var current = SettingsManager.Instance.Current;
+        if (current.Accounts.Count <= 1)
+        {
+            dispatch(new NoticeShown("无法删除账号", "至少需要保留一个账号。", InfoBarSeverity.Warning));
+            return;
+        }
+
+        var accounts = current.Accounts.Where(account => account.Id != accountId).ToArray();
+        var activeId = current.ActiveAccountId == accountId ? accounts[0].Id : current.ActiveAccountId;
+        var settings = current with { Accounts = accounts, ActiveAccountId = activeId };
+        CancelAccountOperations();
+        await SettingsManager.Instance.SaveAsync(settings);
+        BitwardenApplicationService.Instance.Reconfigure(settings);
+        dispatch(new AccountSwitched(settings));
+        await InitializeAsync(dispatch, _accountOperations.Token);
+    }
+
+    public static async Task LoginWithPasswordAsync(string email, string password, Action<AppAction> dispatch)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            dispatch(new NoticeShown("无法登录", "请输入邮箱和主密码。", InfoBarSeverity.Warning));
+            return;
+        }
+
+        dispatch(new BusyChanged(true, "正在登录..."));
+        try
+        {
+            var result = await BitwardenApplicationService.Instance.LoginWithPasswordAsync(email, password);
+            dispatch(new NoticeShown(result.Success ? "登录成功" : "登录失败", result.Message, result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
+            if (result.Success) await InitializeAsync(dispatch);
+        }
+        finally { dispatch(new BusyChanged(false)); }
+    }
+
+    public static async Task LoginWithApiKeyAsync(string clientId, string clientSecret, Action<AppAction> dispatch)
+    {
+        if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
+        {
+            dispatch(new NoticeShown("无法登录", "请输入 Client ID 和 Client Secret。", InfoBarSeverity.Warning));
+            return;
+        }
+
+        dispatch(new BusyChanged(true, "正在使用 API Key 登录..."));
+        try
+        {
+            var result = await BitwardenApplicationService.Instance.LoginWithApiKeyAsync(clientId, clientSecret);
+            dispatch(new NoticeShown(result.Success ? "登录成功" : "登录失败", result.Message, result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
+            if (result.Success) await InitializeAsync(dispatch);
+        }
+        finally { dispatch(new BusyChanged(false)); }
+    }
+
+    public static async Task LoginWithSsoAsync(Action<AppAction> dispatch)
+    {
+        dispatch(new BusyChanged(true, "正在打开 SSO 登录..."));
+        try
+        {
+            var result = await BitwardenApplicationService.Instance.LoginWithSsoAsync();
+            dispatch(new NoticeShown(result.Success ? "登录成功" : "登录失败", result.Message, result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
+            if (result.Success) await InitializeAsync(dispatch);
+        }
+        finally { dispatch(new BusyChanged(false)); }
+    }
+
+    public static async Task LogoutActiveAccountAsync(Action<AppAction> dispatch)
+    {
+        dispatch(new BusyChanged(true, "正在退出账号..."));
+        try
+        {
+            var success = await BitwardenApplicationService.Instance.LogoutAsync();
+            dispatch(new NoticeShown(success ? "已退出账号" : "退出失败", success ? "当前账号的 CLI 会话已清除。" : "Bitwarden CLI 未能退出当前账号。", success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
+            if (success)
+            {
+                dispatch(new Locked());
+                await InitializeAsync(dispatch);
+            }
+        }
+        finally { dispatch(new BusyChanged(false)); }
+    }
+
+    private static async Task UpdateActiveAccountMetadataAsync(BitwardenStatus status, Action<AppAction> dispatch)
+    {
+        var current = SettingsManager.Instance.Current;
+        var accounts = current.Accounts.Select(account => account.Id == current.ActiveAccountId
+            ? account with
+            {
+                Email = status.UserEmail ?? account.Email,
+                UserId = status.UserId ?? account.UserId,
+                ServerUrl = status.ServerUrl ?? account.ServerUrl,
+                LastUsedAt = DateTimeOffset.Now
+            }
+            : account).ToArray();
+        var settings = current with { Accounts = accounts };
+        await SettingsManager.Instance.SaveAsync(settings);
+        dispatch(new AccountsChanged(settings));
+    }
+
+    private static void CancelAccountOperations()
+    {
+        _accountOperations.Cancel();
+        _accountOperations.Dispose();
+        _accountOperations = new CancellationTokenSource();
     }
 }

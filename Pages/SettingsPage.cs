@@ -80,26 +80,12 @@ public sealed class SettingsPage : Component<SettingsPageProps>
                             SubHeading("认证与环境"),
                             SettingsExpander(
                                 "Bitwarden CLI 环境",
-                                "配置 API Key 和自定义环境变量。普通使用场景仍建议先在终端执行 bw login。",
+                                "配置附加到每次 CLI 调用的非敏感环境变量。账号凭据只在登录时临时使用。",
                                 TextBlock("高级").Foreground(Theme.SecondaryText),
                                 [
                                     SettingsCard(
-                                        "BW_CLIENTID",
-                                        "用于 Bitwarden CLI API Key 登录的 Client ID。",
-                                        TextBox(settings.BwClientId, value => Change(settings with { BwClientId = value }))
-                                            .Width(320)
-                                            .AutomationName("BW_CLIENTID"),
-                                        "\uE77B"),
-                                    SettingsCard(
-                                        "BW_CLIENTSECRET",
-                                        "用于 Bitwarden CLI API Key 登录的 Client Secret。",
-                                        PasswordBox(settings.BwClientSecret, value => Change(settings with { BwClientSecret = value }), "输入 Client Secret")
-                                            .Width(320)
-                                            .AutomationName("BW_CLIENTSECRET"),
-                                        "\uE8D7"),
-                                    SettingsCard(
                                         "自定义环境变量",
-                                        "格式为 KEY1=VALUE1;KEY2=VALUE2，会附加到每次 bw 命令执行环境。",
+                                        "格式为 KEY1=VALUE1;KEY2=VALUE2。请勿在此保存密码、Session 或 API Secret。",
                                         TextBox(settings.CustomEnvironment, value => Change(settings with { CustomEnvironment = value }))
                                             .PlaceholderText("KEY1=VALUE1;KEY2=VALUE2")
                                             .Width(360)

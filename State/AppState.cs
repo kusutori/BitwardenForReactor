@@ -33,6 +33,8 @@ public sealed record AppState
 
     public bool ShowSettings { get; init; }
 
+    public bool ShowAccountManager { get; init; }
+
     public VaultItemDraft? EditorDraft { get; init; }
 
     public BitwardenItem? DeleteTarget { get; init; }
@@ -123,6 +125,12 @@ public sealed record SettingsChanged(AppSettings Settings) : AppAction;
 
 public sealed record SettingsSaved(AppSettings Settings) : AppAction;
 
+public sealed record AccountsChanged(AppSettings Settings) : AppAction;
+
+public sealed record AccountSwitched(AppSettings Settings) : AppAction;
+
+public sealed record AccountManagerVisibilityChanged(bool Show) : AppAction;
+
 public sealed record EditorOpened(VaultItemDraft Draft) : AppAction;
 
 public sealed record EditorDraftChanged(VaultItemDraft Draft) : AppAction;
@@ -172,6 +180,22 @@ public static class AppReducer
             SettingsVisibilityChanged changed => state with { ShowSettings = changed.Show },
             SettingsChanged changed => state with { Settings = changed.Settings },
             SettingsSaved saved => state with { Settings = saved.Settings, ShowSettings = false },
+            AccountsChanged changed => state with { Settings = changed.Settings },
+            AccountManagerVisibilityChanged changed => state with { ShowAccountManager = changed.Show },
+            AccountSwitched switched => state with
+            {
+                Settings = switched.Settings,
+                Status = null,
+                Items = [],
+                TrashItems = [],
+                Folders = [],
+                SelectedItemId = null,
+                Filter = VaultFilter.AllItems,
+                ActiveFolderId = null,
+                SearchQuery = string.Empty,
+                ShowSettings = false,
+                ShowAccountManager = false
+            },
             EditorOpened opened => state with { EditorDraft = opened.Draft },
             EditorDraftChanged changed => state with { EditorDraft = changed.Draft },
             EditorClosed => state with { EditorDraft = null },
