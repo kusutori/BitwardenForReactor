@@ -20,10 +20,11 @@ public sealed class App : Component
 
         UseEffect(() => { _ = AppCommands.InitializeAsync(dispatch); });
 
-        return FlexColumn(
+        return Grid(
+                columns: [GridSize.Star()],
+                rows: [GridSize.Star()],
                 Component<BitwardenShell, BitwardenShellProps>(
-                        new BitwardenShellProps(state, dispatch, masterPassword, setMasterPassword))
-                    .Flex(grow: 1, basis: 0),
+                    new BitwardenShellProps(state, dispatch, masterPassword, setMasterPassword)),
                 state.EditorDraft is { } draft
                     ? Component<ItemEditorDialog, ItemEditorDialogProps>(new ItemEditorDialogProps(draft, state.Folders, dispatch))
                     : null,

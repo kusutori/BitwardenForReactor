@@ -6,6 +6,7 @@ using BitwardenForReactor.Models;
 using BitwardenForReactor.State;
 using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
+using Microsoft.UI.Reactor.Hooks;
 using Microsoft.UI.Reactor.Layout;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -21,61 +22,36 @@ public sealed record ItemEditorDialogProps(
 
 public sealed class ItemEditorDialog : Component<ItemEditorDialogProps>
 {
-    public override Element Render()
-    {
-        var draftRef = UseRef(Props.Draft);
-        var title = Props.Draft.Id is null ? "新建项目" : "编辑项目";
-
-        return (ContentDialog(
-            title,
+    public override Element Render() =>
+        Border(
             Component<ItemEditorForm, ItemEditorFormProps>(
-                new ItemEditorFormProps(Props.Draft, Props.Folders, draft => draftRef.Current = draft)),
-            "保存") with
-        {
-            IsOpen = true,
-            SecondaryButtonText = "取消",
-            CloseButtonText = string.Empty,
-            DefaultButton = ContentDialogButton.Primary,
-            OnClosed = result =>
-            {
-                if (result == ContentDialogResult.Primary)
-                {
-                    var draft = draftRef.Current;
-                    _ = AppCommands.SaveDraftAsync(draft, Props.Dispatch);
-                }
-                else
-                {
-                    Props.Dispatch(new EditorClosed());
-                }
-            }
-        }).Set(dialog => dialog.PrimaryButtonClick += (_, args) =>
-        {
-            if (string.IsNullOrWhiteSpace(draftRef.Current.Name))
-            {
-                args.Cancel = true;
-            }
-        });
-    }
+                new ItemEditorFormProps(
+                    Props.Draft,
+                    Props.Folders,
+                    draft => _ = AppCommands.SaveDraftAsync(draft, Props.Dispatch),
+                    () => Props.Dispatch(new EditorClosed())))
+                .Margin(24)
+                .HorizontalAlignment(HorizontalAlignment.Center)
+                .VerticalAlignment(VerticalAlignment.Center))
+            .Background(Theme.SmokeFill)
+            .AutomationName("项目编辑器遮罩");
 }
 
 internal sealed record ItemEditorFormProps(
     VaultItemDraft InitialDraft,
     IReadOnlyList<BitwardenFolder> Folders,
-    Action<VaultItemDraft> OnDraftChanged);
+    Action<VaultItemDraft> OnSave,
+    Action OnCancel);
 
 internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
 {
     public override Element Render()
     {
         var (draft, setDraft) = UseReducer(Props.InitialDraft);
+        var formScroll = this.UseElementRef<Microsoft.UI.Xaml.Controls.ScrollView>();
 
         void Update(Func<VaultItemDraft, VaultItemDraft> change) =>
-            setDraft(current =>
-            {
-                var changed = change(current);
-                Props.OnDraftChanged(changed);
-                return changed;
-            });
+            setDraft(change);
 
         var typeNames = new[] { "登录", "安全笔记", "卡片", "身份" };
         var typeValues = new[] { BitwardenItemType.Login, BitwardenItemType.SecureNote, BitwardenItemType.Card, BitwardenItemType.Identity };
@@ -85,17 +61,20 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
             ? 0
             : Math.Max(0, Props.Folders.ToList().FindIndex(folder => folder.Id == draft.FolderId) + 1);
 
-        return ScrollView(
-            VStack(16,
+        var form = ScrollView(
+                VStack(16,
                 EditorSection("基础信息",
                 [
                     VStack(6,
                         TextBlock("类型").Foreground(Theme.SecondaryText),
                         Segmented(typeNames, selectedType, index =>
+                        {
                             Update(current => current with
                             {
                                 Type = typeValues[Math.Clamp(index, 0, typeValues.Length - 1)]
-                            }))
+                            });
+                            formScroll.Current?.ScrollTo(0, 0);
+                        })
                             .AutomationName("项目类型")),
                     TextBox(draft.Name, value => Update(current => current with { Name = value }), header: "名称")
                         .AutomationName("名称"),
@@ -127,9 +106,40 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                     CheckBox(draft.Favorite, value => Update(current => current with { Favorite = value }), "收藏")
                         .AutomationName("收藏")
                 ])))
-            .MinWidth(380)
-            .MaxWidth(480)
-            .HorizontalAlignment(HorizontalAlignment.Stretch);
+            .Padding(24)
+            .Ref(formScroll)
+            .Grid(row: 1);
+
+        return Border(
+                Grid(
+                    columns: [GridSize.Star()],
+                    rows: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
+                    Heading(draft.Id is null ? "新建项目" : "编辑项目")
+                        .Margin(left: 24, top: 20, right: 24, bottom: 12)
+                        .Grid(row: 0),
+                    form,
+                    Border(
+                            HStack(12,
+                                Button("取消", Props.OnCancel)
+                                    .MinWidth(96)
+                                    .AutomationName("取消编辑"),
+                                Button("保存", () => Props.OnSave(draft))
+                                    .MinWidth(96)
+                                    .IsEnabled(!string.IsNullOrWhiteSpace(draft.Name))
+                                    .AutomationName("保存项目"))
+                                .HorizontalAlignment(HorizontalAlignment.Right))
+                        .WithBorder(Theme.CardStroke, 1)
+                        .Padding(16)
+                        .Grid(row: 2)))
+            .Background(Theme.SolidBackground)
+            .WithBorder(Theme.CardStroke, 1)
+            .CornerRadius(8)
+            .MinWidth(420)
+            .MaxWidth(560)
+            .MaxHeight(680)
+            .HorizontalAlignment(HorizontalAlignment.Stretch)
+            .VerticalAlignment(VerticalAlignment.Stretch)
+            .AutomationName("项目编辑器");
     }
 
     private static Element RenderLogin(VaultItemDraft draft, Action<Func<VaultItemDraft, VaultItemDraft>> update)
