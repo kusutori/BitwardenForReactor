@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Nodes;
@@ -19,9 +20,10 @@ public sealed record VaultItemDraft(
     string? Id,
     BitwardenItemType Type,
     string Name,
+    string? FolderId,
     string? Username,
     string? Password,
-    string? Uri,
+    IReadOnlyList<VaultUriDraft> Uris,
     string? Notes,
     string? CardholderName,
     string? CardBrand,
@@ -38,7 +40,7 @@ public sealed record VaultItemDraft(
     bool Favorite)
 {
     public static VaultItemDraft New(BitwardenItemType type = BitwardenItemType.Login) =>
-        new(null, type, string.Empty, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false);
+        new(null, type, string.Empty, null, null, null, [VaultUriDraft.New()], null, null, null, null, null, null, null, null, null, null, null, null, null, false);
 
     public static VaultItemDraft FromItem(BitwardenItem item)
     {
@@ -52,9 +54,12 @@ public sealed record VaultItemDraft(
             item.Id,
             item.Type,
             item.Name,
+            item.FolderId,
             item.Login?.Username ?? item.Identity?.Username,
             item.Login?.Password,
-            item.Login?.Uris.FirstOrDefault()?.Uri,
+            item.Login?.Uris.Select(VaultUriDraft.FromUri).ToArray() is { Length: > 0 } uris
+                ? uris
+                : [VaultUriDraft.New()],
             item.Notes,
             item.Card?.CardholderName,
             item.Card?.Brand,
@@ -77,6 +82,7 @@ public sealed record VaultItemDraft(
         {
             ["type"] = (int)Type,
             ["name"] = Name,
+            ["folderId"] = EmptyToNull(FolderId),
             ["notes"] = EmptyToNull(Notes),
             ["favorite"] = Favorite
         };
@@ -88,9 +94,14 @@ public sealed record VaultItemDraft(
                 {
                     ["username"] = EmptyToNull(Username),
                     ["password"] = EmptyToNull(Password),
-                    ["uris"] = string.IsNullOrWhiteSpace(Uri)
-                        ? new JsonArray()
-                        : new JsonArray(new JsonObject { ["uri"] = Uri })
+                    ["uris"] = new JsonArray(Uris
+                        .Where(uri => !string.IsNullOrWhiteSpace(uri.Value))
+                        .Select(uri => (JsonNode)new JsonObject
+                        {
+                            ["uri"] = uri.Value.Trim(),
+                            ["match"] = uri.Match
+                        })
+                        .ToArray())
                 };
                 break;
             case BitwardenItemType.Card:
@@ -118,6 +129,14 @@ public sealed record VaultItemDraft(
     }
 
     private static string? EmptyToNull(string? value) => string.IsNullOrWhiteSpace(value) ? null : value;
+}
+
+public sealed record VaultUriDraft(Guid Key, string Value, int? Match)
+{
+    public static VaultUriDraft New() => new(Guid.NewGuid(), string.Empty, null);
+
+    public static VaultUriDraft FromUri(UriEntry uri) =>
+        new(Guid.NewGuid(), uri.Uri ?? string.Empty, uri.Match);
 }
 
 public sealed record IconInfo(string? Glyph, string? ImageUrl)

@@ -138,8 +138,6 @@ public sealed record AccountManagerVisibilityChanged(bool Show) : AppAction;
 
 public sealed record EditorOpened(VaultItemDraft Draft) : AppAction;
 
-public sealed record EditorDraftChanged(VaultItemDraft Draft) : AppAction;
-
 public sealed record EditorClosed : AppAction;
 
 public sealed record DeleteRequested(BitwardenItem Item, bool Permanent) : AppAction;
@@ -202,7 +200,6 @@ public static class AppReducer
                 ShowAccountManager = false
             },
             EditorOpened opened => state with { EditorDraft = opened.Draft },
-            EditorDraftChanged changed => state with { EditorDraft = changed.Draft },
             EditorClosed => state with { EditorDraft = null },
             DeleteRequested requested => state with { DeleteTarget = requested.Item, DeletePermanently = requested.Permanent },
             DeleteCancelled => state with { DeleteTarget = null, DeletePermanently = false },

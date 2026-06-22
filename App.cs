@@ -25,7 +25,7 @@ public sealed class App : Component
                         new BitwardenShellProps(state, dispatch, masterPassword, setMasterPassword))
                     .Flex(grow: 1, basis: 0),
                 state.EditorDraft is { } draft
-                    ? Component<ItemEditorDialog, ItemEditorDialogProps>(new ItemEditorDialogProps(draft, dispatch))
+                    ? Component<ItemEditorDialog, ItemEditorDialogProps>(new ItemEditorDialogProps(draft, state.Folders, dispatch))
                     : null,
                 state.DeleteTarget is { } target
                     ? Component<DeleteConfirmationDialog, DeleteConfirmationDialogProps>(
