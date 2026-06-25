@@ -13,7 +13,6 @@ using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Windows.System;
 using Windows.UI.Core;
 using static BitwardenForReactor.Controls.Toolkit.ToolkitFactories;
@@ -145,8 +144,6 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
             .MaxHeight(680)
             .HorizontalAlignment(HorizontalAlignment.Stretch)
             .VerticalAlignment(VerticalAlignment.Stretch)
-            .Translation(0, 0, 32)
-            .Set(native => native.Shadow = new ThemeShadow())
             .AutomationName("项目编辑器");
     }
 

@@ -6,7 +6,6 @@ using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Windows.System;
 using static Microsoft.UI.Reactor.Factories;
 
@@ -72,8 +71,6 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                     .Width(420)
                     .HorizontalAlignment(HorizontalAlignment.Center)
                     .VerticalAlignment(VerticalAlignment.Center)
-                    .Translation(0, 0, 32)
-                    .Set(native => native.Shadow = new ThemeShadow())
                     .AutomationName("文件夹编辑器"))
             .Background(Theme.SmokeFill)
             .AutomationName("文件夹编辑器遮罩");
