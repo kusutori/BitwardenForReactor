@@ -62,7 +62,7 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
                     MenuItem("卡片", () => OpenNewItem(BitwardenItemType.Card)),
                     MenuItem("身份", () => OpenNewItem(BitwardenItemType.Identity)),
                     MenuSeparator(),
-                    MenuItem("文件夹", () => Props.Dispatch(new EditorOpened(VaultItemDraft.NewFolder())))))
+                    MenuItem("文件夹", () => Props.Dispatch(new FolderEditorVisibilityChanged(true)))))
                 .IsEnabled(Props.State.IsUnlocked && !Props.State.IsBusy)
                 .AutomationName("新建项目"),
             Button("同步", () => _ = AppCommands.SyncAsync(Props.Dispatch))

@@ -28,6 +28,9 @@ public sealed class App : Component
                 state.EditorDraft is { } draft
                     ? Component<ItemEditorDialog, ItemEditorDialogProps>(new ItemEditorDialogProps(draft, state.Folders, dispatch))
                     : null,
+                state.ShowFolderEditor
+                    ? Component<FolderEditorDialog, FolderEditorDialogProps>(new FolderEditorDialogProps(dispatch))
+                    : null,
                 state.DeleteTarget is { } target
                     ? Component<DeleteConfirmationDialog, DeleteConfirmationDialogProps>(
                         new DeleteConfirmationDialogProps(target, state.DeletePermanently, dispatch))

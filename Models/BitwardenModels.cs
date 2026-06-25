@@ -39,12 +39,8 @@ public sealed record VaultItemDraft(
     string? Address,
     bool Favorite)
 {
-    public bool IsFolder { get; init; }
-
     public static VaultItemDraft New(BitwardenItemType type = BitwardenItemType.Login) =>
         new(null, type, string.Empty, null, null, null, [VaultUriDraft.New()], null, null, null, null, null, null, null, null, null, null, null, null, null, false);
-
-    public static VaultItemDraft NewFolder() => New() with { IsFolder = true };
 
     public static VaultItemDraft FromItem(BitwardenItem item)
     {

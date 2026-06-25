@@ -40,6 +40,8 @@ public sealed record AppState
 
     public bool ShowAccountManager { get; init; }
 
+    public bool ShowFolderEditor { get; init; }
+
     public VaultItemDraft? EditorDraft { get; init; }
 
     public BitwardenItem? DeleteTarget { get; init; }
@@ -136,6 +138,8 @@ public sealed record AccountSwitched(AppSettings Settings) : AppAction;
 
 public sealed record AccountManagerVisibilityChanged(bool Show) : AppAction;
 
+public sealed record FolderEditorVisibilityChanged(bool Show) : AppAction;
+
 public sealed record EditorOpened(VaultItemDraft Draft) : AppAction;
 
 public sealed record EditorClosed : AppAction;
@@ -185,6 +189,7 @@ public static class AppReducer
             SettingsSaved saved => state with { Settings = saved.Settings, ShowSettings = false },
             AccountsChanged changed => state with { Settings = changed.Settings },
             AccountManagerVisibilityChanged changed => state with { ShowAccountManager = changed.Show },
+            FolderEditorVisibilityChanged changed => state with { ShowFolderEditor = changed.Show },
             AccountSwitched switched => state with
             {
                 Settings = switched.Settings,
@@ -197,7 +202,8 @@ public static class AppReducer
                 ActiveFolderId = null,
                 SearchQuery = string.Empty,
                 ShowSettings = false,
-                ShowAccountManager = false
+                ShowAccountManager = false,
+                ShowFolderEditor = false
             },
             EditorOpened opened => state with { EditorDraft = opened.Draft },
             EditorClosed => state with { EditorDraft = null },
@@ -220,7 +226,8 @@ public static class AppReducer
                 Filter = VaultFilter.AllItems,
                 ActiveFolderId = null,
                 SearchQuery = string.Empty,
-                ShowSettings = false
+                ShowSettings = false,
+                ShowFolderEditor = false
             },
             _ => state
         };
