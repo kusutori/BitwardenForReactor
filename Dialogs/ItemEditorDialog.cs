@@ -7,9 +7,14 @@ using BitwardenForReactor.State;
 using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Hooks;
+using Microsoft.UI.Reactor.Input;
 using Microsoft.UI.Reactor.Layout;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Windows.System;
+using Windows.UI.Core;
 using static BitwardenForReactor.Controls.Toolkit.ToolkitFactories;
 using static Microsoft.UI.Reactor.Factories;
 
@@ -142,44 +147,17 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
             .AutomationName("项目编辑器");
     }
 
-    private static Element RenderLogin(VaultItemDraft draft, Action<Func<VaultItemDraft, VaultItemDraft>> update)
-    {
-        var uriRows = draft.Uris.Select(uri =>
-            Grid(
-                columns: [GridSize.Star(), GridSize.Auto],
-                rows: [GridSize.Auto],
-                TextBox(uri.Value, value => update(current => current with
-                    {
-                        Uris = current.Uris.Select(entry => entry.Key == uri.Key ? entry with { Value = value } : entry).ToArray()
-                    }), header: "网站 (URI)")
-                    .AutomationName("网站 URI")
-                    .Grid(column: 0),
-                Button(Icon(FontIcon("\uE74D")), () => update(current => current with
-                    {
-                        Uris = current.Uris.Where(entry => entry.Key != uri.Key).ToArray()
-                    }))
-                    .IsEnabled(draft.Uris.Count > 1)
-                    .AutomationName("删除网站")
-                    .Margin(left: 8, top: 24, right: 0, bottom: 0)
-                    .Grid(column: 1))
-                .WithKey(uri.Key.ToString()))
-            .ToArray();
-
-        return EditorSection("登录信息",
+    private static Element RenderLogin(VaultItemDraft draft, Action<Func<VaultItemDraft, VaultItemDraft>> update) =>
+        EditorSection("登录信息",
         [
             TextBox(draft.Username ?? string.Empty, value => update(current => current with { Username = value }), header: "用户名").AutomationName("用户名"),
             PasswordBox(draft.Password ?? string.Empty, value => update(current => current with { Password = value }), "密码")
                 .Header("密码")
                 .AutomationName("密码"),
-            VStack(8, uriRows
-                .Cast<Element>()
-                .Append(
-                    Button("+  添加网站", () => update(current => current with { Uris = [.. current.Uris, VaultUriDraft.New()] }))
-                        .HorizontalAlignment(HorizontalAlignment.Left)
-                        .AutomationName("添加网站"))
-                .ToArray())
+            Component<UriEditorList, UriEditorListProps>(new UriEditorListProps(
+                draft.Uris,
+                uris => update(current => current with { Uris = uris })))
         ]);
-    }
 
     private static Element RenderCard(VaultItemDraft draft, Action<Func<VaultItemDraft, VaultItemDraft>> update) =>
         EditorSection("卡片信息",
@@ -222,4 +200,139 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
         VStack(8,
             TextBlock(title).SemiBold(),
             VStack(10, children.Where(child => child is not null).Cast<Element>().ToArray()));
+}
+
+internal sealed record UriEditorListProps(
+    IReadOnlyList<VaultUriDraft> Uris,
+    Action<IReadOnlyList<VaultUriDraft>> OnChanged);
+
+internal sealed class UriEditorList : Component<UriEditorListProps>
+{
+    public override Element Render()
+    {
+        var (draggingKey, setDraggingKey) = UseState<Guid?>(null);
+        var (hoverKey, setHoverKey) = UseState<Guid?>(null);
+        var (focusedKey, setFocusedKey) = UseState(Props.Uris.FirstOrDefault()?.Key ?? Guid.Empty);
+
+        IReadOnlyList<VaultUriDraft> Replace(Guid key, Func<VaultUriDraft, VaultUriDraft> change) =>
+            Props.Uris.Select(uri => uri.Key == key ? change(uri) : uri).ToArray();
+
+        IReadOnlyList<VaultUriDraft> Remove(Guid key) =>
+            Props.Uris.Count <= 1
+                ? Props.Uris
+                : Props.Uris.Where(uri => uri.Key != key).ToArray();
+
+        IReadOnlyList<VaultUriDraft> Move(int fromIndex, int toIndex)
+        {
+            if (fromIndex == toIndex) return Props.Uris;
+            if (fromIndex < 0 || fromIndex >= Props.Uris.Count) return Props.Uris;
+
+            toIndex = Math.Clamp(toIndex, 0, Props.Uris.Count - 1);
+            var copy = Props.Uris.ToList();
+            var item = copy[fromIndex];
+            copy.RemoveAt(fromIndex);
+            copy.Insert(toIndex, item);
+            return copy;
+        }
+
+        void MoveByKey(Guid sourceKey, Guid targetKey)
+        {
+            var from = Props.Uris.ToList().FindIndex(uri => uri.Key == sourceKey);
+            var to = Props.Uris.ToList().FindIndex(uri => uri.Key == targetKey);
+            if (from >= 0 && to >= 0)
+            {
+                Props.OnChanged(Move(from, to));
+            }
+        }
+
+        void MoveFocused(Guid key, KeyRoutedEventArgs e)
+        {
+            var alt = (InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Menu) & CoreVirtualKeyStates.Down) != 0;
+            if (!alt) return;
+
+            var index = Props.Uris.ToList().FindIndex(uri => uri.Key == key);
+            if (index < 0) return;
+
+            if (e.Key == VirtualKey.Up && index > 0)
+            {
+                Props.OnChanged(Move(index, index - 1));
+                setFocusedKey(key);
+                e.Handled = true;
+            }
+            else if (e.Key == VirtualKey.Down && index < Props.Uris.Count - 1)
+            {
+                Props.OnChanged(Move(index, index + 1));
+                setFocusedKey(key);
+                e.Handled = true;
+            }
+        }
+
+        Element Row(VaultUriDraft uri)
+        {
+            var isDragging = draggingKey == uri.Key;
+            var isHover = hoverKey == uri.Key && draggingKey is not null && draggingKey != uri.Key;
+            var isFocused = focusedKey == uri.Key;
+
+            return Border(
+                    Grid(
+                        columns: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
+                        rows: [GridSize.Auto],
+                        Border(Icon(FontIcon("\uE700")))
+                            .Width(32)
+                            .Height(32)
+                            .Margin(top: 24, right: 8)
+                            .CornerRadius(4)
+                            .Background(Theme.SubtleFill)
+                            .AutomationName("拖动网站")
+                            .OnDragStart<BorderElement, Guid>(
+                                getPayload: () =>
+                                {
+                                    setDraggingKey(uri.Key);
+                                    return uri.Key;
+                                },
+                                allowedOperations: DragOperations.Move,
+                                onEnd: _ =>
+                                {
+                                    setDraggingKey(null);
+                                    setHoverKey(null);
+                                })
+                            .Grid(column: 0),
+                        TextBox(uri.Value, value => Props.OnChanged(Replace(uri.Key, current => current with { Value = value })), header: "网站 (URI)")
+                            .AutomationName("网站 URI")
+                            .Grid(column: 1),
+                        Button(Icon(FontIcon("\uE74D")), () => Props.OnChanged(Remove(uri.Key)))
+                            .IsEnabled(Props.Uris.Count > 1)
+                            .AutomationName("删除网站")
+                            .Margin(left: 8, top: 24, right: 0, bottom: 0)
+                            .Grid(column: 2)))
+                .WithBorder(isHover ? Theme.Accent : Theme.CardStroke, isHover ? 2 : isFocused ? 1 : 0)
+                .CornerRadius(6)
+                .Opacity(isDragging ? 0.55 : 1.0)
+                .IsTabStop(true)
+                .OnGotFocus((_, _) => setFocusedKey(uri.Key))
+                .OnKeyDown((_, e) => MoveFocused(uri.Key, e))
+                .OnDragEnter(args =>
+                {
+                    if (args.Data.TryGetTypedPayload<Guid>(out var sourceKey) && sourceKey != uri.Key)
+                    {
+                        setHoverKey(uri.Key);
+                    }
+                })
+                .OnDrop<BorderElement, Guid>(sourceKey =>
+                {
+                    MoveByKey(sourceKey, uri.Key);
+                    setDraggingKey(null);
+                    setHoverKey(null);
+                }, acceptedOps: DragOperations.Move)
+                .WithKey(uri.Key.ToString("D"));
+        }
+
+        return VStack(8,
+            Props.Uris.Select(Row)
+                .Append(
+                    Button("+  添加网站", () => Props.OnChanged([.. Props.Uris, VaultUriDraft.New()]))
+                        .HorizontalAlignment(HorizontalAlignment.Left)
+                        .AutomationName("添加网站"))
+                .ToArray());
+    }
 }
