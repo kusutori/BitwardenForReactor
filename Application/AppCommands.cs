@@ -160,6 +160,12 @@ public static class AppCommands
 
     public static async Task SaveDraftAsync(VaultItemDraft draft, Action<AppAction> dispatch)
     {
+        if (draft.IsFolder)
+        {
+            await SaveFolderDraftAsync(draft, dispatch);
+            return;
+        }
+
         dispatch(new BusyChanged(true, draft.Id is null ? "正在创建项目..." : "正在保存项目..."));
         try
         {
@@ -177,6 +183,34 @@ public static class AppCommands
             dispatch(new EditorClosed());
             dispatch(new NoticeShown("已保存", "项目已保存。", InfoBarSeverity.Success));
             await LoadVaultAsync(dispatch, draft.Id);
+        }
+        finally
+        {
+            dispatch(new BusyChanged(false));
+        }
+    }
+
+    private static async Task SaveFolderDraftAsync(VaultItemDraft draft, Action<AppAction> dispatch)
+    {
+        if (string.IsNullOrWhiteSpace(draft.Name))
+        {
+            dispatch(new NoticeShown("无法创建文件夹", "请输入文件夹名称。", InfoBarSeverity.Warning));
+            return;
+        }
+
+        dispatch(new BusyChanged(true, "正在创建文件夹..."));
+        try
+        {
+            var folder = await BitwardenApplicationService.Instance.CreateFolderAsync(draft.Name.Trim());
+            if (folder is null)
+            {
+                dispatch(new NoticeShown("创建失败", "Bitwarden CLI 未能创建该文件夹。", InfoBarSeverity.Error));
+                return;
+            }
+
+            dispatch(new EditorClosed());
+            dispatch(new NoticeShown("已创建", $"文件夹「{folder.Name}」已创建。", InfoBarSeverity.Success));
+            await LoadVaultAsync(dispatch);
         }
         finally
         {

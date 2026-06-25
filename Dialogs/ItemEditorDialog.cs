@@ -58,9 +58,9 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
         void Update(Func<VaultItemDraft, VaultItemDraft> change) =>
             setDraft(change);
 
-        var typeNames = new[] { "登录", "安全笔记", "卡片", "身份" };
+        var typeNames = new[] { "登录", "安全笔记", "卡片", "身份", "文件夹" };
         var typeValues = new[] { BitwardenItemType.Login, BitwardenItemType.SecureNote, BitwardenItemType.Card, BitwardenItemType.Identity };
-        var selectedType = Array.IndexOf(typeValues, draft.Type);
+        var selectedType = draft.IsFolder ? 4 : Math.Max(0, Array.IndexOf(typeValues, draft.Type));
         var folderNames = new[] { "无文件夹" }.Concat(Props.Folders.Select(folder => folder.Name)).ToArray();
         var selectedFolder = string.IsNullOrWhiteSpace(draft.FolderId)
             ? 0
@@ -76,14 +76,17 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                         {
                             Update(current => current with
                             {
-                                Type = typeValues[Math.Clamp(index, 0, typeValues.Length - 1)]
+                                IsFolder = index == 4,
+                                Type = index == 4
+                                    ? current.Type
+                                    : typeValues[Math.Clamp(index, 0, typeValues.Length - 1)]
                             });
                             formScroll.Current?.ScrollTo(0, 0);
                         })
                             .AutomationName("项目类型")),
                     TextBox(draft.Name, value => Update(current => current with { Name = value }), header: "名称")
                         .AutomationName("名称"),
-                    ComboBox(folderNames, selectedFolder, index =>
+                    draft.IsFolder ? null : ComboBox(folderNames, selectedFolder, index =>
                             Update(current => current with
                             {
                                 FolderId = index <= 0 || index > Props.Folders.Count
@@ -97,11 +100,11 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                         ? TextBlock("名称必填。").Foreground(Theme.SystemCaution)
                         : null
                 ]),
-                draft.Type == BitwardenItemType.Login ? RenderLogin(draft, Update) : null,
-                draft.Type == BitwardenItemType.Card ? RenderCard(draft, Update) : null,
-                draft.Type == BitwardenItemType.Identity ? RenderIdentity(draft, Update) : null,
-                draft.Type == BitwardenItemType.SecureNote ? RenderSecureNote() : null,
-                EditorSection("备注与选项",
+                !draft.IsFolder && draft.Type == BitwardenItemType.Login ? RenderLogin(draft, Update) : null,
+                !draft.IsFolder && draft.Type == BitwardenItemType.Card ? RenderCard(draft, Update) : null,
+                !draft.IsFolder && draft.Type == BitwardenItemType.Identity ? RenderIdentity(draft, Update) : null,
+                !draft.IsFolder && draft.Type == BitwardenItemType.SecureNote ? RenderSecureNote() : null,
+                draft.IsFolder ? null : EditorSection("备注与选项",
                 [
                     TextBox(draft.Notes ?? string.Empty, value => Update(current => current with { Notes = value }), header: "备注")
                         .TextWrapping()
@@ -119,7 +122,7 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                 Grid(
                     columns: [GridSize.Star()],
                     rows: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
-                    Heading(draft.Id is null ? "新建项目" : "编辑项目")
+                    Heading(draft.IsFolder ? "新建文件夹" : draft.Id is null ? "新建项目" : "编辑项目")
                         .Margin(left: 24, top: 20, right: 24, bottom: 12)
                         .Grid(row: 0),
                     form,
@@ -128,7 +131,7 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                                 Button("取消", Props.OnCancel)
                                     .MinWidth(96)
                                     .AutomationName("取消编辑"),
-                                Button("保存", () => Props.OnSave(draft))
+                                Button(draft.IsFolder ? "创建文件夹" : "保存", () => Props.OnSave(draft))
                                     .MinWidth(96)
                                     .IsEnabled(!string.IsNullOrWhiteSpace(draft.Name))
                                     .AutomationName("保存项目"))

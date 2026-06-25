@@ -99,6 +99,12 @@ public sealed class BitwardenApplicationService
     public Task<CliResult<IReadOnlyList<BitwardenFolder>>> GetFoldersResultAsync(CancellationToken cancellationToken = default) =>
         ActiveClient.Folders.ListAsync(cancellationToken: cancellationToken);
 
+    public async Task<BitwardenFolder?> CreateFolderAsync(string name)
+    {
+        var result = await ActiveClient.Folders.CreateAsync(name);
+        return result.IsSuccess ? result.Value : null;
+    }
+
     public static string DescribeError(CliError? error, string fallback) =>
         ToChineseError(error?.Code, error?.Message, fallback);
 
