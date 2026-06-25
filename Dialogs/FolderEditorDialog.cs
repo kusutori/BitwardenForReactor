@@ -11,19 +11,20 @@ using static Microsoft.UI.Reactor.Factories;
 
 namespace BitwardenForReactor.Dialogs;
 
-public sealed record FolderEditorDialogProps(Action<AppAction> Dispatch);
+public sealed record FolderEditorDialogProps(BitwardenFolder? Folder, Action<AppAction> Dispatch);
 
 public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
 {
     public override Element Render()
     {
-        var (name, setName) = UseState(string.Empty);
+        var (name, setName) = UseState(Props.Folder?.Name ?? string.Empty);
+        var isEditing = Props.Folder is not null;
 
         void Save()
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                _ = AppCommands.CreateFolderAsync(name, Props.Dispatch);
+                _ = AppCommands.SaveFolderAsync(Props.Folder, name, Props.Dispatch);
             }
         }
 
@@ -32,11 +33,11 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                         Grid(
                             columns: [GridSize.Star()],
                             rows: [GridSize.Auto, GridSize.Auto, GridSize.Auto],
-                            Heading("新建文件夹")
+                            Heading(isEditing ? "编辑文件夹" : "新建文件夹")
                                 .Margin(left: 20, top: 18, right: 20, bottom: 10)
                                 .Grid(row: 0),
                             VStack(10,
-                                TextBlock("输入名称后会在当前密码库中创建文件夹。")
+                                TextBlock(isEditing ? "修改名称后会覆盖当前文件夹名称。" : "输入名称后会在当前密码库中创建文件夹。")
                                     .Foreground(Theme.SecondaryText)
                                     .TextWrapping(),
                                 TextBox(name, setName, header: "文件夹名称")
@@ -53,14 +54,14 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                                 .Grid(row: 1),
                             Border(
                                     HStack(12,
-                                        Button("取消", () => Props.Dispatch(new FolderEditorVisibilityChanged(false)))
+                                        Button("取消", () => Props.Dispatch(new FolderEditorClosed()))
                                             .MinWidth(96)
-                                            .AutomationName("取消创建文件夹"),
-                                        Button("创建", Save)
+                                            .AutomationName("取消编辑文件夹"),
+                                        Button(isEditing ? "保存" : "创建", Save)
                                             .AccentButton()
                                             .MinWidth(96)
                                             .IsEnabled(!string.IsNullOrWhiteSpace(name))
-                                            .AutomationName("创建文件夹"))
+                                            .AutomationName(isEditing ? "保存文件夹" : "创建文件夹"))
                                         .HorizontalAlignment(HorizontalAlignment.Right))
                                 .WithBorder(Theme.CardStroke, 1)
                                 .Padding(16)

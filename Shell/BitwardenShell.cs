@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BitwardenForReactor.Application;
 using BitwardenForReactor.Components;
 using BitwardenForReactor.Models;
@@ -7,9 +8,11 @@ using BitwardenForReactor.State;
 using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using static Microsoft.UI.Reactor.Factories;
 using System.Linq;
+using WinUI = Microsoft.UI.Xaml.Controls;
 
 namespace BitwardenForReactor.Shell;
 
@@ -62,7 +65,7 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
                     MenuItem("卡片", () => OpenNewItem(BitwardenItemType.Card)),
                     MenuItem("身份", () => OpenNewItem(BitwardenItemType.Identity)),
                     MenuSeparator(),
-                    MenuItem("文件夹", () => Props.Dispatch(new FolderEditorVisibilityChanged(true)))))
+                    MenuItem("文件夹", () => Props.Dispatch(new FolderEditorOpened()))))
                 .IsEnabled(Props.State.IsUnlocked && !Props.State.IsBusy)
                 .AutomationName("新建项目"),
             Button("同步", () => _ = AppCommands.SyncAsync(Props.Dispatch))
@@ -107,6 +110,79 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
         {
             SelectedTag = state.ShowSettings ? null : VaultNavigation.SelectedTag(state),
             IsSettingsVisible = true
-        }).Flex(grow: 1, basis: 0);
+        })
+        .Set(native => AttachFolderEditButtons(native, state.Folders, Props.Dispatch))
+        .Flex(grow: 1, basis: 0);
+    }
+
+    private static void AttachFolderEditButtons(
+        WinUI.NavigationView navigationView,
+        IReadOnlyList<BitwardenFolder> folders,
+        Action<AppAction> dispatch)
+    {
+        var byId = folders.ToDictionary(folder => folder.Id, StringComparer.Ordinal);
+        AttachFolderEditButtons(navigationView.MenuItems, byId, dispatch);
+    }
+
+    private static void AttachFolderEditButtons(
+        System.Collections.IEnumerable items,
+        IReadOnlyDictionary<string, BitwardenFolder> foldersById,
+        Action<AppAction> dispatch)
+    {
+        foreach (var item in items)
+        {
+            if (item is not WinUI.NavigationViewItem navItem)
+            {
+                continue;
+            }
+
+            if (navItem.Tag is string tag && VaultNavigation.TryGetFolderId(tag, out var folderId) && foldersById.TryGetValue(folderId, out var folder))
+            {
+                navItem.Content = FolderNavContent(folder, dispatch);
+            }
+
+            if (navItem.MenuItems.Count > 0)
+            {
+                AttachFolderEditButtons(navItem.MenuItems, foldersById, dispatch);
+            }
+        }
+    }
+
+    private static UIElement FolderNavContent(BitwardenFolder folder, Action<AppAction> dispatch)
+    {
+        var grid = new WinUI.Grid
+        {
+            ColumnDefinitions =
+            {
+                new WinUI.ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new WinUI.ColumnDefinition { Width = GridLength.Auto }
+            }
+        };
+
+        var name = new TextBlock
+        {
+            Text = folder.Name,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        WinUI.Grid.SetColumn(name, 0);
+        grid.Children.Add(name);
+
+        var edit = new WinUI.Button
+        {
+            Content = new FontIcon { Glyph = "\uE70F", FontSize = 12 },
+            Width = 28,
+            Height = 28,
+            Padding = new Thickness(0),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        edit.Click += (_, _) => dispatch(new FolderEditorOpened(folder));
+        WinUI.ToolTipService.SetToolTip(edit, "编辑文件夹");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(edit, $"编辑文件夹 {folder.Name}");
+        WinUI.Grid.SetColumn(edit, 1);
+        grid.Children.Add(edit);
+
+        return grid;
     }
 }

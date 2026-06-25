@@ -105,6 +105,12 @@ public sealed class BitwardenApplicationService
         return result.IsSuccess ? result.Value : null;
     }
 
+    public async Task<BitwardenFolder?> EditFolderAsync(string id, string name)
+    {
+        var result = await ActiveClient.Folders.EditAsync(id, name);
+        return result.IsSuccess ? result.Value : null;
+    }
+
     public static string DescribeError(CliError? error, string fallback) =>
         ToChineseError(error?.Code, error?.Message, fallback);
 

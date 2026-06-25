@@ -184,26 +184,29 @@ public static class AppCommands
         }
     }
 
-    public static async Task CreateFolderAsync(string name, Action<AppAction> dispatch)
+    public static async Task SaveFolderAsync(BitwardenFolder? existingFolder, string name, Action<AppAction> dispatch)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            dispatch(new NoticeShown("无法创建文件夹", "请输入文件夹名称。", InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(existingFolder is null ? "无法创建文件夹" : "无法保存文件夹", "请输入文件夹名称。", InfoBarSeverity.Warning));
             return;
         }
 
-        dispatch(new BusyChanged(true, "正在创建文件夹..."));
+        dispatch(new BusyChanged(true, existingFolder is null ? "正在创建文件夹..." : "正在保存文件夹..."));
         try
         {
-            var folder = await BitwardenApplicationService.Instance.CreateFolderAsync(name.Trim());
+            var service = BitwardenApplicationService.Instance;
+            var folder = existingFolder is null
+                ? await service.CreateFolderAsync(name.Trim())
+                : await service.EditFolderAsync(existingFolder.Id, name.Trim());
             if (folder is null)
             {
-                dispatch(new NoticeShown("创建失败", "Bitwarden CLI 未能创建该文件夹。", InfoBarSeverity.Error));
+                dispatch(new NoticeShown(existingFolder is null ? "创建失败" : "保存失败", "Bitwarden CLI 未能保存该文件夹。", InfoBarSeverity.Error));
                 return;
             }
 
-            dispatch(new FolderEditorVisibilityChanged(false));
-            dispatch(new NoticeShown("已创建", $"文件夹「{folder.Name}」已创建。", InfoBarSeverity.Success));
+            dispatch(new FolderEditorClosed());
+            dispatch(new NoticeShown(existingFolder is null ? "已创建" : "已保存", $"文件夹「{folder.Name}」已保存。", InfoBarSeverity.Success));
             await LoadVaultAsync(dispatch);
         }
         finally

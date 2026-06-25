@@ -29,7 +29,7 @@ public sealed class App : Component
                     ? Component<ItemEditorDialog, ItemEditorDialogProps>(new ItemEditorDialogProps(draft, state.Folders, dispatch))
                     : null,
                 state.ShowFolderEditor
-                    ? Component<FolderEditorDialog, FolderEditorDialogProps>(new FolderEditorDialogProps(dispatch))
+                    ? Component<FolderEditorDialog, FolderEditorDialogProps>(new FolderEditorDialogProps(state.FolderEditorTarget, dispatch))
                     : null,
                 state.DeleteTarget is { } target
                     ? Component<DeleteConfirmationDialog, DeleteConfirmationDialogProps>(
