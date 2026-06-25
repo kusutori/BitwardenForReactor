@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using BitwardenForReactor.Models;
 using BitwardenForReactor.State;
@@ -11,10 +12,7 @@ public static class VaultNavigation
 {
     public static NavigationViewItemData[] BuildItems(AppState state)
     {
-        var folderItems = state.Folders
-            .OrderBy(folder => folder.Name, StringComparer.CurrentCultureIgnoreCase)
-            .Select(folder => NavItem(folder.Name, "Folder", FolderToTag(folder.Id)))
-            .ToArray();
+        var folderItems = BuildFolderItems(state.Folders);
 
         return
         [
@@ -78,6 +76,9 @@ public static class VaultNavigation
         return false;
     }
 
+    public static bool IsFolderGroupTag(string? tag) =>
+        !string.IsNullOrWhiteSpace(tag) && tag.StartsWith("FolderGroup:", StringComparison.Ordinal);
+
     private static string FilterToTag(VaultFilter filter) => filter switch
     {
         VaultFilter.Logins => "Logins",
@@ -90,4 +91,68 @@ public static class VaultNavigation
     };
 
     private static string FolderToTag(string folderId) => $"Folder:{folderId}";
+
+    private static string FolderGroupToTag(string path) => $"FolderGroup:{path}";
+
+    private static NavigationViewItemData[] BuildFolderItems(IReadOnlyList<BitwardenFolder> folders)
+    {
+        if (folders.Count == 0)
+        {
+            return [];
+        }
+
+        var root = new FolderNode(string.Empty);
+        foreach (var folder in folders.OrderBy(folder => folder.Name, StringComparer.CurrentCultureIgnoreCase))
+        {
+            var segments = FolderSegments(folder.Name);
+            var current = root;
+            foreach (var segment in segments)
+            {
+                if (!current.Children.TryGetValue(segment, out var child))
+                {
+                    child = new FolderNode(segment);
+                    current.Children.Add(segment, child);
+                }
+
+                current = child;
+            }
+
+            current.Folder = folder;
+        }
+
+        return BuildFolderItems(root.Children.Values, string.Empty);
+    }
+
+    private static NavigationViewItemData[] BuildFolderItems(IEnumerable<FolderNode> nodes, string parentPath) =>
+        nodes
+            .OrderBy(node => node.Name, StringComparer.CurrentCultureIgnoreCase)
+            .Select(node =>
+            {
+                var path = string.IsNullOrWhiteSpace(parentPath) ? node.Name : $"{parentPath}/{node.Name}";
+                var children = node.Children.Count > 0 ? BuildFolderItems(node.Children.Values, path) : null;
+                return NavItem(node.Name, "Folder", node.Folder is { } folder ? FolderToTag(folder.Id) : FolderGroupToTag(path)) with
+                {
+                    Children = children
+                };
+            })
+            .ToArray();
+
+    private static string[] FolderSegments(string name)
+    {
+        var segments = name
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(segment => !string.IsNullOrWhiteSpace(segment))
+            .ToArray();
+
+        return segments.Length > 0 ? segments : [name];
+    }
+
+    private sealed class FolderNode(string name)
+    {
+        public string Name { get; } = name;
+
+        public BitwardenFolder? Folder { get; set; }
+
+        public Dictionary<string, FolderNode> Children { get; } = new(StringComparer.CurrentCultureIgnoreCase);
+    }
 }

@@ -30,6 +30,7 @@ public sealed class App : Component
                     : null,
                 state.ShowFolderEditor
                     ? Component<FolderEditorDialog, FolderEditorDialogProps>(new FolderEditorDialogProps(state.FolderEditorTarget, dispatch))
+                        .WithKey(state.FolderEditorTarget?.Id ?? "new-folder")
                     : null,
                 state.DeleteTarget is { } target
                     ? Component<DeleteConfirmationDialog, DeleteConfirmationDialogProps>(

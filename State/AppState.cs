@@ -170,6 +170,7 @@ public static class AppReducer
                 Items = loaded.Items,
                 TrashItems = loaded.TrashItems,
                 Folders = loaded.Folders,
+                ActiveFolderId = PreserveFolderSelection(state.ActiveFolderId, loaded.Folders),
                 SelectedItemId = loaded.SelectedItemId ?? PreserveSelection(state.SelectedItemId, loaded.Items, loaded.TrashItems, state.Filter)
             },
             FilterChanged changed => state with
@@ -252,5 +253,15 @@ public static class AppReducer
 
         var source = filter == VaultFilter.Trash ? trashItems : items;
         return source.Any(item => item.Id == selectedItemId) ? selectedItemId : null;
+    }
+
+    private static string? PreserveFolderSelection(string? activeFolderId, IReadOnlyList<BitwardenFolder> folders)
+    {
+        if (activeFolderId is null)
+        {
+            return null;
+        }
+
+        return folders.Any(folder => folder.Id == activeFolderId) ? activeFolderId : null;
     }
 }

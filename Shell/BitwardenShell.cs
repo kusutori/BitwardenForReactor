@@ -103,6 +103,11 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
                     return;
                 }
 
+                if (VaultNavigation.IsFolderGroupTag(tag))
+                {
+                    return;
+                }
+
                 Props.Dispatch(new FilterChanged(VaultNavigation.TagToFilter(tag)));
             });
 
@@ -161,7 +166,7 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
 
         var name = new TextBlock
         {
-            Text = folder.Name,
+            Text = FolderDisplayName(folder.Name),
             TextTrimming = TextTrimming.CharacterEllipsis,
             VerticalAlignment = VerticalAlignment.Center
         };
@@ -184,5 +189,11 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
         grid.Children.Add(edit);
 
         return grid;
+    }
+
+    private static string FolderDisplayName(string name)
+    {
+        var segments = name.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return segments.Length > 0 ? segments[^1] : name;
     }
 }

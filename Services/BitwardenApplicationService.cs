@@ -111,6 +111,9 @@ public sealed class BitwardenApplicationService
         return result.IsSuccess ? result.Value : null;
     }
 
+    public async Task<bool> DeleteFolderAsync(string id) =>
+        (await ActiveClient.Folders.DeleteAsync(id)).IsSuccess;
+
     public static string DescribeError(CliError? error, string fallback) =>
         ToChineseError(error?.Code, error?.Message, fallback);
 

@@ -215,6 +215,28 @@ public static class AppCommands
         }
     }
 
+    public static async Task DeleteFolderAsync(BitwardenFolder folder, Action<AppAction> dispatch)
+    {
+        dispatch(new BusyChanged(true, "正在删除文件夹..."));
+        try
+        {
+            var success = await BitwardenApplicationService.Instance.DeleteFolderAsync(folder.Id);
+            if (!success)
+            {
+                dispatch(new NoticeShown("删除失败", "Bitwarden CLI 未能删除该文件夹。", InfoBarSeverity.Error));
+                return;
+            }
+
+            dispatch(new FolderEditorClosed());
+            dispatch(new NoticeShown("已删除", $"文件夹「{folder.Name}」已删除。", InfoBarSeverity.Success));
+            await LoadVaultAsync(dispatch);
+        }
+        finally
+        {
+            dispatch(new BusyChanged(false));
+        }
+    }
+
     public static async Task DeleteAsync(BitwardenItem item, bool permanent, Action<AppAction> dispatch)
     {
         dispatch(new BusyChanged(true, permanent ? "正在永久删除..." : "正在删除..."));
