@@ -111,7 +111,7 @@ public sealed class SettingsPage : Component<SettingsPageProps>
                                 "\uE895")),
                         HStack(8,
                             Button("保存设置", () => _ = AppCommands.SaveSettingsAsync(state.Settings, Props.Dispatch))
-                                .Background(Theme.Accent)
+                                .AccentButton()
                                 .AutomationName("保存设置"),
                             Button("放弃更改", () => Change(SettingsManager.Instance.Current))
                                 .AutomationName("放弃设置更改"))))

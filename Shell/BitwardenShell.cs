@@ -61,6 +61,7 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
                     MenuItem("安全笔记", () => OpenNewItem(BitwardenItemType.SecureNote)),
                     MenuItem("卡片", () => OpenNewItem(BitwardenItemType.Card)),
                     MenuItem("身份", () => OpenNewItem(BitwardenItemType.Identity))))
+                .AccentButton()
                 .IsEnabled(Props.State.IsUnlocked && !Props.State.IsBusy)
                 .AutomationName("新建项目"),
             Button("同步", () => _ = AppCommands.SyncAsync(Props.Dispatch))
