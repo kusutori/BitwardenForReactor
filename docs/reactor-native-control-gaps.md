@@ -1,6 +1,6 @@
 # Reactor 原生控件回退清单
 
-最后审计日期：2026-06-20
+最后审计日期：2026-06-25
 
 当前依赖版本：
 
@@ -54,6 +54,27 @@ MenuItem("删除", onDelete, icon: "\uE74D")
 
 `MinWidth`、`MinHeight` 和 `Padding` 已经由通用 Reactor modifier 支持，不属于此缺口。后续整理时可把它们移出 `.Set(...)`，只保留尚未封装的内容对齐设置。
 
+### RNC-003：NavigationViewItem 的自定义内容和右侧操作
+
+| 项目 | 内容 |
+| --- | --- |
+| Reactor 类型 | `NavigationViewItemData` |
+| 缺失能力 | `Content` 只能传入 `string`，无法声明式传入自定义 `UIElement` 或右侧操作区域 |
+| 使用场景 | 左侧导航“文件夹”子项需要在文本右侧显示编辑按钮 |
+| 当前方案 | 在 `NavigationView` 创建后通过 `.Set(...)` 遍历原生 `NavigationViewItem`，把匹配文件夹项的 `Content` 替换为原生 `Grid + TextBlock + Button` |
+| 代码位置 | [`Shell/BitwardenShell.cs`](../Shell/BitwardenShell.cs) 的 `AttachFolderEditButtons`、`FolderNavContent` |
+| 移除条件 | Reactor 的导航数据模型支持 `Element`/`UIElement` 内容模板，或提供可组合的 item content / trailing action API，并且更新路径不会覆盖自定义内容 |
+| 状态 | **必须回退** |
+
+当前 `NavigationViewItemData` 适合表达普通树状导航：文本、图标、Tag、Children、Separator、Header、Disabled、KeyboardAccelerators、AccessKey 和 Description。但它不能表达“左侧文本 + 右侧按钮”这种 item template。
+
+项目现在仍然使用 Reactor 的 `NavigationViewItemData.Children` 构建树状结构，只在文件夹项创建完成后补一个原生内容替换。升级 Reactor 后需要重点检查两点：
+
+1. 数据模型是否允许传入自定义内容或 trailing action。
+2. `NavigationView` 的更新逻辑是否会在每次 render 时把原生 `Content` 重置回字符串。
+
+如果只新增了创建时的自定义内容支持，但更新路径仍会覆盖内容，这个回退仍不能删除。
+
 ## 第三方控件适配
 
 Reactor 当前没有为以下 Windows Community Toolkit 控件提供官方 Element。这类代码不是单个属性缺失，而是整个控件需要项目自行接入。
@@ -78,9 +99,31 @@ Reactor 当前没有为以下 Windows Community Toolkit 控件提供官方 Eleme
 
 ### NavigationViewItemData
 
-当前树状导航通过 `NavigationViewItemData.Children` 实现，未使用原生控件回退。但该轻量数据类型目前没有暴露 `IsExpanded`、`Style`、`ToolTip` 等完整的 `NavigationViewItem` 属性。
+当前树状导航通过 `NavigationViewItemData.Children` 实现，文件夹右侧编辑按钮见 RNC-003。该轻量数据类型目前仍没有暴露 `IsExpanded`、`Style`、`ToolTip` 等完整的 `NavigationViewItem` 属性。
 
 项目当前不需要强制控制展开状态，因此不添加原生实现。若将来需要由状态驱动展开/折叠，应先检查新版 Reactor 是否已补充对应映射，再考虑本地扩展。
+
+## 已知框架/渲染问题
+
+### BUG-001：自定义弹窗卡片阴影二次打开不稳定
+
+| 项目 | 内容 |
+| --- | --- |
+| 涉及界面 | 项目编辑弹窗、文件夹编辑弹窗 |
+| 现象 | 弹窗第一次打开时卡片有阴影，关闭后第二次打开阴影可能消失 |
+| 已尝试方案 | 原生 `ThemeShadow + Translation.Z`；伪阴影层；两种方案都未能稳定解决 |
+| 当前方案 | 不再显式设置阴影，保留当前弹窗结构，把问题记录为框架或当前自定义弹窗实现限制 |
+| 代码位置 | [`Components/ItemEditorDialog.cs`](../Components/ItemEditorDialog.cs)、[`Components/FolderEditorDialog.cs`](../Components/FolderEditorDialog.cs) |
+| 复查条件 | Reactor/WinUI 对 `ContentDialog`、overlay、shadow 或 visual tree 生命周期有更新后重新验证 |
+| 状态 | **观察项** |
+
+这个问题不是单纯缺少一个属性映射。项目曾经使用原生 `ThemeShadow` 和 `Translation` 尝试增强弹窗层级，但第二次打开仍然不稳定；后来又尝试确定性的伪阴影层，视觉收益有限，已回退。
+
+短期内不要继续在业务组件里堆叠阴影补丁。后续更合适的处理路径是：
+
+1. 等待 Reactor/WinUI 相关弹窗和 overlay 行为更新后复查。
+2. 如果必须稳定实现，则抽成独立弹窗宿主或自定义控件统一处理，不在每个业务弹窗里分别 patch。
+3. 重新评估是否能回到原生 `ContentDialog`，前提是动态表单内容更新问题已经解决。
 
 ## 升级审计流程
 
