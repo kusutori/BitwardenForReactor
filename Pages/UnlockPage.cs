@@ -120,10 +120,19 @@ public sealed class UnlockPage : Component<UnlockPageProps>
                             Border(VStack())
                                 .Height(1)
                                 .Background(Theme.DividerStroke),
-                            HStack(8,
-                                TextBlock("CLI 状态发生变化？").Foreground(Theme.SecondaryText),
+                            Grid(
+                                columns: [GridSize.Auto, GridSize.Auto],
+                                rows: [GridSize.Auto],
+                                TextBlock("CLI 状态发生变化？")
+                                    .Foreground(Theme.SecondaryText)
+                                    .VerticalAlignment(VerticalAlignment.Center)
+                                    .Grid(column: 0),
                                 HyperlinkButton("重新检测", onClick: () => _ = AppCommands.InitializeAsync(Props.Dispatch))
-                                    .AutomationName("重新检测状态"))
+                                    .Padding(0)
+                                    .Margin(left: 14)
+                                    .VerticalAlignment(VerticalAlignment.Center)
+                                    .AutomationName("重新检测状态")
+                                    .Grid(column: 1))
                             .HorizontalAlignment(HorizontalAlignment.Center)))
                     .Padding(28)
                     .Width(440)
