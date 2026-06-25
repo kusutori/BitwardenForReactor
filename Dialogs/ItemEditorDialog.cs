@@ -115,40 +115,36 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
             .Ref(formScroll)
             .Grid(row: 1);
 
-        return ModalCard(
-            Border(
-                    Grid(
-                        columns: [GridSize.Star()],
-                        rows: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
-                        Heading(draft.Id is null ? "新建项目" : "编辑项目")
-                            .Margin(left: 24, top: 20, right: 24, bottom: 12)
-                            .Grid(row: 0),
-                        form,
-                        Border(
-                                HStack(12,
-                                    Button("取消", Props.OnCancel)
-                                        .MinWidth(96)
-                                        .AutomationName("取消编辑"),
-                                    Button("保存", () => Props.OnSave(draft))
-                                        .MinWidth(96)
-                                        .IsEnabled(!string.IsNullOrWhiteSpace(draft.Name))
-                                        .AutomationName("保存项目"))
-                                    .HorizontalAlignment(HorizontalAlignment.Right))
-                            .WithBorder(Theme.CardStroke, 1)
-                            .Padding(16)
-                            .Grid(row: 2)))
-                .Background(Theme.SolidBackground)
-                .WithBorder(Theme.CardStroke, 1)
-                .CornerRadius(8)
-                .MinWidth(420)
-                .MaxWidth(560)
-                .MaxHeight(680)
-                .HorizontalAlignment(HorizontalAlignment.Stretch)
-                .VerticalAlignment(VerticalAlignment.Stretch)
-                .AutomationName("项目编辑器"),
-            420,
-            560,
-            680);
+        return Border(
+                Grid(
+                    columns: [GridSize.Star()],
+                    rows: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
+                    Heading(draft.Id is null ? "新建项目" : "编辑项目")
+                        .Margin(left: 24, top: 20, right: 24, bottom: 12)
+                        .Grid(row: 0),
+                    form,
+                    Border(
+                            HStack(12,
+                                Button("取消", Props.OnCancel)
+                                    .MinWidth(96)
+                                    .AutomationName("取消编辑"),
+                                Button("保存", () => Props.OnSave(draft))
+                                    .MinWidth(96)
+                                    .IsEnabled(!string.IsNullOrWhiteSpace(draft.Name))
+                                    .AutomationName("保存项目"))
+                                .HorizontalAlignment(HorizontalAlignment.Right))
+                        .WithBorder(Theme.CardStroke, 1)
+                        .Padding(16)
+                        .Grid(row: 2)))
+            .Background(Theme.SolidBackground)
+            .WithBorder(Theme.CardStroke, 1)
+            .CornerRadius(8)
+            .MinWidth(420)
+            .MaxWidth(560)
+            .MaxHeight(680)
+            .HorizontalAlignment(HorizontalAlignment.Stretch)
+            .VerticalAlignment(VerticalAlignment.Stretch)
+            .AutomationName("项目编辑器");
     }
 
     private static Element RenderLogin(VaultItemDraft draft, Action<Func<VaultItemDraft, VaultItemDraft>> update) =>
@@ -204,24 +200,6 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
         VStack(8,
             TextBlock(title).SemiBold(),
             VStack(10, children.Where(child => child is not null).Cast<Element>().ToArray()));
-
-    private static Element ModalCard(Element card, double minWidth, double maxWidth, double maxHeight) =>
-        Grid(
-                columns: [GridSize.Star()],
-                rows: [GridSize.Star()],
-                Border(VStack())
-                    .Background(Theme.SystemNeutral)
-                    .Opacity(0.16)
-                    .CornerRadius(10)
-                    .MinWidth(minWidth)
-                    .MaxWidth(maxWidth)
-                    .MaxHeight(maxHeight)
-                    .Margin(left: 6, top: 8, right: 0, bottom: 0)
-                    .HorizontalAlignment(HorizontalAlignment.Stretch)
-                    .VerticalAlignment(VerticalAlignment.Stretch),
-                card)
-            .HorizontalAlignment(HorizontalAlignment.Center)
-            .VerticalAlignment(VerticalAlignment.Center);
 }
 
 internal sealed record UriEditorListProps(
