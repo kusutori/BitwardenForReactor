@@ -153,6 +153,7 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
             TextBox(draft.Username ?? string.Empty, value => update(current => current with { Username = value }), header: "用户名").AutomationName("用户名"),
             PasswordBox(draft.Password ?? string.Empty, value => update(current => current with { Password = value }), "密码")
                 .Header("密码")
+                .Set(passwordBox => passwordBox.PasswordRevealMode = PasswordRevealMode.Peek)
                 .AutomationName("密码"),
             Component<UriEditorList, UriEditorListProps>(new UriEditorListProps(
                 draft.Uris,
@@ -164,14 +165,19 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
         [
             TextBox(draft.CardBrand ?? string.Empty, value => update(current => current with { CardBrand = value }), header: "品牌").AutomationName("品牌"),
             TextBox(draft.CardholderName ?? string.Empty, value => update(current => current with { CardholderName = value }), header: "持卡人").AutomationName("持卡人"),
-            TextBox(draft.CardNumber ?? string.Empty, value => update(current => current with { CardNumber = value }), header: "卡号").AutomationName("卡号"),
+            PasswordBox(draft.CardNumber ?? string.Empty, value => update(current => current with { CardNumber = value }), "卡号")
+                .Header("卡号")
+                .Set(passwordBox => passwordBox.PasswordRevealMode = PasswordRevealMode.Peek)
+                .AutomationName("卡号"),
             HStack(8,
                 TextBox(draft.CardExpMonth ?? string.Empty, value => update(current => current with { CardExpMonth = value }), header: "月份")
                     .Flex(grow: 1, basis: 0).AutomationName("月份"),
                 TextBox(draft.CardExpYear ?? string.Empty, value => update(current => current with { CardExpYear = value }), header: "年份")
                     .Flex(grow: 1, basis: 0).AutomationName("年份")),
             PasswordBox(draft.CardCode ?? string.Empty, value => update(current => current with { CardCode = value }), "CVV")
-                .Header("CVV").AutomationName("CVV")
+                .Header("CVV")
+                .Set(passwordBox => passwordBox.PasswordRevealMode = PasswordRevealMode.Peek)
+                .AutomationName("CVV")
         ]);
 
     private static Element RenderIdentity(VaultItemDraft draft, Action<Func<VaultItemDraft, VaultItemDraft>> update) =>

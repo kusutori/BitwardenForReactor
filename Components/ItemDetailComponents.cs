@@ -121,7 +121,8 @@ public sealed record DetailFieldRowProps(
     string Label,
     string Value,
     string? CopyValue,
-    Action<string>? CopyRequested);
+    Action<string>? CopyRequested,
+    Element? ExtraAction = null);
 
 public sealed class DetailFieldRow : Component<DetailFieldRowProps>
 {
@@ -135,7 +136,9 @@ public sealed class DetailFieldRow : Component<DetailFieldRowProps>
                         TextBlock(Props.Value).TextWrapping())
                     .VerticalAlignment(VerticalAlignment.Center)
                     .Grid(column: 0),
-                    BuildCopyButton()
+                    HStack(4,
+                            Props.ExtraAction,
+                            BuildCopyButton())
                         .Margin(left: 12)
                         .VerticalAlignment(VerticalAlignment.Center)
                         .Grid(column: 1)))
@@ -159,9 +162,22 @@ public sealed record SensitiveFieldProps(
 
 public sealed class SensitiveField : Component<SensitiveFieldProps>
 {
-    public override Element Render() =>
-        Component<DetailFieldRow, DetailFieldRowProps>(
-            new DetailFieldRowProps(Props.Label, Props.MaskedValue, Props.Value, Props.CopyRequested));
+    public override Element Render()
+    {
+        var (revealed, setRevealed) = UseState(false);
+        var value = revealed ? Props.Value ?? string.Empty : Props.MaskedValue;
+
+        return Component<DetailFieldRow, DetailFieldRowProps>(
+            new DetailFieldRowProps(
+                Props.Label,
+                value,
+                Props.Value,
+                Props.CopyRequested,
+                Button(Icon(FontIcon(revealed ? "\uE890" : "\uE8F4")), () => setRevealed(!revealed))
+                    .SubtleButton()
+                    .ToolTip(revealed ? "隐藏" : "显示")
+                    .AutomationName($"{(revealed ? "隐藏" : "显示")}{Props.Label}")));
+    }
 }
 
 public sealed record TotpFieldProps(Action CopyRequested);
