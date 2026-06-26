@@ -184,7 +184,7 @@ public sealed class SensitiveField : Component<SensitiveFieldProps>
                 value,
                 Props.Value,
                 Props.CopyRequested,
-                Button(Icon(FontIcon(revealed ? "\uE890" : "\uED1A")), () => setRevealed(!revealed))
+                Button(Icon(FontIcon(revealed ? "\uED1A" : "\uE890")), () => setRevealed(!revealed))
                     .SubtleButton()
                     .ToolTip(revealed ? "隐藏" : "显示")
                     .AutomationName($"{(revealed ? "隐藏" : "显示")}{Props.Label}")));
