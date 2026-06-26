@@ -9,6 +9,7 @@ using BitwardenCli.Core;
 using BitwardenCli.Core.Accounts;
 using BitwardenCli.Core.Authentication;
 using BitwardenCli.Core.Generator;
+using BitwardenCli.Core.ImportExport;
 using BitwardenCli.Core.Models;
 using BitwardenCli.Core.Results;
 using BitwardenForReactor.Models;
@@ -162,6 +163,34 @@ public sealed class BitwardenApplicationService
         var result = await ActiveClient.Generator.GenerateUsernameAsync(options);
         return result.IsSuccess ? result.Value : null;
     }
+
+    public async Task<IReadOnlyList<string>> GetImportFormatsAsync()
+    {
+        var result = await ActiveClient.ImportExport.ListImportFormatsAsync();
+        if (!result.IsSuccess || string.IsNullOrWhiteSpace(result.Value))
+        {
+            return [];
+        }
+
+        return result.Value
+            .Split(['\r', '\n', ',', ' '], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(format => format, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    public async Task<bool> ImportVaultFromFileAsync(string format, string inputPath) =>
+        (await ActiveClient.ImportExport.ImportAsync(format, inputPath)).IsSuccess;
+
+    public async Task<bool> ImportVaultFromContentAsync(string format, string content, string fileExtension) =>
+        (await ActiveClient.ImportExport.ImportContentAsync(format, content, fileExtension: fileExtension)).IsSuccess;
+
+    public async Task<bool> ExportVaultAsync(VaultExportFormat format, string outputPath) =>
+        (await ActiveClient.ImportExport.ExportAsync(new VaultExportOptions
+        {
+            Format = format,
+            OutputPath = outputPath
+        })).IsSuccess;
 
     public async Task<(bool Success, string Message)> LoginWithPasswordAsync(string email, string masterPassword)
     {

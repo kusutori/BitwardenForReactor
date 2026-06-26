@@ -45,7 +45,9 @@ public static class VaultNavigation
                     }
                 ]
             },
-            NavItem("生成器", "\uE72C", "Generator")
+            NavItem("生成器", "\uE72C", "Generator"),
+            NavItem("导入", "\uE8B5", "Import"),
+            NavItem("导出", "\uE896", "Export")
         ];
     }
 
@@ -66,6 +68,16 @@ public static class VaultNavigation
         if (state.ShowGenerator)
         {
             return "Generator";
+        }
+
+        if (state.ImportExportDialog == ImportExportDialogKind.Import)
+        {
+            return "Import";
+        }
+
+        if (state.ImportExportDialog == ImportExportDialogKind.Export)
+        {
+            return "Export";
         }
 
         return !string.IsNullOrWhiteSpace(state.ActiveFolderId)

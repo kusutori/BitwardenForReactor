@@ -7,6 +7,7 @@ using System.Linq;
 using BitwardenForReactor.Models;
 using BitwardenForReactor.Services;
 using BitwardenForReactor.State;
+using BitwardenCli.Core.ImportExport;
 using Microsoft.UI.Xaml.Controls;
 using Windows.System;
 
@@ -320,6 +321,79 @@ public static class AppCommands
         dispatch(new NoticeShown("已复制", "内容已复制到剪贴板，并会按设置自动清除。", InfoBarSeverity.Success));
     }
 
+    public static async Task ImportVaultAsync(string format, string? filePath, string pastedContent, Action<AppAction> dispatch)
+    {
+        if (string.IsNullOrWhiteSpace(format))
+        {
+            dispatch(new NoticeShown("无法导入", "请选择文件格式。", InfoBarSeverity.Warning));
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(filePath) && string.IsNullOrWhiteSpace(pastedContent))
+        {
+            dispatch(new NoticeShown("无法导入", "请选择要导入的文件，或粘贴文件内容。", InfoBarSeverity.Warning));
+            return;
+        }
+
+        dispatch(new BusyChanged(true, "正在导入..."));
+        try
+        {
+            var service = BitwardenApplicationService.Instance;
+            var success = !string.IsNullOrWhiteSpace(filePath)
+                ? await service.ImportVaultFromFileAsync(format, filePath)
+                : await service.ImportVaultFromContentAsync(format, pastedContent, GuessImportExtension(format));
+
+            if (!success)
+            {
+                dispatch(new NoticeShown("导入失败", "Bitwarden CLI 未能导入该文件。请确认格式和内容匹配。", InfoBarSeverity.Error));
+                return;
+            }
+
+            dispatch(new ImportExportVisibilityChanged(null));
+            dispatch(new NoticeShown("导入完成", "密码库数据已导入。", InfoBarSeverity.Success));
+            await LoadVaultAsync(dispatch);
+        }
+        catch
+        {
+            dispatch(new NoticeShown("导入失败", "导入参数无效，或 Bitwarden CLI 未能读取该文件。", InfoBarSeverity.Error));
+        }
+        finally
+        {
+            dispatch(new BusyChanged(false));
+        }
+    }
+
+    public static async Task ExportVaultAsync(VaultExportFormat format, string outputPath, Action<AppAction> dispatch)
+    {
+        if (string.IsNullOrWhiteSpace(outputPath))
+        {
+            dispatch(new NoticeShown("无法导出", "请选择导出文件保存位置。", InfoBarSeverity.Warning));
+            return;
+        }
+
+        dispatch(new BusyChanged(true, "正在导出..."));
+        try
+        {
+            var success = await BitwardenApplicationService.Instance.ExportVaultAsync(format, outputPath);
+            if (!success)
+            {
+                dispatch(new NoticeShown("导出失败", "Bitwarden CLI 未能导出密码库。", InfoBarSeverity.Error));
+                return;
+            }
+
+            dispatch(new ImportExportVisibilityChanged(null));
+            dispatch(new NoticeShown("导出完成", $"密码库已导出到 {outputPath}", InfoBarSeverity.Success));
+        }
+        catch
+        {
+            dispatch(new NoticeShown("导出失败", "导出路径无效，或 Bitwarden CLI 未能写入该文件。", InfoBarSeverity.Error));
+        }
+        finally
+        {
+            dispatch(new BusyChanged(false));
+        }
+    }
+
     public static async Task OpenUriAsync(string? uriText, Action<AppAction> dispatch)
     {
         if (string.IsNullOrWhiteSpace(uriText))
@@ -333,6 +407,27 @@ public static class AppCommands
         {
             dispatch(new NoticeShown("无法打开网站", "系统未能打开该项目的网站地址。", InfoBarSeverity.Error));
         }
+    }
+
+    private static string GuessImportExtension(string format)
+    {
+        if (format.Contains("json", StringComparison.OrdinalIgnoreCase) ||
+            format.Contains("1pux", StringComparison.OrdinalIgnoreCase))
+        {
+            return ".json";
+        }
+
+        if (format.Contains("xml", StringComparison.OrdinalIgnoreCase))
+        {
+            return ".xml";
+        }
+
+        if (format.Contains("csv", StringComparison.OrdinalIgnoreCase))
+        {
+            return ".csv";
+        }
+
+        return ".txt";
     }
 
     public static async Task ToggleFavoriteAsync(BitwardenItem item, Action<AppAction> dispatch)

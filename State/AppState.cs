@@ -46,6 +46,8 @@ public sealed record AppState
 
     public bool ShowGenerator { get; init; }
 
+    public ImportExportDialogKind? ImportExportDialog { get; init; }
+
     public BitwardenFolder? FolderEditorTarget { get; init; }
 
     public VaultItemDraft? EditorDraft { get; init; }
@@ -120,6 +122,12 @@ public sealed record AppState
 
 public abstract record AppAction;
 
+public enum ImportExportDialogKind
+{
+    Import,
+    Export
+}
+
 public sealed record BusyChanged(bool IsBusy, string BusyText = "") : AppAction;
 
 public sealed record StatusLoaded(BitwardenStatus? Status) : AppAction;
@@ -157,6 +165,8 @@ public sealed record FolderEditorClosed : AppAction;
 
 public sealed record GeneratorVisibilityChanged(bool Show) : AppAction;
 
+public sealed record ImportExportVisibilityChanged(ImportExportDialogKind? Kind) : AppAction;
+
 public sealed record EditorOpened(VaultItemDraft Draft) : AppAction;
 
 public sealed record EditorClosed : AppAction;
@@ -192,6 +202,8 @@ public static class AppReducer
                 Filter = changed.Filter,
                 ActiveFolderId = null,
                 ShowSettings = false,
+                ShowGenerator = false,
+                ImportExportDialog = null,
                 SelectedItemId = null
             },
             FolderChanged changed => state with
@@ -199,18 +211,31 @@ public static class AppReducer
                 Filter = VaultFilter.AllItems,
                 ActiveFolderId = changed.FolderId,
                 ShowSettings = false,
+                ShowGenerator = false,
+                ImportExportDialog = null,
                 SelectedItemId = null
             },
             SearchChanged changed => state with { SearchQuery = changed.Query, SelectedItemId = null },
             ItemSelected selected => state with { SelectedItemId = selected.ItemId },
-            SettingsVisibilityChanged changed => state with { ShowSettings = changed.Show },
+            SettingsVisibilityChanged changed => state with { ShowSettings = changed.Show, ShowGenerator = false, ImportExportDialog = null },
             SettingsChanged changed => state with { Settings = changed.Settings },
             SettingsSaved saved => state with { Settings = saved.Settings, ShowSettings = false },
             AccountsChanged changed => state with { Settings = changed.Settings },
             AccountManagerVisibilityChanged changed => state with { ShowAccountManager = changed.Show },
             FolderEditorOpened opened => state with { ShowFolderEditor = true, FolderEditorTarget = opened.Folder },
             FolderEditorClosed => state with { ShowFolderEditor = false, FolderEditorTarget = null },
-            GeneratorVisibilityChanged changed => state with { ShowGenerator = changed.Show },
+            GeneratorVisibilityChanged changed => state with
+            {
+                ShowGenerator = changed.Show,
+                ImportExportDialog = changed.Show ? null : state.ImportExportDialog,
+                ShowSettings = changed.Show ? false : state.ShowSettings
+            },
+            ImportExportVisibilityChanged changed => state with
+            {
+                ImportExportDialog = changed.Kind,
+                ShowGenerator = changed.Kind is null ? state.ShowGenerator : false,
+                ShowSettings = changed.Kind is null ? state.ShowSettings : false
+            },
             AccountSwitched switched => state with
             {
                 Settings = switched.Settings,
@@ -227,6 +252,7 @@ public static class AppReducer
                 ShowAccountManager = false,
                 ShowFolderEditor = false,
                 ShowGenerator = false,
+                ImportExportDialog = null,
                 FolderEditorTarget = null
             },
             EditorOpened opened => state with { EditorDraft = opened.Draft },
@@ -254,6 +280,7 @@ public static class AppReducer
                 ShowSettings = false,
                 ShowFolderEditor = false,
                 ShowGenerator = false,
+                ImportExportDialog = null,
                 FolderEditorTarget = null
             },
             _ => state

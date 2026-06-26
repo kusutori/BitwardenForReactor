@@ -35,6 +35,12 @@ public sealed class App : Component
                 state.ShowGenerator
                     ? Component<GeneratorDialog, GeneratorDialogProps>(new GeneratorDialogProps(state, dispatch))
                     : null,
+                state.ImportExportDialog == ImportExportDialogKind.Import
+                    ? Component<ImportDialog, ImportDialogProps>(new ImportDialogProps(state, dispatch))
+                    : null,
+                state.ImportExportDialog == ImportExportDialogKind.Export
+                    ? Component<ExportDialog, ExportDialogProps>(new ExportDialogProps(state, dispatch))
+                    : null,
                 state.DeleteTarget is { } target
                     ? Component<DeleteConfirmationDialog, DeleteConfirmationDialogProps>(
                         new DeleteConfirmationDialogProps(target, state.DeletePermanently, dispatch))

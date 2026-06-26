@@ -121,6 +121,18 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
                     return;
                 }
 
+                if (string.Equals(tag, "Import", StringComparison.Ordinal))
+                {
+                    Props.Dispatch(new ImportExportVisibilityChanged(ImportExportDialogKind.Import));
+                    return;
+                }
+
+                if (string.Equals(tag, "Export", StringComparison.Ordinal))
+                {
+                    Props.Dispatch(new ImportExportVisibilityChanged(ImportExportDialogKind.Export));
+                    return;
+                }
+
                 Props.Dispatch(new FilterChanged(VaultNavigation.TagToFilter(tag)));
             });
 
