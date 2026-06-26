@@ -125,14 +125,14 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                     form,
                     Border(
                             HStack(12,
-                                Button("取消", Props.OnCancel)
-                                    .MinWidth(96)
-                                    .AutomationName("取消编辑"),
                                 Button("保存", () => Props.OnSave(draft))
                                     .MinWidth(96)
                                     .IsEnabled(!string.IsNullOrWhiteSpace(draft.Name))
-                                    .AutomationName("保存项目"))
-                                .HorizontalAlignment(HorizontalAlignment.Right))
+                                    .AutomationName("保存项目"),
+                                Button("取消", Props.OnCancel)
+                                    .MinWidth(96)
+                                    .AutomationName("取消编辑"))
+                                .HorizontalAlignment(HorizontalAlignment.Left))
                         .WithBorder(Theme.CardStroke, 1)
                         .Padding(16)
                         .Grid(row: 2)))
