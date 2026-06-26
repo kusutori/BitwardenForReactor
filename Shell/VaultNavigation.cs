@@ -32,11 +32,11 @@ public static class VaultNavigation
                             NavItem("登录", "World", "Logins"),
                             NavItem("支付卡", "ContactInfo", "Cards"),
                             NavItem("身份", "People", "Identities"),
-                            NavItem("安全笔记", "Page", "Notes"),
-                            NavItem("归档", "Archive", "Archive"),
-                            NavItem("回收站", "Delete", "Trash")
+                            NavItem("安全笔记", "Page", "Notes")
                         ]
                     },
+                    NavItem("归档", "\uE7B8", "Archive"),
+                    NavItem("回收站", "Delete", "Trash"),
                     NavItem("文件夹", "Folder", "Folders") with
                     {
                         Children = folderItems.Length > 0

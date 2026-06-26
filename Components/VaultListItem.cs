@@ -123,7 +123,7 @@ public sealed class VaultListItem : Component<VaultListItemProps>
         flyout.Items.Add(NativeMenuItem("克隆", "\uE8C8", () => _ = AppCommands.CloneItemAsync(item, Props.Dispatch)));
         if (!Props.IsArchiveView)
         {
-            flyout.Items.Add(NativeMenuItem("归档", "\uE8DE", () => _ = AppCommands.ArchiveAsync(item, Props.Dispatch)));
+            flyout.Items.Add(NativeMenuItem("归档", "\uE7B8", () => _ = AppCommands.ArchiveAsync(item, Props.Dispatch)));
         }
         flyout.Items.Add(new WinUI.MenuFlyoutSeparator());
         flyout.Items.Add(NativeMenuItem("删除", "\uE74D", () => Props.Dispatch(new DeleteRequested(item, false)), critical: true));

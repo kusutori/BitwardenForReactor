@@ -70,7 +70,7 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                             .ToolTip("编辑")
                             .AutomationName("编辑项目"),
                         !Props.IsTrashView && !Props.IsArchiveView
-                            ? Button(Icon(FontIcon("\uE8DE")), Props.Archive)
+                            ? Button(Icon(FontIcon("\uE7B8")), Props.Archive)
                                 .SubtleButton()
                                 .ToolTip("归档")
                                 .AutomationName("归档项目")
@@ -184,7 +184,7 @@ public sealed class SensitiveField : Component<SensitiveFieldProps>
                 value,
                 Props.Value,
                 Props.CopyRequested,
-                Button(Icon(FontIcon(revealed ? "\uE890" : "\uE8F4")), () => setRevealed(!revealed))
+                Button(Icon(FontIcon(revealed ? "\uE890" : "\uED1A")), () => setRevealed(!revealed))
                     .SubtleButton()
                     .ToolTip(revealed ? "隐藏" : "显示")
                     .AutomationName($"{(revealed ? "隐藏" : "显示")}{Props.Label}")));
