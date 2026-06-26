@@ -37,7 +37,9 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
                         new DetailHeaderProps(
                             item,
                             state.Filter == VaultFilter.Trash,
+                            state.Filter == VaultFilter.Archive,
                             () => Props.Dispatch(new EditorOpened(VaultItemDraft.FromItem(item))),
+                            () => _ = AppCommands.ArchiveAsync(item, Props.Dispatch),
                             () => Props.Dispatch(new DeleteRequested(item, false)),
                             () => Props.Dispatch(new DeleteRequested(item, true)),
                             () => _ = AppCommands.RestoreAsync(item, Props.Dispatch)))

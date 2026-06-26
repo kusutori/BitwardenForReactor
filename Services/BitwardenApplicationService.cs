@@ -96,6 +96,9 @@ public sealed class BitwardenApplicationService
     public Task<CliResult<IReadOnlyList<BitwardenItem>>> GetTrashItemsResultAsync(CancellationToken cancellationToken = default) =>
         ActiveClient.Vault.ListItemsAsync(new VaultItemQuery { Trash = true }, cancellationToken);
 
+    public Task<CliResult<IReadOnlyList<BitwardenItem>>> GetArchivedItemsResultAsync(CancellationToken cancellationToken = default) =>
+        ActiveClient.Vault.ListItemsAsync(new VaultItemQuery { Archived = true }, cancellationToken);
+
     public Task<CliResult<IReadOnlyList<BitwardenFolder>>> GetFoldersResultAsync(CancellationToken cancellationToken = default) =>
         ActiveClient.Folders.ListAsync(cancellationToken: cancellationToken);
 
@@ -128,6 +131,9 @@ public sealed class BitwardenApplicationService
 
     public async Task<bool> RestoreItemAsync(string itemId) =>
         (await ActiveClient.Vault.RestoreItemAsync(itemId)).IsSuccess;
+
+    public async Task<bool> ArchiveItemAsync(string itemId) =>
+        (await ActiveClient.Vault.ArchiveItemAsync(itemId)).IsSuccess;
 
     public async Task<bool> CreateItemAsync(JsonObject newItem) =>
         (await ActiveClient.Vault.CreateItemAsync(newItem)).IsSuccess;

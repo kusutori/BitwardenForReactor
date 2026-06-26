@@ -17,6 +17,7 @@ public sealed record VaultListItemProps(
     BitwardenItem Item,
     bool IsSelected,
     bool IsTrashView,
+    bool IsArchiveView,
     Action<AppAction> Dispatch);
 
 public sealed class VaultListItem : Component<VaultListItemProps>
@@ -51,6 +52,11 @@ public sealed class VaultListItem : Component<VaultListItemProps>
                             .TextTrimming(TextTrimming.CharacterEllipsis),
                         Props.IsTrashView && item.DeletedDate is not null
                             ? TextBlock($"已删除 · {item.DeletedDate:yyyy-MM-dd}")
+                                .Foreground(Theme.SecondaryText)
+                                .FontSize(11)
+                            : null,
+                        Props.IsArchiveView && item.ArchivedDate is not null
+                            ? TextBlock($"已归档 · {item.ArchivedDate:yyyy-MM-dd}")
                                 .Foreground(Theme.SecondaryText)
                                 .FontSize(11)
                             : null)
@@ -115,7 +121,10 @@ public sealed class VaultListItem : Component<VaultListItemProps>
         flyout.Items.Add(NativeMenuItem("编辑", "\uE70F", () => Props.Dispatch(new EditorOpened(VaultItemDraft.FromItem(item)))));
         flyout.Items.Add(NativeMenuItem("附件", "\uE723", null, enabled: false));
         flyout.Items.Add(NativeMenuItem("克隆", "\uE8C8", () => _ = AppCommands.CloneItemAsync(item, Props.Dispatch)));
-        flyout.Items.Add(NativeMenuItem("归档", "\uE8DE", null, enabled: false));
+        if (!Props.IsArchiveView)
+        {
+            flyout.Items.Add(NativeMenuItem("归档", "\uE8DE", () => _ = AppCommands.ArchiveAsync(item, Props.Dispatch)));
+        }
         flyout.Items.Add(new WinUI.MenuFlyoutSeparator());
         flyout.Items.Add(NativeMenuItem("删除", "\uE74D", () => Props.Dispatch(new DeleteRequested(item, false)), critical: true));
         return flyout;

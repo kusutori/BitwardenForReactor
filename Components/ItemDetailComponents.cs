@@ -15,7 +15,9 @@ namespace BitwardenForReactor.Components;
 public sealed record DetailHeaderProps(
     BitwardenItem Item,
     bool IsTrashView,
+    bool IsArchiveView,
     Action Edit,
+    Action Archive,
     Action Delete,
     Action PermanentDelete,
     Action Restore);
@@ -53,6 +55,9 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                                 .Background(Theme.SubtleFill),
                             item.DeletedDate is not null
                                 ? TextBlock($"已删除 {item.DeletedDate:yyyy-MM-dd}").Foreground(Theme.SecondaryText)
+                                : null,
+                            item.ArchivedDate is not null
+                                ? TextBlock($"已归档 {item.ArchivedDate:yyyy-MM-dd}").Foreground(Theme.SecondaryText)
                                 : null))
                     .Margin(left: 16, right: 16)
                     .VerticalAlignment(VerticalAlignment.Center)
@@ -64,6 +69,12 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                             .SubtleButton()
                             .ToolTip("编辑")
                             .AutomationName("编辑项目"),
+                        !Props.IsTrashView && !Props.IsArchiveView
+                            ? Button(Icon(FontIcon("\uE8DE")), Props.Archive)
+                                .SubtleButton()
+                                .ToolTip("归档")
+                                .AutomationName("归档项目")
+                            : null,
                         Props.IsTrashView
                             ? Button(Icon(FontIcon("\uE845")), Props.Restore)
                                 .SubtleButton()

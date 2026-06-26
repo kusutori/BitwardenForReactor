@@ -80,11 +80,13 @@ public static class AppCommands
             var service = BitwardenApplicationService.Instance;
             var itemsTask = service.GetItemsResultAsync(cancellationToken);
             var trashTask = service.GetTrashItemsResultAsync(cancellationToken);
+            var archivedTask = service.GetArchivedItemsResultAsync(cancellationToken);
             var foldersTask = service.GetFoldersResultAsync(cancellationToken);
-            await Task.WhenAll(itemsTask, trashTask, foldersTask);
+            await Task.WhenAll(itemsTask, trashTask, archivedTask, foldersTask);
             cancellationToken.ThrowIfCancellationRequested();
             var itemsResult = await itemsTask;
             var trashResult = await trashTask;
+            var archivedResult = await archivedTask;
             var foldersResult = await foldersTask;
             if (!itemsResult.IsSuccess)
             {
@@ -97,15 +99,16 @@ public static class AppCommands
 
             var items = itemsResult.Value ?? [];
             var trash = trashResult.Value ?? [];
+            var archived = archivedResult.Value ?? [];
             var folders = foldersResult.Value ?? [];
-            if (!trashResult.IsSuccess || !foldersResult.IsSuccess)
+            if (!trashResult.IsSuccess || !archivedResult.IsSuccess || !foldersResult.IsSuccess)
             {
                 dispatch(new NoticeShown(
                     "部分数据加载失败",
-                    "普通项目已加载，但回收站或文件夹暂时不可用。",
+                    "普通项目已加载，但回收站、归档或文件夹暂时不可用。",
                     InfoBarSeverity.Warning));
             }
-            dispatch(new VaultLoaded(items, trash, folders, selectedItemId));
+            dispatch(new VaultLoaded(items, trash, archived, folders, selectedItemId));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -271,6 +274,26 @@ public static class AppCommands
             if (success)
             {
                 await LoadVaultAsync(dispatch, item.Id);
+            }
+        }
+        finally
+        {
+            dispatch(new BusyChanged(false));
+        }
+    }
+
+    public static async Task ArchiveAsync(BitwardenItem item, Action<AppAction> dispatch)
+    {
+        dispatch(new BusyChanged(true, "正在归档..."));
+        try
+        {
+            var success = await BitwardenApplicationService.Instance.ArchiveItemAsync(item.Id);
+            dispatch(success
+                ? new NoticeShown("已归档", "项目已归档。", InfoBarSeverity.Success)
+                : new NoticeShown("归档失败", "Bitwarden CLI 未能归档该项目。", InfoBarSeverity.Error));
+            if (success)
+            {
+                await LoadVaultAsync(dispatch);
             }
         }
         finally

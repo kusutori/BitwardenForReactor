@@ -16,6 +16,8 @@ public sealed record AppState
 
     public IReadOnlyList<BitwardenItem> TrashItems { get; init; } = [];
 
+    public IReadOnlyList<BitwardenItem> ArchivedItems { get; init; } = [];
+
     public IReadOnlyList<BitwardenFolder> Folders { get; init; } = [];
 
     public VaultFilter Filter { get; init; } = VaultFilter.AllItems;
@@ -64,7 +66,12 @@ public sealed record AppState
     {
         get
         {
-            var source = Filter == VaultFilter.Trash ? TrashItems : Items;
+            var source = Filter switch
+            {
+                VaultFilter.Trash => TrashItems,
+                VaultFilter.Archive => ArchivedItems,
+                _ => Items
+            };
             var filtered = source.AsEnumerable();
 
             filtered = Filter switch
@@ -74,6 +81,7 @@ public sealed record AppState
                 VaultFilter.Identities => filtered.Where(item => item.Type == BitwardenItemType.Identity),
                 VaultFilter.Notes => filtered.Where(item => item.Type == BitwardenItemType.SecureNote),
                 VaultFilter.Favorites => filtered.Where(item => item.Favorite),
+                VaultFilter.Archive => filtered,
                 VaultFilter.Trash => filtered,
                 _ => filtered
             };
@@ -117,6 +125,7 @@ public sealed record StatusLoaded(BitwardenStatus? Status) : AppAction;
 public sealed record VaultLoaded(
     IReadOnlyList<BitwardenItem> Items,
     IReadOnlyList<BitwardenItem> TrashItems,
+    IReadOnlyList<BitwardenItem> ArchivedItems,
     IReadOnlyList<BitwardenFolder> Folders,
     string? SelectedItemId = null) : AppAction;
 
@@ -169,9 +178,10 @@ public static class AppReducer
             {
                 Items = loaded.Items,
                 TrashItems = loaded.TrashItems,
+                ArchivedItems = loaded.ArchivedItems,
                 Folders = loaded.Folders,
                 ActiveFolderId = PreserveFolderSelection(state.ActiveFolderId, loaded.Folders),
-                SelectedItemId = loaded.SelectedItemId ?? PreserveSelection(state.SelectedItemId, loaded.Items, loaded.TrashItems, state.Filter)
+                SelectedItemId = loaded.SelectedItemId ?? PreserveSelection(state.SelectedItemId, loaded.Items, loaded.TrashItems, loaded.ArchivedItems, state.Filter)
             },
             FilterChanged changed => state with
             {
@@ -202,6 +212,7 @@ public static class AppReducer
                 Status = null,
                 Items = [],
                 TrashItems = [],
+                ArchivedItems = [],
                 Folders = [],
                 SelectedItemId = null,
                 Filter = VaultFilter.AllItems,
@@ -228,6 +239,7 @@ public static class AppReducer
                 Status = (state.Status ?? new BitwardenStatus()) with { Status = "locked" },
                 Items = [],
                 TrashItems = [],
+                ArchivedItems = [],
                 Folders = [],
                 SelectedItemId = null,
                 Filter = VaultFilter.AllItems,
@@ -244,6 +256,7 @@ public static class AppReducer
         string? selectedItemId,
         IReadOnlyList<BitwardenItem> items,
         IReadOnlyList<BitwardenItem> trashItems,
+        IReadOnlyList<BitwardenItem> archivedItems,
         VaultFilter filter)
     {
         if (selectedItemId is null)
@@ -251,7 +264,12 @@ public static class AppReducer
             return null;
         }
 
-        var source = filter == VaultFilter.Trash ? trashItems : items;
+        var source = filter switch
+        {
+            VaultFilter.Trash => trashItems,
+            VaultFilter.Archive => archivedItems,
+            _ => items
+        };
         return source.Any(item => item.Id == selectedItemId) ? selectedItemId : null;
     }
 

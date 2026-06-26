@@ -35,6 +35,7 @@ public static class VaultDisplay
             VaultFilter.Identities => "身份",
             VaultFilter.Notes => "安全笔记",
             VaultFilter.Favorites => "收藏",
+            VaultFilter.Archive => "归档",
             VaultFilter.Trash => "回收站",
             _ => "全部项目"
         };
@@ -54,6 +55,7 @@ public static class VaultDisplay
             VaultFilter.Identities => "联系人、地址和身份信息",
             VaultFilter.Notes => "加密保存的纯文本笔记",
             VaultFilter.Favorites => "标记为收藏的常用项目",
+            VaultFilter.Archive => "已归档的密码库项目",
             VaultFilter.Trash => "已删除但仍可恢复的项目",
             _ => "浏览当前密码库中的全部项目"
         };
@@ -67,6 +69,7 @@ public static class VaultDisplay
         {
             _ when !string.IsNullOrWhiteSpace(state.ActiveFolderId) => "文件夹为空",
             VaultFilter.Favorites => "还没有收藏项目",
+            VaultFilter.Archive => "归档为空",
             VaultFilter.Trash => "回收站为空",
             VaultFilter.Logins => "没有登录项目",
             VaultFilter.Cards => "没有卡片项目",
@@ -87,6 +90,7 @@ public static class VaultDisplay
         {
             _ when !string.IsNullOrWhiteSpace(state.ActiveFolderId) => "这个文件夹下还没有项目。",
             VaultFilter.Favorites => "在详情页或 Bitwarden 中为项目加星标后会显示在这里。",
+            VaultFilter.Archive => "使用项目菜单中的归档操作后，项目会显示在这里。",
             VaultFilter.Trash => "删除的项目会先进入回收站，可以在这里恢复或永久删除。",
             _ => "可以点击标题栏的新建项目开始添加。"
         };

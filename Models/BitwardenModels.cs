@@ -13,6 +13,7 @@ public enum VaultFilter
     Identities,
     Notes,
     Favorites,
+    Archive,
     Trash
 }
 

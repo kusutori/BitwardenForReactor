@@ -33,6 +33,7 @@ public static class VaultNavigation
                             NavItem("支付卡", "ContactInfo", "Cards"),
                             NavItem("身份", "People", "Identities"),
                             NavItem("安全笔记", "Page", "Notes"),
+                            NavItem("归档", "Archive", "Archive"),
                             NavItem("回收站", "Delete", "Trash")
                         ]
                     },
@@ -54,6 +55,7 @@ public static class VaultNavigation
         "Identities" => VaultFilter.Identities,
         "Notes" => VaultFilter.Notes,
         "Favorites" => VaultFilter.Favorites,
+        "Archive" => VaultFilter.Archive,
         "Trash" => VaultFilter.Trash,
         _ => VaultFilter.AllItems
     };
@@ -86,6 +88,7 @@ public static class VaultNavigation
         VaultFilter.Identities => "Identities",
         VaultFilter.Notes => "Notes",
         VaultFilter.Favorites => "Favorites",
+        VaultFilter.Archive => "Archive",
         VaultFilter.Trash => "Trash",
         _ => "AllItems"
     };

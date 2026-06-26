@@ -38,7 +38,12 @@ public sealed class VaultListPane : Component<VaultPaneProps>
                         ? RenderEmptyList()
                         : (ListView(items, item => item.Id, (item, _) =>
                             Component<VaultListItem, VaultListItemProps>(
-                                    new VaultListItemProps(item, item.Id == selectedId, state.Filter == VaultFilter.Trash, Props.Dispatch))
+                                    new VaultListItemProps(
+                                        item,
+                                        item.Id == selectedId,
+                                        state.Filter == VaultFilter.Trash,
+                                        state.Filter == VaultFilter.Archive,
+                                        Props.Dispatch))
                                 .HorizontalAlignment(HorizontalAlignment.Stretch))
                             with { SelectionMode = ListViewSelectionMode.Single })
                             .SelectionChanged<BitwardenItem>(selected =>
