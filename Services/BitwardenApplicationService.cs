@@ -8,6 +8,7 @@ using System.Threading;
 using BitwardenCli.Core;
 using BitwardenCli.Core.Accounts;
 using BitwardenCli.Core.Authentication;
+using BitwardenCli.Core.Generator;
 using BitwardenCli.Core.Models;
 using BitwardenCli.Core.Results;
 using BitwardenForReactor.Models;
@@ -143,6 +144,24 @@ public sealed class BitwardenApplicationService
 
     public async Task<bool> CloneItemAsync(string itemId, string newName) =>
         (await ActiveClient.Vault.CloneItemAsync(itemId, newName)).IsSuccess;
+
+    public async Task<string?> GeneratePasswordAsync(PasswordGenerationOptions options)
+    {
+        var result = await ActiveClient.Generator.GeneratePasswordAsync(options);
+        return result.IsSuccess ? result.Value : null;
+    }
+
+    public async Task<string?> GeneratePassphraseAsync(PassphraseGenerationOptions options)
+    {
+        var result = await ActiveClient.Generator.GeneratePassphraseAsync(options);
+        return result.IsSuccess ? result.Value : null;
+    }
+
+    public async Task<string?> GenerateUsernameAsync(UsernameGenerationOptions options)
+    {
+        var result = await ActiveClient.Generator.GenerateUsernameAsync(options);
+        return result.IsSuccess ? result.Value : null;
+    }
 
     public async Task<(bool Success, string Message)> LoginWithPasswordAsync(string email, string masterPassword)
     {

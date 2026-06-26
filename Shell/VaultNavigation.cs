@@ -42,7 +42,8 @@ public static class VaultNavigation
                         Children = folderItems.Length > 0
                             ? folderItems
                             : [NavItem("暂无文件夹", "Folder", "FoldersEmpty")]
-                    }
+                    },
+                    NavItem("生成器", "\uE72C", "Generator")
                 ]
             }
         ];

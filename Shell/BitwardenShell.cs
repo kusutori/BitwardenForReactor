@@ -115,6 +115,12 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
                     return;
                 }
 
+                if (string.Equals(tag, "Generator", StringComparison.Ordinal))
+                {
+                    Props.Dispatch(new GeneratorVisibilityChanged(true));
+                    return;
+                }
+
                 Props.Dispatch(new FilterChanged(VaultNavigation.TagToFilter(tag)));
             });
 

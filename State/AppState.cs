@@ -44,6 +44,8 @@ public sealed record AppState
 
     public bool ShowFolderEditor { get; init; }
 
+    public bool ShowGenerator { get; init; }
+
     public BitwardenFolder? FolderEditorTarget { get; init; }
 
     public VaultItemDraft? EditorDraft { get; init; }
@@ -153,6 +155,8 @@ public sealed record FolderEditorOpened(BitwardenFolder? Folder = null) : AppAct
 
 public sealed record FolderEditorClosed : AppAction;
 
+public sealed record GeneratorVisibilityChanged(bool Show) : AppAction;
+
 public sealed record EditorOpened(VaultItemDraft Draft) : AppAction;
 
 public sealed record EditorClosed : AppAction;
@@ -206,6 +210,7 @@ public static class AppReducer
             AccountManagerVisibilityChanged changed => state with { ShowAccountManager = changed.Show },
             FolderEditorOpened opened => state with { ShowFolderEditor = true, FolderEditorTarget = opened.Folder },
             FolderEditorClosed => state with { ShowFolderEditor = false, FolderEditorTarget = null },
+            GeneratorVisibilityChanged changed => state with { ShowGenerator = changed.Show },
             AccountSwitched switched => state with
             {
                 Settings = switched.Settings,
@@ -221,6 +226,7 @@ public static class AppReducer
                 ShowSettings = false,
                 ShowAccountManager = false,
                 ShowFolderEditor = false,
+                ShowGenerator = false,
                 FolderEditorTarget = null
             },
             EditorOpened opened => state with { EditorDraft = opened.Draft },
@@ -247,6 +253,7 @@ public static class AppReducer
                 SearchQuery = string.Empty,
                 ShowSettings = false,
                 ShowFolderEditor = false,
+                ShowGenerator = false,
                 FolderEditorTarget = null
             },
             _ => state
