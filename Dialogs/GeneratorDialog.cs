@@ -130,7 +130,7 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
                 .HorizontalAlignment(HorizontalAlignment.Stretch)
                 .IsEnabled(false)
                 .AutomationName("生成器历史记录"))
-            .Padding(28);
+            .Padding(24);
 
         var scroll = ScrollView(body)
             .HorizontalScrollMode(Microsoft.UI.Xaml.Controls.ScrollingScrollMode.Disabled)
@@ -139,41 +139,39 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
         var content = Grid(
             columns: [GridSize.Star()],
             rows: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
-            Header().Grid(row: 0),
+            Heading("生成器")
+                .Margin(left: 24, top: 20, right: 24, bottom: 12)
+                .Grid(row: 0),
             scroll,
             Border(
-                    Button("关闭", () => Props.Dispatch(new GeneratorVisibilityChanged(false)))
-                        .MinWidth(96)
-                        .AutomationName("关闭生成器"))
+                    HStack(12,
+                            Button("取消", () => Props.Dispatch(new GeneratorVisibilityChanged(false)))
+                                .MinWidth(96)
+                                .AutomationName("取消生成器"))
+                        .HorizontalAlignment(HorizontalAlignment.Left))
                 .WithBorder(Theme.CardStroke, 1)
-                .Padding(18)
+                .Padding(16)
                 .Grid(row: 2));
 
         var dialog = Border(content)
             .Background(Theme.SolidBackground)
             .WithBorder(Theme.CardStroke, 1)
             .CornerRadius(8)
-            .Width(820)
-            .MaxHeight(760)
-            .HorizontalAlignment(HorizontalAlignment.Center)
-            .VerticalAlignment(VerticalAlignment.Center)
+            .MinWidth(420)
+            .MaxWidth(640)
+            .MaxHeight(720)
+            .HorizontalAlignment(HorizontalAlignment.Stretch)
+            .VerticalAlignment(VerticalAlignment.Stretch)
             .AutomationName("生成器");
 
-        return Border(dialog)
+        return Border(
+                dialog
+                    .Margin(24)
+                    .HorizontalAlignment(HorizontalAlignment.Center)
+                    .VerticalAlignment(VerticalAlignment.Center))
             .Background(Theme.SmokeFill)
             .AutomationName("生成器遮罩");
     }
-
-    private Element Header() =>
-        Grid(
-                columns: [GridSize.Star(), GridSize.Auto],
-                rows: [GridSize.Auto],
-                Heading("生成器").Grid(column: 0),
-                Button(Icon(FontIcon("\uE8BB", fontSize: 18)), () => Props.Dispatch(new GeneratorVisibilityChanged(false)))
-                    .SubtleButton()
-                    .AutomationName("关闭生成器")
-                    .Grid(column: 1))
-            .Padding(left: 28, top: 24, right: 24, bottom: 18);
 
     private Element ResultCard(string value, Action regenerate, Action copy) =>
         Border(

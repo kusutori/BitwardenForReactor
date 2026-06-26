@@ -42,10 +42,10 @@ public static class VaultNavigation
                         Children = folderItems.Length > 0
                             ? folderItems
                             : [NavItem("暂无文件夹", "Folder", "FoldersEmpty")]
-                    },
-                    NavItem("生成器", "\uE72C", "Generator")
+                    }
                 ]
-            }
+            },
+            NavItem("生成器", "\uE72C", "Generator")
         ];
     }
 
@@ -61,10 +61,17 @@ public static class VaultNavigation
         _ => VaultFilter.AllItems
     };
 
-    public static string SelectedTag(AppState state) =>
-        !string.IsNullOrWhiteSpace(state.ActiveFolderId)
+    public static string SelectedTag(AppState state)
+    {
+        if (state.ShowGenerator)
+        {
+            return "Generator";
+        }
+
+        return !string.IsNullOrWhiteSpace(state.ActiveFolderId)
             ? FolderToTag(state.ActiveFolderId)
             : FilterToTag(state.Filter);
+    }
 
     public static bool TryGetFolderId(string? tag, out string folderId)
     {
