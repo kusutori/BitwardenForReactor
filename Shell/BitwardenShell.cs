@@ -24,6 +24,13 @@ public sealed record BitwardenShellProps(
 
 public sealed class BitwardenShell : Component<BitwardenShellProps>
 {
+    private static readonly DependencyProperty FolderIconHookedProperty =
+        DependencyProperty.RegisterAttached(
+            "FolderIconHooked",
+            typeof(bool),
+            typeof(BitwardenShell),
+            new PropertyMetadata(false));
+
     public override Element Render()
     {
         var state = Props.State;
@@ -145,6 +152,10 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
             {
                 navItem.Content = FolderNavContent(folder, dispatch);
             }
+            else if (string.Equals(navItem.Tag as string, "Folders", StringComparison.Ordinal))
+            {
+                AttachExpandableFolderIcon(navItem);
+            }
 
             if (navItem.MenuItems.Count > 0)
             {
@@ -152,6 +163,21 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
             }
         }
     }
+
+    private static void AttachExpandableFolderIcon(WinUI.NavigationViewItem navItem)
+    {
+        UpdateFolderIcon(navItem);
+        if (navItem.GetValue(FolderIconHookedProperty) is true)
+        {
+            return;
+        }
+
+        navItem.RegisterPropertyChangedCallback(WinUI.NavigationViewItem.IsExpandedProperty, (_, _) => UpdateFolderIcon(navItem));
+        navItem.SetValue(FolderIconHookedProperty, true);
+    }
+
+    private static void UpdateFolderIcon(WinUI.NavigationViewItem navItem) =>
+        navItem.Icon = new FontIcon { Glyph = navItem.IsExpanded ? "\uE838" : "\uE8B7" };
 
     private static UIElement FolderNavContent(BitwardenFolder folder, Action<AppAction> dispatch)
     {

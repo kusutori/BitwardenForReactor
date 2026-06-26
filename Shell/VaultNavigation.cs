@@ -20,19 +20,19 @@ public static class VaultNavigation
             {
                 Children =
                 [
-                    NavItem("所有密码库", "Library", "AllVaults") with
+                    NavItem("所有密码库", "\uE8A9", "AllVaults") with
                     {
                         Children = [NavItem("我的密码库", "Contact", "AllItems")]
                     },
-                    NavItem("所有项目", "AllApps", "ItemTypes") with
+                    NavItem("所有项目", "\uE8A9", "ItemTypes") with
                     {
                         Children =
                         [
                             NavItem("收藏夹", "Favorite", "Favorites"),
                             NavItem("登录", "World", "Logins"),
-                            NavItem("支付卡", "ContactInfo", "Cards"),
+                            NavItem("支付卡", "\uE8C7", "Cards"),
                             NavItem("身份", "People", "Identities"),
-                            NavItem("安全笔记", "Page", "Notes")
+                            NavItem("安全笔记", "\uE70B", "Notes")
                         ]
                     },
                     NavItem("归档", "\uE7B8", "Archive"),
