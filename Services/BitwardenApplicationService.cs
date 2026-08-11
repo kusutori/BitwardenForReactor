@@ -84,8 +84,8 @@ public sealed class BitwardenApplicationService
     {
         var result = await ActiveClient.UnlockAsync(DelegateSecretProvider.FromMasterPassword(masterPassword));
         return result.IsSuccess
-            ? (true, "密码库已解锁。")
-            : (false, ToChineseError(result.Error?.Code, result.Error?.Message, "解锁失败。"));
+            ? (true, T("密码库已解锁。"))
+            : (false, ToChineseError(result.Error?.Code, result.Error?.Message, T("解锁失败。")));
     }
 
     public async Task<bool> LockAsync() => (await ActiveClient.LockAsync()).IsSuccess;
@@ -199,7 +199,7 @@ public sealed class BitwardenApplicationService
         var result = await ActiveClient.LoginAsync(
             new PasswordLoginRequest(email),
             DelegateSecretProvider.FromMasterPassword(masterPassword));
-        return result.IsSuccess ? (true, "账号登录成功。") : (false, ToChineseError(result.Error?.Code, result.Error?.Message, "登录失败。"));
+        return result.IsSuccess ? (true, T("账号登录成功。")) : (false, ToChineseError(result.Error?.Code, result.Error?.Message, T("登录失败。")));
     }
 
     public async Task<(bool Success, string Message)> LoginWithApiKeyAsync(string clientId, string clientSecret)
@@ -209,7 +209,7 @@ public sealed class BitwardenApplicationService
         var provider = new DelegateSecretProvider((_, purpose, _) => ValueTask.FromResult<string?>(
             purpose == SecretPurpose.ApiClientSecret ? clientSecret : null));
         var result = await ActiveClient.LoginAsync(new ApiKeyLoginRequest(clientId), provider);
-        return result.IsSuccess ? (true, "API Key 登录成功。") : (false, ToChineseError(result.Error?.Code, result.Error?.Message, "登录失败。"));
+        return result.IsSuccess ? (true, T("API Key 登录成功。")) : (false, ToChineseError(result.Error?.Code, result.Error?.Message, T("登录失败。")));
     }
 
     public async Task<bool> LogoutAsync() => (await ActiveClient.LogoutAsync()).IsSuccess;
@@ -219,14 +219,14 @@ public sealed class BitwardenApplicationService
         var configured = await ConfigureServerIfNeededAsync();
         if (!configured.Success) return configured;
         var result = await ActiveClient.LoginAsync(new SsoLoginRequest());
-        return result.IsSuccess ? (true, "SSO 登录成功。") : (false, ToChineseError(result.Error?.Code, result.Error?.Message, "SSO 登录失败。"));
+        return result.IsSuccess ? (true, T("SSO 登录成功。")) : (false, ToChineseError(result.Error?.Code, result.Error?.Message, T("SSO 登录失败。")));
     }
 
     private async Task<(bool Success, string Message)> ConfigureServerIfNeededAsync()
     {
         if (string.IsNullOrWhiteSpace(ActiveClient.Profile.ServerUrl)) return (true, string.Empty);
         var result = await ActiveClient.Authentication.ConfigureServerAsync(ActiveClient.Profile.ServerUrl);
-        return result.IsSuccess ? (true, string.Empty) : (false, ToChineseError(result.Error?.Code, result.Error?.Message, "服务器配置失败。"));
+        return result.IsSuccess ? (true, string.Empty) : (false, ToChineseError(result.Error?.Code, result.Error?.Message, T("服务器配置失败。")));
     }
 
     private static BitwardenAccountProfile Map(AccountSettings account) => new()
@@ -248,10 +248,10 @@ public sealed class BitwardenApplicationService
 
     private static string ToChineseError(BitwardenCli.Core.Results.CliErrorCode? code, string? message, string fallback) => code switch
     {
-        BitwardenCli.Core.Results.CliErrorCode.InvalidMasterPassword => "主密码不正确。",
-        BitwardenCli.Core.Results.CliErrorCode.Unauthenticated => "账号尚未登录。",
-        BitwardenCli.Core.Results.CliErrorCode.NetworkUnavailable => "网络不可用。",
-        BitwardenCli.Core.Results.CliErrorCode.Timeout => "Bitwarden CLI 操作超时。",
+        BitwardenCli.Core.Results.CliErrorCode.InvalidMasterPassword => T("主密码不正确。"),
+        BitwardenCli.Core.Results.CliErrorCode.Unauthenticated => T("账号尚未登录。"),
+        BitwardenCli.Core.Results.CliErrorCode.NetworkUnavailable => T("网络不可用。"),
+        BitwardenCli.Core.Results.CliErrorCode.Timeout => T("Bitwarden CLI 操作超时。"),
         _ => string.IsNullOrWhiteSpace(message) ? fallback : message
     };
 }

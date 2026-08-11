@@ -57,10 +57,10 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                                 .CornerRadius(4)
                                 .Background(Theme.SubtleFill),
                             item.DeletedDate is not null
-                                ? TextBlock($"已删除 {item.DeletedDate:yyyy-MM-dd}").Foreground(Theme.SecondaryText)
+                                ? TextBlock(T("已删除 {date}", ("date", item.DeletedDate.Value.ToString("yyyy-MM-dd")))).Foreground(Theme.SecondaryText)
                                 : null,
                             item.ArchivedDate is not null
-                                ? TextBlock($"已归档 {item.ArchivedDate:yyyy-MM-dd}").Foreground(Theme.SecondaryText)
+                                ? TextBlock(T("已归档 {date}", ("date", item.ArchivedDate.Value.ToString("yyyy-MM-dd")))).Foreground(Theme.SecondaryText)
                                 : null))
                     .Margin(left: 16, right: 16)
                     .VerticalAlignment(VerticalAlignment.Center)
@@ -68,30 +68,30 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                     HStack(8,
                         Button(HStack(6,
                                 Icon(FontIcon("\uE70F", fontSize: 14)),
-                                TextBlock("编辑")), Props.Edit)
+                                TextBlock(T("编辑"))), Props.Edit)
                             .SubtleButton()
-                            .ToolTip("编辑")
-                            .AutomationName("编辑项目"),
+                            .ToolTip(T("编辑"))
+                            .AutomationName(T("编辑项目")),
                         !Props.IsTrashView && !Props.IsArchiveView
                             ? Button(Icon(FontIcon("\uE7B8")), Props.Archive)
                                 .SubtleButton()
-                                .ToolTip("归档")
-                                .AutomationName("归档项目")
+                                .ToolTip(T("归档"))
+                                .AutomationName(T("归档项目"))
                             : null,
                         Props.IsTrashView
                             ? Button(Icon(FontIcon("\uE845")), Props.Restore)
                                 .SubtleButton()
-                                .ToolTip("恢复")
-                                .AutomationName("恢复项目")
+                                .ToolTip(T("恢复"))
+                                .AutomationName(T("恢复项目"))
                             : Button(Icon(FontIcon("\uE74D")), Props.Delete)
                                 .SubtleButton()
-                                .ToolTip("删除")
-                                .AutomationName("删除项目"),
+                                .ToolTip(T("删除"))
+                                .AutomationName(T("删除项目")),
                         Props.IsTrashView
                             ? Button(Icon(FontIcon("\uE74D")), Props.PermanentDelete)
                                 .SubtleButton()
-                                .ToolTip("永久删除")
-                                .AutomationName("永久删除项目")
+                                .ToolTip(T("永久删除"))
+                                .AutomationName(T("永久删除项目"))
                             : null)
                     .VerticalAlignment(VerticalAlignment.Center)
                     .Grid(column: 2)))
@@ -164,8 +164,8 @@ public sealed class DetailFieldRow : Component<DetailFieldRowProps>
             ? Empty()
             : Button(Icon(FontIcon("\uE8C8")), () => Props.CopyRequested(Props.CopyValue))
                 .SubtleButton()
-                .ToolTip("复制")
-                .AutomationName($"复制{Props.Label}");
+                .ToolTip(T("复制"))
+                .AutomationName(T("复制{label}", ("label", Props.Label)));
 }
 
 public sealed record SensitiveFieldProps(
@@ -189,8 +189,8 @@ public sealed class SensitiveField : Component<SensitiveFieldProps>
                 Props.CopyRequested,
                 Button(Icon(FontIcon(revealed ? "\uED1A" : "\uE890")), () => setRevealed(!revealed))
                     .SubtleButton()
-                    .ToolTip(revealed ? "隐藏" : "显示")
-                    .AutomationName($"{(revealed ? "隐藏" : "显示")}{Props.Label}")));
+                    .ToolTip(revealed ? T("隐藏") : T("显示"))
+                    .AutomationName($"{(revealed ? T("隐藏") : T("显示"))}{Props.Label}")));
     }
 }
 
@@ -205,12 +205,12 @@ public sealed class TotpField : Component<TotpFieldProps>
                     rows: [GridSize.Auto],
                     VStack(4,
                         TextBlock("TOTP").Foreground(Theme.SecondaryText),
-                        TextBlock("点击获取一次性验证码").TextWrapping())
+                        TextBlock(T("点击获取一次性验证码")).TextWrapping())
                     .VerticalAlignment(VerticalAlignment.Center)
                     .Grid(column: 0),
-                    Button("获取", Props.CopyRequested)
+                    Button(T("获取"), Props.CopyRequested)
                         .SubtleButton()
-                        .AutomationName("复制TOTP")
+                        .AutomationName(T("复制TOTP"))
                         .Margin(left: 12)
                         .VerticalAlignment(VerticalAlignment.Center)
                         .Grid(column: 1)))

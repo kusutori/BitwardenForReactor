@@ -63,24 +63,24 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
                         }
                     })
                 .Width(150)
-                .AutomationName("当前账号"),
-            Button("管理账号", () => Props.Dispatch(new AccountManagerVisibilityChanged(true)))
-                .AutomationName("管理账号"),
-            SplitButton("新建项目", () => OpenNewItem(BitwardenItemType.Login), MenuItems(
-                    MenuItem("登录", () => OpenNewItem(BitwardenItemType.Login)),
-                    MenuItem("安全笔记", () => OpenNewItem(BitwardenItemType.SecureNote)),
-                    MenuItem("卡片", () => OpenNewItem(BitwardenItemType.Card)),
-                    MenuItem("身份", () => OpenNewItem(BitwardenItemType.Identity)),
+                .AutomationName(T("当前账号")),
+            Button(T("管理账号"), () => Props.Dispatch(new AccountManagerVisibilityChanged(true)))
+                .AutomationName(T("管理账号")),
+            SplitButton(T("新建项目"), () => OpenNewItem(BitwardenItemType.Login), MenuItems(
+                    MenuItem(T("登录"), () => OpenNewItem(BitwardenItemType.Login)),
+                    MenuItem(T("安全笔记"), () => OpenNewItem(BitwardenItemType.SecureNote)),
+                    MenuItem(T("卡片"), () => OpenNewItem(BitwardenItemType.Card)),
+                    MenuItem(T("身份"), () => OpenNewItem(BitwardenItemType.Identity)),
                     MenuSeparator(),
-                    MenuItem("文件夹", () => Props.Dispatch(new FolderEditorOpened()))))
+                    MenuItem(T("文件夹"), () => Props.Dispatch(new FolderEditorOpened()))))
                 .IsEnabled(Props.State.IsUnlocked && !Props.State.IsBusy)
-                .AutomationName("新建项目"),
-            Button("同步", () => _ = AppCommands.SyncAsync(Props.Dispatch))
+                .AutomationName(T("新建项目")),
+            Button(T("同步"), () => _ = AppCommands.SyncAsync(Props.Dispatch))
                 .IsEnabled(Props.State.IsUnlocked && !Props.State.IsBusy)
-                .AutomationName("同步密码库"),
-            Button("锁定", () => _ = AppCommands.LockAsync(Props.Dispatch))
+                .AutomationName(T("同步密码库")),
+            Button(T("锁定"), () => _ = AppCommands.LockAsync(Props.Dispatch))
                 .IsEnabled(Props.State.IsUnlocked && !Props.State.IsBusy)
-                .AutomationName("锁定密码库"));
+                .AutomationName(T("锁定密码库")));
 
     private void OpenNewItem(BitwardenItemType type) =>
         Props.Dispatch(new EditorOpened(VaultItemDraft.New(type)));
@@ -227,8 +227,8 @@ public sealed class BitwardenShell : Component<BitwardenShellProps>
             VerticalAlignment = VerticalAlignment.Center
         };
         edit.Click += (_, _) => dispatch(new FolderEditorOpened(folder));
-        WinUI.ToolTipService.SetToolTip(edit, "编辑文件夹");
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(edit, $"编辑文件夹 {folder.Name}");
+        WinUI.ToolTipService.SetToolTip(edit, T("编辑文件夹"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(edit, T("编辑文件夹 {name}", ("name", folder.Name)));
         WinUI.Grid.SetColumn(edit, 1);
         grid.Children.Add(edit);
 

@@ -83,13 +83,13 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
             }
             catch
             {
-                Props.Dispatch(new NoticeShown("生成失败", "无法生成内容，请检查选项后重试。", Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error));
+                Props.Dispatch(new NoticeShown(T("生成失败"), T("无法生成内容，请检查选项后重试。"), Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error));
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(generated))
             {
-                Props.Dispatch(new NoticeShown("生成失败", "无法生成内容，请检查选项后重试。", Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error));
+                Props.Dispatch(new NoticeShown(T("生成失败"), T("无法生成内容，请检查选项后重试。"), Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error));
                 return;
             }
 
@@ -99,14 +99,14 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
         UseEffect(() => Generate());
 
         var body = VStack(18,
-            Segmented(items: new object[] { "密码", "密码短语", "用户名" }, selectedIndex: mode, onSelectedIndexChanged: index =>
+            Segmented(items: new object[] { T("密码"), T("密码短语"), T("用户名") }, selectedIndex: mode, onSelectedIndexChanged: index =>
                 {
                     setMode(index);
                     Generate(index);
                 })
                 .HorizontalAlignment(HorizontalAlignment.Stretch),
             ResultCard(value, () => Generate(), () => Copy(value)),
-            TextBlock("选项").SemiBold(),
+            TextBlock(T("选项")).SemiBold(),
             Options(mode,
                 length, setLength,
                 uppercase, setUppercase,
@@ -125,11 +125,11 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
                 numberUsername, setNumberUsername,
                 email, setEmail,
                 website, setWebsite),
-            Button(HStack(6, TextBlock("生成器历史记录").SemiBold(), TextBlock("›")))
+            Button(HStack(6, TextBlock(T("生成器历史记录")).SemiBold(), TextBlock("›")))
                 .SubtleButton()
                 .HorizontalAlignment(HorizontalAlignment.Stretch)
                 .IsEnabled(false)
-                .AutomationName("生成器历史记录"))
+                .AutomationName(T("生成器历史记录")))
             .Padding(24);
 
         var scroll = ScrollView(body)
@@ -139,15 +139,15 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
         var content = Grid(
             columns: [GridSize.Star()],
             rows: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
-            Heading("生成器")
+            Heading(T("生成器"))
                 .Margin(left: 24, top: 20, right: 24, bottom: 12)
                 .Grid(row: 0),
             scroll,
             Border(
                     HStack(12,
-                            Button("取消", () => Props.Dispatch(new GeneratorVisibilityChanged(false)))
+                            Button(T("取消"), () => Props.Dispatch(new GeneratorVisibilityChanged(false)))
                                 .MinWidth(96)
-                                .AutomationName("取消生成器"))
+                                .AutomationName(T("取消生成器")))
                         .HorizontalAlignment(HorizontalAlignment.Left))
                 .WithBorder(Theme.CardStroke, 1)
                 .Padding(16)
@@ -162,7 +162,7 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
             .MaxHeight(720)
             .HorizontalAlignment(HorizontalAlignment.Stretch)
             .VerticalAlignment(VerticalAlignment.Stretch)
-            .AutomationName("生成器");
+            .AutomationName(T("生成器"));
 
         return Border(
                 dialog
@@ -170,7 +170,7 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
                     .HorizontalAlignment(HorizontalAlignment.Center)
                     .VerticalAlignment(VerticalAlignment.Center))
             .Background(Theme.SmokeFill)
-            .AutomationName("生成器遮罩");
+            .AutomationName(T("生成器遮罩"));
     }
 
     private Element ResultCard(string value, Action regenerate, Action copy) =>
@@ -178,7 +178,7 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
                 Grid(
                     columns: [GridSize.Star(), GridSize.Auto],
                     rows: [GridSize.Auto],
-                    TextBlock(string.IsNullOrWhiteSpace(value) ? "正在生成..." : value)
+                    TextBlock(string.IsNullOrWhiteSpace(value) ? T("正在生成...") : value)
                         .FontFamily("Consolas")
                         .FontSize(20)
                         .TextWrapping()
@@ -187,13 +187,13 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
                     HStack(10,
                             Button(Icon(FontIcon("\uE72C", fontSize: 18)), regenerate)
                                 .SubtleButton()
-                                .ToolTip("重新生成")
-                                .AutomationName("重新生成"),
+                                .ToolTip(T("重新生成"))
+                                .AutomationName(T("重新生成")),
                             Button(Icon(FontIcon("\uE8C8", fontSize: 18)), copy)
                                 .SubtleButton()
                                 .IsEnabled(!string.IsNullOrWhiteSpace(value))
-                                .ToolTip("复制")
-                                .AutomationName("复制生成结果"))
+                                .ToolTip(T("复制"))
+                                .AutomationName(T("复制生成结果")))
                         .Grid(column: 1)))
             .Background(Theme.CardBackground)
             .WithBorder(Theme.CardStroke, 1)
@@ -238,10 +238,10 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
         bool avoidAmbiguous, Action<bool> setAvoidAmbiguous) =>
         VStack(18,
             Card(VStack(8,
-                TextBox(length, setLength, header: "长度").AutomationName("密码长度"),
-                TextBlock("值必须在 5 和 128 之间。使用 14 个或更多字符生成强大的密码。").Foreground(Theme.SecondaryText).TextWrapping())),
+                TextBox(length, setLength, header: T("长度")).AutomationName(T("密码长度")),
+                TextBlock(T("值必须在 5 和 128 之间。使用 14 个或更多字符生成强大的密码。")).Foreground(Theme.SecondaryText).TextWrapping())),
             Card(VStack(14,
-                TextBlock("包含").SemiBold(),
+                TextBlock(T("包含")).SemiBold(),
                 HStack(24,
                     CheckBox(uppercase, setUppercase, "A-Z"),
                     CheckBox(lowercase, setLowercase, "a-z"),
@@ -250,9 +250,9 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
                 Grid(
                     columns: [GridSize.Star(), GridSize.Star()],
                     rows: [GridSize.Auto],
-                    TextBox(minimumNumbers, setMinimumNumbers, header: "数字最少个数").Grid(column: 0).Margin(right: 8),
-                    TextBox(minimumSpecial, setMinimumSpecial, header: "符号最少个数").Grid(column: 1).Margin(left: 8)),
-                CheckBox(avoidAmbiguous, setAvoidAmbiguous, "避免易混淆的字符"))));
+                    TextBox(minimumNumbers, setMinimumNumbers, header: T("数字最少个数")).Grid(column: 0).Margin(right: 8),
+                    TextBox(minimumSpecial, setMinimumSpecial, header: T("符号最少个数")).Grid(column: 1).Margin(left: 8)),
+                CheckBox(avoidAmbiguous, setAvoidAmbiguous, T("避免易混淆的字符")))));
 
     private static Element PassphraseOptions(
         string words, Action<string> setWords,
@@ -261,12 +261,12 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
         bool includeNumber, Action<bool> setIncludeNumber) =>
         VStack(18,
             Card(VStack(8,
-                TextBox(words, setWords, header: "单词个数").AutomationName("单词个数"),
-                TextBlock("值必须在 3 和 20 之间。使用 6 个或更多单词生成强大的密码短语。").Foreground(Theme.SecondaryText).TextWrapping())),
+                TextBox(words, setWords, header: T("单词个数")).AutomationName(T("单词个数")),
+                TextBlock(T("值必须在 3 和 20 之间。使用 6 个或更多单词生成强大的密码短语。")).Foreground(Theme.SecondaryText).TextWrapping())),
             Card(VStack(14,
-                TextBox(separator, setSeparator, header: "单词分隔符").AutomationName("单词分隔符"),
-                CheckBox(capitalize, setCapitalize, "首字母大写"),
-                CheckBox(includeNumber, setIncludeNumber, "包含数字"))));
+                TextBox(separator, setSeparator, header: T("单词分隔符")).AutomationName(T("单词分隔符")),
+                CheckBox(capitalize, setCapitalize, T("首字母大写")),
+                CheckBox(includeNumber, setIncludeNumber, T("包含数字")))));
 
     private static Element UsernameOptions(
         int usernameType, Action<int> setUsernameType,
@@ -275,13 +275,13 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
         string email, Action<string> setEmail,
         string website, Action<string> setWebsite) =>
         Card(VStack(14,
-            ComboBox(["随机单词", "邮箱前缀", "网站前缀"], usernameType, setUsernameType)
-                .Header("类型")
-                .AutomationName("用户名类型"),
-            usernameType == 1 ? TextBox(email, setEmail, header: "邮箱").AutomationName("用户名邮箱") : null,
-            usernameType == 2 ? TextBox(website, setWebsite, header: "网站").AutomationName("用户名网站") : null,
-            CheckBox(capitalize, setCapitalize, "首字母大写"),
-            CheckBox(includeNumber, setIncludeNumber, "包含数字")));
+            ComboBox([T("随机单词"), T("邮箱前缀"), T("网站前缀")], usernameType, setUsernameType)
+                .Header(T("类型"))
+                .AutomationName(T("用户名类型")),
+            usernameType == 1 ? TextBox(email, setEmail, header: T("邮箱")).AutomationName(T("用户名邮箱")) : null,
+            usernameType == 2 ? TextBox(website, setWebsite, header: T("网站")).AutomationName(T("用户名网站")) : null,
+            CheckBox(capitalize, setCapitalize, T("首字母大写")),
+            CheckBox(includeNumber, setIncludeNumber, T("包含数字"))));
 
     private static Element Card(Element child) =>
         Border(child)

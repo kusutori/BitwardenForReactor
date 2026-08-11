@@ -10,3 +10,4 @@ global using IdentityData = BitwardenCli.Core.Models.VaultIdentity;
 global using CustomField = BitwardenCli.Core.Models.VaultField;
 global using CustomFieldType = BitwardenCli.Core.Models.VaultFieldType;
 global using PasswordHistoryEntry = BitwardenCli.Core.Models.VaultPasswordHistoryEntry;
+global using static BitwardenForReactor.Localization.AppText;

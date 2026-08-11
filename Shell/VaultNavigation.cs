@@ -16,38 +16,38 @@ public static class VaultNavigation
 
         return
         [
-            NavItem("密码库", "Library", "VaultRoot") with
+            NavItem(T("密码库"), "Library", "VaultRoot") with
             {
                 Children =
                 [
-                    NavItem("所有密码库", "\uE8A9", "AllVaults") with
+                    NavItem(T("所有密码库"), "\uE8A9", "AllVaults") with
                     {
-                        Children = [NavItem("我的密码库", "Contact", "AllItems")]
+                        Children = [NavItem(T("我的密码库"), "Contact", "AllItems")]
                     },
-                    NavItem("所有项目", "\uE8A9", "ItemTypes") with
+                    NavItem(T("所有项目"), "\uE8A9", "ItemTypes") with
                     {
                         Children =
                         [
-                            NavItem("收藏夹", "Favorite", "Favorites"),
-                            NavItem("登录", "World", "Logins"),
-                            NavItem("支付卡", "\uE8C7", "Cards"),
-                            NavItem("身份", "People", "Identities"),
-                            NavItem("安全笔记", "\uE70B", "Notes")
+                            NavItem(T("收藏夹"), "Favorite", "Favorites"),
+                            NavItem(T("登录"), "World", "Logins"),
+                            NavItem(T("支付卡"), "\uE8C7", "Cards"),
+                            NavItem(T("身份"), "People", "Identities"),
+                            NavItem(T("安全笔记"), "\uE70B", "Notes")
                         ]
                     },
-                    NavItem("归档", "\uE7B8", "Archive"),
-                    NavItem("回收站", "Delete", "Trash"),
-                    NavItem("文件夹", "Folder", "Folders") with
+                    NavItem(T("归档"), "\uE7B8", "Archive"),
+                    NavItem(T("回收站"), "Delete", "Trash"),
+                    NavItem(T("文件夹"), "Folder", "Folders") with
                     {
                         Children = folderItems.Length > 0
                             ? folderItems
-                            : [NavItem("暂无文件夹", "Folder", "FoldersEmpty")]
+                            : [NavItem(T("暂无文件夹"), "Folder", "FoldersEmpty")]
                     }
                 ]
             },
-            NavItem("生成器", "\uE72C", "Generator"),
-            NavItem("导入", "\uE8B5", "Import"),
-            NavItem("导出", "\uE896", "Export")
+            NavItem(T("生成器"), "\uE72C", "Generator"),
+            NavItem(T("导入"), "\uE8B5", "Import"),
+            NavItem(T("导出"), "\uE896", "Export")
         ];
     }
 

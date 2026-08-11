@@ -10,9 +10,17 @@ public enum AppThemeMode
     Dark
 }
 
+public enum AppLanguage
+{
+    SimplifiedChinese,
+    English
+}
+
 public sealed record AppSettings
 {
     public AppThemeMode ThemeMode { get; init; } = AppThemeMode.System;
+
+    public AppLanguage Language { get; init; } = AppLanguage.SimplifiedChinese;
 
     public CliConfiguration Cli { get; init; } = new();
 

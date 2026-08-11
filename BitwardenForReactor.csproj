@@ -33,6 +33,8 @@
         <Nullable>enable</Nullable>
         <!-- Core and optional sibling packages must stay on the same preview version. -->
         <MicrosoftUIReactorVersion>0.1.0-preview.13</MicrosoftUIReactorVersion>
+        <ReactorLocDefaultLocale>zh-CN</ReactorLocDefaultLocale>
+        <ReactorLocStringsPath>Strings\</ReactorLocStringsPath>
         <!--
             Auto-resolve RuntimeIdentifier from the host SDK when the caller hasn't pinned
             Platform / RuntimeIdentifier explicitly. Lets `dotnet build` / `dotnet run`
@@ -48,6 +50,14 @@
         <PackageReference Include="CommunityToolkit.WinUI.Controls.Segmented" Version="8.2.251219" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.1" />
         <PackageReference Include="Microsoft.UI.Reactor" Version="$(MicrosoftUIReactorVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PRIResource Remove="Strings\**\*.resw" />
+        <None Include="Strings\**\*.resw"
+              CopyToOutputDirectory="PreserveNewest"
+              CopyToPublishDirectory="PreserveNewest"
+              Link="Strings\%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,6 +1,6 @@
 # BitwardenForReactor
 
-使用 [Microsoft.UI.Reactor](https://microsoft.github.io/microsoft-ui-reactor/) 和 WinUI 3 开发的中文 Bitwarden 桌面客户端。
+使用 [Microsoft.UI.Reactor](https://microsoft.github.io/microsoft-ui-reactor/) 和 WinUI 3 开发的 Bitwarden 桌面客户端，支持简体中文和英文界面。
 
 项目通过 Bitwarden CLI（`bw`）访问密码库，界面采用 Reactor 的声明式组件和 MVU 状态管理，不使用 XAML 或传统 ViewModel 架构。
 
@@ -16,6 +16,7 @@
 - 生成密码、密码短语和用户名，并复制生成结果
 - 配置 Bitwarden CLI 路径、认证环境和剪贴板清除时间
 - 可持久化的跟随系统、浅色和深色主题选择
+- 基于 Reactor `LocaleProvider` 的简体中文、英文界面切换
 - 树状侧边导航、列表快捷操作、详情卡片和 Toolkit 设置控件
 
 目前主要工作是继续优化各页面的布局、控件一致性和交互细节。附件、导入导出等入口尚未全部完成。
@@ -48,4 +49,5 @@ dotnet run -p:Platform=x64
 - `State/`：应用状态、Action 和纯 Reducer
 - `Services/`：Bitwarden CLI、设置、剪贴板和图标服务
 - `Models/`：密码库数据模型和编辑草稿
+- `Localization/`、`Strings/`：Reactor 国际化适配与语言资源
 - `Controls/Toolkit/`：通过 `[GenerateReactorWrapper]` 生成的 Windows Community Toolkit Reactor 适配器

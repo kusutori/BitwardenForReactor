@@ -35,19 +35,19 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                         Grid(
                             columns: [GridSize.Star()],
                             rows: [GridSize.Auto, GridSize.Auto, GridSize.Auto],
-                            Heading(isEditing ? "编辑文件夹" : "新建文件夹")
+                            Heading(isEditing ? T("编辑文件夹") : T("新建文件夹"))
                                 .Margin(left: 20, top: 18, right: 20, bottom: 10)
                                 .Grid(row: 0),
                             VStack(10,
-                                TextBlock(isEditing ? "修改名称后会覆盖当前文件夹名称。" : "输入名称后会在当前密码库中创建文件夹。")
+                                TextBlock(isEditing ? T("修改名称后会覆盖当前文件夹名称。") : T("输入名称后会在当前密码库中创建文件夹。"))
                                     .Foreground(Theme.SecondaryText)
                                     .TextWrapping(),
                                 TextBox(name, value =>
                                     {
                                         setName(value);
                                         setConfirmDelete(false);
-                                    }, header: "文件夹名称（必填）")
-                                    .AutomationName("文件夹名称")
+                                    }, header: T("文件夹名称（必填）"))
+                                    .AutomationName(T("文件夹名称"))
                                     .OnKeyDown((_, e) =>
                                     {
                                         if (e.Key == VirtualKey.Enter)
@@ -56,7 +56,7 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                                             e.Handled = true;
                                         }
                                     }),
-                                TextBlock("通过在父文件夹名后面添加“/”来嵌套文件夹。示例：Social/Forums")
+                                TextBlock(T("通过在父文件夹名后面添加“/”来嵌套文件夹。示例：Social/Forums"))
                                     .Foreground(Theme.SecondaryText)
                                     .TextWrapping())
                                 .Padding(left: 20, top: 4, right: 20, bottom: 18)
@@ -66,14 +66,14 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                                         columns: [GridSize.Star(), GridSize.Auto],
                                         rows: [GridSize.Auto],
                                         HStack(12,
-                                                Button(isEditing ? "保存" : "创建", Save)
+                                                Button(isEditing ? T("保存") : T("创建"), Save)
                                                     .AccentButton()
                                                     .MinWidth(96)
                                                     .IsEnabled(!string.IsNullOrWhiteSpace(name))
-                                                    .AutomationName(isEditing ? "保存文件夹" : "创建文件夹"),
-                                                Button("取消", () => Props.Dispatch(new FolderEditorClosed()))
+                                                    .AutomationName(isEditing ? T("保存文件夹") : T("创建文件夹")),
+                                                Button(T("取消"), () => Props.Dispatch(new FolderEditorClosed()))
                                                     .MinWidth(96)
-                                                    .AutomationName("取消编辑文件夹"))
+                                                    .AutomationName(T("取消编辑文件夹")))
                                             .Grid(column: 0),
                                         isEditing
                                             ? DeleteButton(Props.Folder!, confirmDelete, setConfirmDelete)
@@ -88,15 +88,15 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                     .Width(420)
                     .HorizontalAlignment(HorizontalAlignment.Center)
                     .VerticalAlignment(VerticalAlignment.Center)
-                    .AutomationName("文件夹编辑器"))
+                    .AutomationName(T("文件夹编辑器")))
             .Background(Theme.SmokeFill)
-            .AutomationName("文件夹编辑器遮罩");
+            .AutomationName(T("文件夹编辑器遮罩"));
     }
 
     private Element DeleteButton(BitwardenFolder folder, bool confirmDelete, Action<bool> setConfirmDelete) =>
         Button(
             confirmDelete
-                ? TextBlock("确认删除")
+                ? TextBlock(T("确认删除"))
                 : Icon(FontIcon("\uE74D", fontSize: 18)),
             () =>
             {
@@ -110,6 +110,6 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
             })
             .MinWidth(confirmDelete ? 96 : 40)
             .Foreground(Theme.SystemCritical)
-            .AutomationName(confirmDelete ? "确认删除文件夹" : "删除文件夹")
-            .ToolTip(confirmDelete ? "确认删除文件夹" : "删除文件夹");
+            .AutomationName(confirmDelete ? T("确认删除文件夹") : T("删除文件夹"))
+            .ToolTip(confirmDelete ? T("确认删除文件夹") : T("删除文件夹"));
 }
