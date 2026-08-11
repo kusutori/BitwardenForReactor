@@ -39,7 +39,7 @@ dotnet restore
 dotnet run -p:Platform=x64
 ```
 
-项目当前使用 `Microsoft.UI.Reactor 0.1.0-preview.11`。主要设计和开发记录位于 [`docs/`](docs/)。
+项目当前使用 `Microsoft.UI.Reactor 0.1.0-preview.13`。主要设计和开发记录位于 [`docs/`](docs/)。
 
 ## 项目结构
 
@@ -48,4 +48,4 @@ dotnet run -p:Platform=x64
 - `State/`：应用状态、Action 和纯 Reducer
 - `Services/`：Bitwarden CLI、设置、剪贴板和图标服务
 - `Models/`：密码库数据模型和编辑草稿
-- `Controls/Toolkit/`：Windows Community Toolkit 的 Reactor 适配器
+- `Controls/Toolkit/`：通过 `[GenerateReactorWrapper]` 生成的 Windows Community Toolkit Reactor 适配器

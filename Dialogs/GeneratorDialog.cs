@@ -8,7 +8,7 @@ using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
 using Microsoft.UI.Xaml;
-using static BitwardenForReactor.Controls.Toolkit.ToolkitFactories;
+using static BitwardenForReactor.Controls.Toolkit.SegmentedElement;
 using static Microsoft.UI.Reactor.Factories;
 
 namespace BitwardenForReactor.Dialogs;
@@ -99,7 +99,7 @@ public sealed class GeneratorDialog : Component<GeneratorDialogProps>
         UseEffect(() => Generate());
 
         var body = VStack(18,
-            Segmented(["密码", "密码短语", "用户名"], mode, index =>
+            Segmented(items: new object[] { "密码", "密码短语", "用户名" }, selectedIndex: mode, onSelectedIndexChanged: index =>
                 {
                     setMode(index);
                     Generate(index);

@@ -94,7 +94,11 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
     }
 
     private Element DeleteButton(BitwardenFolder folder, bool confirmDelete, Action<bool> setConfirmDelete) =>
-        Button(confirmDelete ? "确认删除" : string.Empty, () =>
+        Button(
+            confirmDelete
+                ? TextBlock("确认删除")
+                : Icon(FontIcon("\uE74D", fontSize: 18)),
+            () =>
             {
                 if (confirmDelete)
                 {
@@ -107,19 +111,5 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
             .MinWidth(confirmDelete ? 96 : 40)
             .Foreground(Theme.SystemCritical)
             .AutomationName(confirmDelete ? "确认删除文件夹" : "删除文件夹")
-            .Set(button =>
-            {
-                if (confirmDelete)
-                {
-                    button.Content = "确认删除";
-                    return;
-                }
-
-                button.Content = new FontIcon
-                {
-                    Glyph = "\uE74D",
-                    FontSize = 18
-                };
-                ToolTipService.SetToolTip(button, "删除文件夹");
-            });
+            .ToolTip(confirmDelete ? "确认删除文件夹" : "删除文件夹");
 }

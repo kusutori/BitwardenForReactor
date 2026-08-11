@@ -1,10 +1,10 @@
 # Reactor 原生控件回退清单
 
-最后审计日期：2026-06-26
+最后审计日期：2026-08-11
 
 当前依赖版本：
 
-- `Microsoft.UI.Reactor 0.1.0-preview.11`
+- `Microsoft.UI.Reactor 0.1.0-preview.13`
 - `CommunityToolkit.WinUI.Controls.SettingsControls 8.2.251219`
 - `CommunityToolkit.WinUI.Controls.Segmented 8.2.251219`
 
@@ -78,17 +78,17 @@ MenuItem("删除", onDelete, icon: "\uE74D")
 
 ## 第三方控件适配
 
-Reactor 当前没有为以下 Windows Community Toolkit 控件提供官方 Element。这类代码不是单个属性缺失，而是整个控件需要项目自行接入。
+Reactor 不直接内置以下 Windows Community Toolkit 控件，但 preview13 已提供 `[GenerateReactorWrapper]` 源代码生成器。项目只保留控件声明和必要标注，不再手写 Element、Handler、事件订阅或程序集注册。
 
 | 控件 | 项目 Element | 已映射能力 | 代码位置 | 状态 |
 | --- | --- | --- | --- | --- |
-| `SettingsCard` | `ToolkitSettingsCardElement` | Header、Description、Content、HeaderIconGlyph | [`Controls/Toolkit/ToolkitControls.cs`](../Controls/Toolkit/ToolkitControls.cs) | **自定义适配** |
-| `SettingsExpander` | `ToolkitSettingsExpanderElement` | Header、Description、Content、Items、HeaderIconGlyph、IsExpanded | [`Controls/Toolkit/ToolkitControls.cs`](../Controls/Toolkit/ToolkitControls.cs) | **自定义适配** |
-| `Segmented` | `ToolkitSegmentedElement` | Items、SelectedIndex、选择回调 | [`Controls/Toolkit/ToolkitControls.cs`](../Controls/Toolkit/ToolkitControls.cs) | **自定义适配** |
+| `SettingsCard` | `SettingsCardElement` | 自动发现 Header、Description、Content；`HeaderIcon` 使用 `[WrapElementSlot]` | [`Controls/Toolkit/ToolkitControls.cs`](../Controls/Toolkit/ToolkitControls.cs) | **生成器适配** |
+| `SettingsExpander` | `SettingsExpanderElement` | 自动发现 Header、Description、Content、Items、IsExpanded；`HeaderIcon` 使用 `[WrapElementSlot]` | [`Controls/Toolkit/ToolkitControls.cs`](../Controls/Toolkit/ToolkitControls.cs) | **生成器适配** |
+| `Segmented` | `SegmentedElement` | 自动发现 Items；`SelectedIndex` 与 `SelectionChanged` 使用 `[WrapControlled]` 配对 | [`Controls/Toolkit/ToolkitControls.cs`](../Controls/Toolkit/ToolkitControls.cs) | **生成器适配** |
 
-相关 Toolkit 程序集在 [`Program.cs`](../Program.cs) 中通过 `ReactorApp.RegisterControlAssembly(...)` 注册，以便 WinUI 加载控件资源。
+生成代码会自动调用 `ReactorApp.RegisterControlAssembly(...)`，以便 WinUI 在首次实现控件前加载 Toolkit 资源程序集。
 
-升级 Reactor 或新增官方 Toolkit 集成包后，应比较官方 wrapper 的属性覆盖和更新语义，再决定是否替换。不要仅因为官方出现同名 Element 就立即删除本地适配器。
+升级 Reactor 后应关注 wrapper generator 的诊断和生成 API 变更；只有控件形状无法由 `[Wrap*]` 标注表达时，才回退到手写 `ControlDescriptor` / `IElementHandler`。
 
 ## 可立即清理
 

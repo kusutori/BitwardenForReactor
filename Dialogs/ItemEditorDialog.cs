@@ -15,7 +15,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
 using Windows.UI.Core;
-using static BitwardenForReactor.Controls.Toolkit.ToolkitFactories;
+using static BitwardenForReactor.Controls.Toolkit.SegmentedElement;
 using static Microsoft.UI.Reactor.Factories;
 
 namespace BitwardenForReactor.Dialogs;
@@ -72,7 +72,7 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                 [
                     VStack(6,
                         TextBlock("类型").Foreground(Theme.SecondaryText),
-                        Segmented(typeNames, selectedType, index =>
+                        Segmented(items: typeNames, selectedIndex: selectedType, onSelectedIndexChanged: index =>
                         {
                             Update(current => current with
                             {

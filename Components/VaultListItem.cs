@@ -45,7 +45,10 @@ public sealed class VaultListItem : Component<VaultListItemProps>
                                 .SemiBold()
                                 .Flex(grow: 1, basis: 0),
                             item.Favorite
-                                ? Icon(FontIcon("\uE735", fontSize: 13)).Foreground(Theme.SystemCaution)
+                                ? TextBlock("\uE735")
+                                    .FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets")
+                                    .FontSize(13)
+                                    .Foreground(Theme.SystemCaution)
                                 : null),
                         TextBlock(secondary)
                             .Foreground(Theme.SecondaryText)

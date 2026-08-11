@@ -46,7 +46,10 @@ public sealed class DetailHeader : Component<DetailHeaderProps>
                                 .SemiBold()
                                 .TextTrimming(TextTrimming.CharacterEllipsis),
                             item.Favorite
-                                ? Icon(FontIcon("\uE735", fontSize: 16)).Foreground(Theme.SystemCaution)
+                                ? TextBlock("\uE735")
+                                    .FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets")
+                                    .FontSize(16)
+                                    .Foreground(Theme.SystemCaution)
                                 : null),
                         HStack(8,
                             Border(TextBlock(VaultDisplay.TypeLabel(item)).Foreground(Theme.SecondaryText))
