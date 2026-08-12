@@ -42,6 +42,28 @@ dotnet run -p:Platform=x64
 
 项目当前使用 `Microsoft.UI.Reactor 0.1.0-preview.13`。主要设计和开发记录位于 [`docs/`](docs/)。
 
+## 发布与打包
+
+默认构建仍是 unpackaged、Windows App SDK self-contained 的开发版本。发布 x64 Native AOT 版本：
+
+```powershell
+dotnet publish -c Release -r win-x64 -p:Platform=x64 -p:NativeAot=true -o bin\publish\aot-win-x64
+```
+
+验证未签名的 MSIX 包布局：
+
+```powershell
+dotnet build -c Release -p:Platform=x64 -p:ReactorPackaged=true
+```
+
+生成可安装的签名 MSIX 时，证书主题必须与 `Package.appxmanifest` 的 `Publisher` 一致：
+
+```powershell
+dotnet build -c Release -p:Platform=x64 -p:ReactorPackaged=true -p:GenerateAppxPackageOnBuild=true -p:AppxPackageSigningEnabled=true -p:PackageCertificateThumbprint=<thumbprint>
+```
+
+ARM64 使用相同命令，将 `x64` / `win-x64` 分别替换为 `ARM64` / `win-arm64`。AOT 发布保留官方针对 Windows App SDK #6394 的 PRI/XBF 复制修复；Release 和 AOT 构建不包含 Reactor DevTools。
+
 ## 项目结构
 
 - `Application/`：异步命令和副作用编排

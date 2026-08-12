@@ -1,20 +1,14 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Linq;
+using BitwardenForReactor.Serialization;
 
 namespace BitwardenForReactor.Services;
 
 public sealed class SettingsManager
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        WriteIndented = true,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-    };
-
     public static SettingsManager Instance { get; } = new();
 
     private readonly string _settingsPath;
@@ -41,7 +35,7 @@ public sealed class SettingsManager
             }
 
             var json = File.ReadAllText(_settingsPath);
-            return Normalize(JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings());
+            return Normalize(JsonSerializer.Deserialize(json, AppJsonContext.Default.AppSettings) ?? new AppSettings());
         }
         catch
         {
@@ -52,7 +46,7 @@ public sealed class SettingsManager
     public async Task SaveAsync(AppSettings settings)
     {
         Current = Normalize(settings);
-        var json = JsonSerializer.Serialize(Current, JsonOptions);
+        var json = JsonSerializer.Serialize(Current, AppJsonContext.Default.AppSettings);
         await File.WriteAllTextAsync(_settingsPath, json);
     }
 
