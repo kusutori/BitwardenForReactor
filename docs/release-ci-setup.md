@@ -2,21 +2,32 @@
 
 The repository contains two release workflows:
 
-- `release.yml` creates signed x64 and ARM64 MSIX packages and attaches them to a GitHub Release when a `v1.2.3` tag is pushed.
+- `release.yml` creates x64 and ARM64 Native AOT portable ZIPs and attaches them to a GitHub Release when a `v1.2.3` tag is pushed. Signed MSIX packages are optional.
 - `store.yml` creates an unsigned x64/ARM64 `.msixupload` for Partner Center whenever a release tag is pushed. It can also be run manually and optionally submit the package.
 
-Both workflows check out `kusutori/BitwardenCli.Core` beside this repository because the application currently uses a sibling `ProjectReference`.
+Both workflows restore the published `BitwardenCli.Core` package from NuGet.org.
 
 ## Direct-download release
 
-Create these repository variables under **Settings > Secrets and variables > Actions > Variables**:
+No Secrets or repository variables are required for portable ZIP releases. Push a release tag after the workflow is on the default branch:
+
+```powershell
+git tag -a v0.1.0 -m "Release v0.1.0"
+git push origin v0.1.0
+```
+
+The portable ZIP is unpackaged and self-contained. Users extract it and run `BitwardenForReactor.exe`; Bitwarden CLI remains a separate prerequisite. Native AOT debugging symbols are published as a separate symbols ZIP for crash analysis.
+
+### Optional signed MSIX
+
+Set `ENABLE_SIGNED_MSIX=true` and create these repository variables only after obtaining a publicly trusted production code-signing certificate:
 
 | Variable | Value |
 | --- | --- |
 | `PACKAGE_IDENTITY_NAME` | Stable package identity for the direct-download channel |
 | `PACKAGE_PUBLISHER` | Exact certificate subject, for example `CN=Your Company` |
 | `PACKAGE_PUBLISHER_DISPLAY_NAME` | Publisher name shown to users |
-| `ENABLE_DIRECT_RELEASE` | Set to `true` to create signed GitHub Releases on tag pushes |
+| `ENABLE_SIGNED_MSIX` | Set to `true` to append signed MSIX packages to GitHub Releases |
 
 Create these repository secrets:
 
@@ -34,12 +45,7 @@ Encode a PFX without writing the result to the terminal:
 
 The certificate subject must exactly equal `PACKAGE_PUBLISHER`. Never commit a PFX, its password, or its Base64 representation.
 
-Push a release tag after configuring the values. The direct-release job stays skipped until `ENABLE_DIRECT_RELEASE` is `true`:
-
-```powershell
-git tag -a v1.0.0 -m "Release v1.0.0"
-git push origin v1.0.0
-```
+Do not enable this job with a self-signed certificate for public distribution. Users would have to trust that certificate manually.
 
 ## Microsoft Store package
 

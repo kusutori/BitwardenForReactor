@@ -37,6 +37,7 @@
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
         <Nullable>enable</Nullable>
+        <DefaultItemExcludes>$(DefaultItemExcludes);artifacts\**</DefaultItemExcludes>
         <!-- Core and optional sibling packages must stay on the same preview version. -->
         <MicrosoftUIReactorVersion>0.1.0-preview.13</MicrosoftUIReactorVersion>
         <ReactorLocDefaultLocale>en-US</ReactorLocDefaultLocale>
@@ -94,7 +95,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BitwardenCli.Core\src\BitwardenCli.Core\BitwardenCli.Core.csproj" />
+        <PackageReference Include="BitwardenCli.Core" Version="0.1.2" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(ReactorPackaged)' == 'true'">

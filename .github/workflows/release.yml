@@ -1,4 +1,4 @@
-name: Release signed MSIX
+name: GitHub Release
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "MSIX version tag, for example v1.2.3"
+        description: "Release version tag, for example v1.2.3"
         required: true
         type: string
 
@@ -17,12 +17,10 @@ permissions:
 
 env:
   APP_DIRECTORY: BitwardenForReactor
-  CORE_REPOSITORY: kusutori/BitwardenCli.Core
 
 jobs:
-  build:
-    name: Build ${{ matrix.platform }}
-    if: github.event_name == 'workflow_dispatch' || vars.ENABLE_DIRECT_RELEASE == 'true'
+  portable:
+    name: Build portable ${{ matrix.platform }}
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -39,19 +37,98 @@ jobs:
         with:
           path: ${{ env.APP_DIRECTORY }}
 
-      # The app currently uses a sibling ProjectReference to BitwardenCli.Core.
-      - name: Check out Bitwarden CLI Core
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Resolve release version
+        id: release
+        working-directory: ${{ env.APP_DIRECTORY }}
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+        run: |
+          $version = $env:RELEASE_TAG.Trim()
+          if ($version.StartsWith('v', [StringComparison]::OrdinalIgnoreCase)) {
+            $version = $version.Substring(1)
+          }
+          if ($version -notmatch '^\d+\.\d+\.\d+(?:\.\d+)?$') {
+            throw "Version '$version' must use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH.REVISION."
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Restore
+        working-directory: ${{ env.APP_DIRECTORY }}
+        run: >-
+          dotnet restore BitwardenForReactor.csproj
+          -p:Platform=${{ matrix.platform }}
+          -p:NativeAot=true
+          -r ${{ matrix.rid }}
+
+      - name: Publish Native AOT application
+        working-directory: ${{ env.APP_DIRECTORY }}
+        shell: pwsh
+        run: |
+          $publishDir = Join-Path $env:RUNNER_TEMP "publish-${{ matrix.platform }}"
+          dotnet publish BitwardenForReactor.csproj --no-restore -c Release `
+            -r ${{ matrix.rid }} `
+            -p:Platform=${{ matrix.platform }} `
+            -p:NativeAot=true `
+            -p:Version=${{ steps.release.outputs.version }} `
+            -o $publishDir
+
+          $requiredFiles = @('BitwardenForReactor.exe', 'BitwardenForReactor.pri')
+          foreach ($requiredFile in $requiredFiles) {
+            if (-not (Test-Path (Join-Path $publishDir $requiredFile))) {
+              throw "Publish output is missing $requiredFile."
+            }
+          }
+          if ((Get-ChildItem (Join-Path $publishDir 'Strings') -Recurse -Filter *.resw).Count -lt 1) {
+            throw 'Publish output is missing localized RESW files.'
+          }
+
+          Copy-Item README.md, LICENSE -Destination $publishDir
+          $symbols = Get-Item (Join-Path $publishDir 'BitwardenForReactor.pdb')
+          $symbolsArchive = Join-Path $env:RUNNER_TEMP "BitwardenForReactor-${{ steps.release.outputs.version }}-${{ matrix.platform }}-symbols.zip"
+          Compress-Archive -Path $symbols.FullName -DestinationPath $symbolsArchive -CompressionLevel Optimal
+          Remove-Item $symbols.FullName -Force
+
+          $archive = Join-Path $env:RUNNER_TEMP "BitwardenForReactor-${{ steps.release.outputs.version }}-${{ matrix.platform }}-portable.zip"
+          Compress-Archive -Path (Join-Path $publishDir '*') -DestinationPath $archive -CompressionLevel Optimal
+
+      - name: Upload portable package
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable-${{ matrix.platform }}
+          path: ${{ runner.temp }}/BitwardenForReactor-${{ steps.release.outputs.version }}-${{ matrix.platform }}-*.zip
+          if-no-files-found: error
+
+  signed-msix:
+    name: Build signed MSIX ${{ matrix.platform }}
+    if: vars.ENABLE_SIGNED_MSIX == 'true'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x64
+            rid: win-x64
+          - platform: ARM64
+            rid: win-arm64
+
+    steps:
+      - name: Check out application
         uses: actions/checkout@v4
         with:
-          repository: ${{ env.CORE_REPOSITORY }}
-          path: BitwardenCli.Core
+          path: ${{ env.APP_DIRECTORY }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
-      - name: Validate release configuration
+      - name: Validate signing configuration
         shell: pwsh
         env:
           IDENTITY_NAME: ${{ vars.PACKAGE_IDENTITY_NAME }}
@@ -135,15 +212,14 @@ jobs:
             throw "The build completed without producing an MSIX package."
           }
 
-          $outputDir = Join-Path $env:RUNNER_TEMP "release-${{ matrix.platform }}"
-          New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
-          Copy-Item $package.FullName (Join-Path $outputDir "BitwardenForReactor-${{ steps.package.outputs.version }}-${{ matrix.platform }}.msix")
+          $output = Join-Path $env:RUNNER_TEMP "BitwardenForReactor-${{ steps.package.outputs.version }}-${{ matrix.platform }}.msix"
+          Copy-Item $package.FullName $output
 
       - name: Upload signed package
         uses: actions/upload-artifact@v4
         with:
           name: signed-msix-${{ matrix.platform }}
-          path: ${{ runner.temp }}/release-${{ matrix.platform }}/*.msix
+          path: ${{ runner.temp }}/BitwardenForReactor-${{ steps.package.outputs.version }}-${{ matrix.platform }}.msix
           if-no-files-found: error
 
       - name: Remove signing certificate
@@ -152,21 +228,31 @@ jobs:
         run: Remove-Item "Cert:\CurrentUser\My\${{ steps.certificate.outputs.thumbprint }}" -Force -ErrorAction SilentlyContinue
 
   release:
-    name: Create GitHub release
-    if: github.event_name == 'workflow_dispatch' || vars.ENABLE_DIRECT_RELEASE == 'true'
-    needs: build
+    name: Create GitHub Release
+    if: always() && needs.portable.result == 'success' && needs.signed-msix.result != 'failure'
+    needs:
+      - portable
+      - signed-msix
     runs-on: windows-latest
     steps:
-      - name: Download signed packages
+      - name: Download release packages
         uses: actions/download-artifact@v4
         with:
-          pattern: signed-msix-*
+          pattern: "portable-*"
           path: packages
           merge-multiple: true
 
-      - name: Publish GitHub release
+      - name: Download signed MSIX packages
+        if: needs.signed-msix.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "signed-msix-*"
+          path: packages
+          merge-multiple: true
+
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
           generate_release_notes: true
-          files: packages/*.msix
+          files: packages/*

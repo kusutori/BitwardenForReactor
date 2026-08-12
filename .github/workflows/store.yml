@@ -22,7 +22,6 @@ permissions:
 
 env:
   APP_DIRECTORY: BitwardenForReactor
-  CORE_REPOSITORY: kusutori/BitwardenCli.Core
 
 jobs:
   package:
@@ -33,12 +32,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: ${{ env.APP_DIRECTORY }}
-
-      - name: Check out Bitwarden CLI Core
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.CORE_REPOSITORY }}
-          path: BitwardenCli.Core
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
