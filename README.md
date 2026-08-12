@@ -64,6 +64,8 @@ dotnet build -c Release -p:Platform=x64 -p:ReactorPackaged=true -p:GenerateAppxP
 
 ARM64 使用相同命令，将 `x64` / `win-x64` 分别替换为 `ARM64` / `win-arm64`。AOT 发布保留官方针对 Windows App SDK #6394 的 PRI/XBF 复制修复；Release 和 AOT 构建不包含 Reactor DevTools。
 
+推送 `v1.2.3` 格式的 Tag 后，GitHub Actions 会生成 Microsoft Store 的 x64/ARM64 上传包；配置生产证书后也可创建已签名的 GitHub Release。所需变量、Secrets 和 Partner Center 配置见 [`docs/release-ci-setup.md`](docs/release-ci-setup.md)。
+
 ## 项目结构
 
 - `Application/`：异步命令和副作用编排
