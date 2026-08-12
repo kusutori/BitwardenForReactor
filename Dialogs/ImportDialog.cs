@@ -81,59 +81,59 @@ public sealed class ImportDialog : Component<ImportDialogProps>
             (!string.IsNullOrWhiteSpace(filePath) || !string.IsNullOrWhiteSpace(pastedContent));
 
         var body = VStack(18,
-            TextBlock(T("目的地")).SemiBold(),
+            TextBlock(T("Destination")).SemiBold(),
             Card(VStack(14,
-                ComboBox([T("我的密码库")], 0, _ => { })
-                    .Header(T("密码库"))
+                ComboBox([T("My vault")], 0, _ => { })
+                    .Header(T("Vault"))
                     .IsEnabled(false)
-                    .AutomationName(T("导入目标密码库")),
-                ComboBox([T("不指定文件夹")], 0, _ => { })
-                    .Header(T("文件夹"))
+                    .AutomationName(T("Destination vault")),
+                ComboBox([T("Do not assign a folder")], 0, _ => { })
+                    .Header(T("Folders"))
                     .IsEnabled(false)
-                    .AutomationName(T("导入目标文件夹")),
-                TextBlock(T("Bitwarden CLI 当前不支持在导入时指定目标文件夹。需要移动到文件夹时，请在导入后批量整理。"))
+                    .AutomationName(T("Destination folder")),
+                TextBlock(T("Bitwarden CLI does not currently support selecting a destination folder during import. Organize imported items afterward if needed."))
                     .Foreground(Theme.SecondaryText)
                     .TextWrapping())),
-            TextBlock(T("数据")).SemiBold(),
+            TextBlock(T("Data")).SemiBold(),
             Card(VStack(14,
                 ComboBox(formats.ToArray(), formatIndex, setFormatIndex)
-                    .Header(T("文件格式"))
-                    .AutomationName(T("导入文件格式")),
+                    .Header(T("File format"))
+                    .AutomationName(T("Import file format")),
                 VStack(6,
-                    TextBlock(T("选择要导入的文件")).SemiBold(),
+                    TextBlock(T("Select a file to import")).SemiBold(),
                     Grid(
                         columns: [GridSize.Star(), GridSize.Auto],
                         rows: [GridSize.Auto],
-                        TextBox(filePath, setFilePath, placeholderText: T("未选择文件"))
-                            .AutomationName(T("导入文件路径"))
+                        TextBox(filePath, setFilePath, placeholderText: T("No file selected"))
+                            .AutomationName(T("Import file path"))
                             .Grid(column: 0),
-                        Button(T("选择文件"), PickImportFile)
+                        Button(T("Choose file"), PickImportFile)
                             .MinWidth(96)
-                            .AutomationName(T("选择导入文件"))
+                            .AutomationName(T("Choose import file"))
                             .Grid(column: 1)
                             .Margin(left: 8))),
-                TextBox(pastedContent, setPastedContent, header: T("或复制/粘贴要导入的文件内容"))
+                TextBox(pastedContent, setPastedContent, header: T("Or paste the contents of the file to import"))
                     .AcceptsReturn()
                     .TextWrapping()
                     .MinHeight(112)
-                    .AutomationName(T("导入文件内容")),
-                TextBlock(T("如果同时选择了文件并粘贴了内容，将优先导入所选文件。"))
+                    .AutomationName(T("Import file contents")),
+                TextBlock(T("If you select a file and paste content, the selected file takes precedence."))
                     .Foreground(Theme.SecondaryText)
                     .TextWrapping())))
             .Padding(24);
 
         return DialogShell(
-            T("导入"),
+            T("Import"),
             body,
             HStack(12,
-                Button(T("导入"), () => _ = AppCommands.ImportVaultAsync(selectedFormat, filePath, pastedContent, Props.Dispatch))
+                Button(T("Import"), () => _ = AppCommands.ImportVaultAsync(selectedFormat, filePath, pastedContent, Props.Dispatch))
                     .AccentButton()
                     .MinWidth(96)
                     .IsEnabled(canImport)
-                    .AutomationName(T("导入密码库")),
-                Button(T("取消"), () => Props.Dispatch(new ImportExportVisibilityChanged(null)))
+                    .AutomationName(T("Import vault")),
+                Button(T("Cancel"), () => Props.Dispatch(new ImportExportVisibilityChanged(null)))
                     .MinWidth(96)
-                    .AutomationName(T("取消导入"))));
+                    .AutomationName(T("Cancel import"))));
     }
 
     private static Element DialogShell(string title, Element body, Element footer) =>
@@ -165,7 +165,7 @@ public sealed class ImportDialog : Component<ImportDialogProps>
                     .HorizontalAlignment(HorizontalAlignment.Center)
                     .VerticalAlignment(VerticalAlignment.Center))
             .Background(Theme.SmokeFill)
-            .AutomationName(T("{title}遮罩", ("title", title)));
+            .AutomationName(T("{title} overlay", ("title", title)));
 
     private static Element Card(Element child) =>
         Border(child)

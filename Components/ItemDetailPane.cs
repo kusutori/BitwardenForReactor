@@ -25,7 +25,7 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
             return Border(
                     VStack(12,
                         Icon(FontIcon("\uE785", fontSize: 42)),
-                        TextBlock(T("选择一个项目查看详情")).Foreground(Theme.SecondaryText)))
+                        TextBlock(T("Select an item to view its details")).Foreground(Theme.SecondaryText)))
                 .HorizontalAlignment(HorizontalAlignment.Center)
                 .VerticalAlignment(VerticalAlignment.Center)
                 .Flex(grow: 1, basis: 0);
@@ -65,35 +65,35 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
         switch (item.Type)
         {
             case BitwardenItemType.Login:
-                AddField(primaryFields, T("用户名"), item.Login?.Username, copyRequested);
-                AddSensitiveField(primaryFields, T("密码"), VaultDisplay.Mask("password"), item.Login?.Password, copyRequested);
-                foreach (var uri in item.Login?.Uris ?? []) AddField(primaryFields, T("网站"), uri.Uri, copyRequested);
+                AddField(primaryFields, T("Username"), item.Login?.Username, copyRequested);
+                AddSensitiveField(primaryFields, T("Password"), VaultDisplay.Mask("password"), item.Login?.Password, copyRequested);
+                foreach (var uri in item.Login?.Uris ?? []) AddField(primaryFields, T("Website"), uri.Uri, copyRequested);
                 if (!string.IsNullOrWhiteSpace(item.Login?.Totp))
                 {
                     primaryFields.Add(Component<TotpField, TotpFieldProps>(
                             new TotpFieldProps(() => _ = AppCommands.CopyTotpAsync(item, Props.Dispatch)))
                         .HorizontalAlignment(HorizontalAlignment.Stretch));
                 }
-                sections.Add(DetailSection(T("登录信息"), primaryFields));
+                sections.Add(DetailSection(T("Login information"), primaryFields));
                 break;
             case BitwardenItemType.Card:
-                AddField(primaryFields, T("品牌"), item.Card?.Brand, copyRequested);
-                AddField(primaryFields, T("持卡人"), item.Card?.CardholderName, copyRequested);
-                AddSensitiveField(primaryFields, T("卡号"), VaultDisplay.MaskCard(item.Card?.Number), item.Card?.Number, copyRequested);
-                AddField(primaryFields, T("有效期"), VaultDisplay.FormatExpiry(item.Card), copyRequested);
+                AddField(primaryFields, T("Brand"), item.Card?.Brand, copyRequested);
+                AddField(primaryFields, T("Cardholder"), item.Card?.CardholderName, copyRequested);
+                AddSensitiveField(primaryFields, T("Card number"), VaultDisplay.MaskCard(item.Card?.Number), item.Card?.Number, copyRequested);
+                AddField(primaryFields, T("Expiration"), VaultDisplay.FormatExpiry(item.Card), copyRequested);
                 AddSensitiveField(primaryFields, "CVV", VaultDisplay.Mask("cvv"), item.Card?.Code, copyRequested);
-                sections.Add(DetailSection(T("卡片信息"), primaryFields));
+                sections.Add(DetailSection(T("Card information"), primaryFields));
                 break;
             case BitwardenItemType.Identity:
-                AddField(primaryFields, T("姓名"), VaultDisplay.JoinParts(item.Identity?.FirstName, item.Identity?.LastName), copyRequested);
-                AddField(primaryFields, T("邮箱"), item.Identity?.Email, copyRequested);
-                AddField(primaryFields, T("电话"), item.Identity?.Phone, copyRequested);
-                AddField(primaryFields, T("公司"), item.Identity?.Company, copyRequested);
-                AddField(primaryFields, T("地址"), VaultDisplay.JoinParts(item.Identity?.Address1, item.Identity?.Address2, item.Identity?.Address3, item.Identity?.City, item.Identity?.State, item.Identity?.PostalCode, item.Identity?.Country), copyRequested);
+                AddField(primaryFields, T("Full name"), VaultDisplay.JoinParts(item.Identity?.FirstName, item.Identity?.LastName), copyRequested);
+                AddField(primaryFields, T("Email"), item.Identity?.Email, copyRequested);
+                AddField(primaryFields, T("Phone"), item.Identity?.Phone, copyRequested);
+                AddField(primaryFields, T("Company"), item.Identity?.Company, copyRequested);
+                AddField(primaryFields, T("Address"), VaultDisplay.JoinParts(item.Identity?.Address1, item.Identity?.Address2, item.Identity?.Address3, item.Identity?.City, item.Identity?.State, item.Identity?.PostalCode, item.Identity?.Country), copyRequested);
                 AddSensitiveField(primaryFields, "SSN", VaultDisplay.Mask("ssn"), item.Identity?.Ssn, copyRequested);
-                AddField(primaryFields, T("护照"), item.Identity?.PassportNumber, copyRequested);
-                AddField(primaryFields, T("驾照"), item.Identity?.LicenseNumber, copyRequested);
-                sections.Add(DetailSection(T("身份信息"), primaryFields));
+                AddField(primaryFields, T("Passport"), item.Identity?.PassportNumber, copyRequested);
+                AddField(primaryFields, T("Driver's license"), item.Identity?.LicenseNumber, copyRequested);
+                sections.Add(DetailSection(T("Identity information"), primaryFields));
                 break;
             case BitwardenItemType.SecureNote:
                 break;
@@ -101,12 +101,12 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
 
         if (item.Fields?.Count > 0)
         {
-            sections.Add(DetailSection(T("自定义字段"), item.Fields.Select(field =>
+            sections.Add(DetailSection(T("Custom fields"), item.Fields.Select(field =>
                     field.Type == CustomFieldType.Hidden
                         ? Component<SensitiveField, SensitiveFieldProps>(
-                                new SensitiveFieldProps(field.Name ?? T("未命名字段"), VaultDisplay.Mask("hidden"), field.Value, copyRequested))
+                                new SensitiveFieldProps(field.Name ?? T("Unnamed field"), VaultDisplay.Mask("hidden"), field.Value, copyRequested))
                             .HorizontalAlignment(HorizontalAlignment.Stretch)
-                        : DetailField(field.Name ?? T("未命名字段"), field.Value ?? string.Empty, field.Value, copyRequested))
+                        : DetailField(field.Name ?? T("Unnamed field"), field.Value ?? string.Empty, field.Value, copyRequested))
                 .Select((element, index) => element.WithKey($"{item.Id}:field:{index}"))
                 .ToArray()));
         }
@@ -138,19 +138,19 @@ public sealed class ItemDetailPane : Component<VaultPaneProps>
             .HorizontalAlignment(HorizontalAlignment.Stretch);
 
     private Element RenderNotes(string notes) =>
-        DetailSection(T("备注"),
+        DetailSection(T("Notes"),
         [
-            DetailField(T("内容"), notes, notes, value => { _ = AppCommands.CopyAsync(value, Props.Dispatch); })
+            DetailField(T("Content"), notes, notes, value => { _ = AppCommands.CopyAsync(value, Props.Dispatch); })
         ]);
 
     private Element RenderMetadata(BitwardenItem item)
     {
         Action<string> copyRequested = value => { _ = AppCommands.CopyAsync(value, Props.Dispatch); };
-        return DetailSection(T("项目记录"),
+        return DetailSection(T("Item details"),
         [
-            DetailField(T("修改时间"), item.RevisionDate?.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture) ?? T("未知"), null, copyRequested),
-            DetailField(T("创建时间"), item.CreationDate?.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture) ?? T("未知"), null, copyRequested),
-            DetailField(T("项目 ID"), item.Id, item.Id, copyRequested)
+            DetailField(T("Modified"), item.RevisionDate?.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture) ?? T("Unknown"), null, copyRequested),
+            DetailField(T("Creation date"), item.CreationDate?.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture) ?? T("Unknown"), null, copyRequested),
+            DetailField(T("Item ID"), item.Id, item.Id, copyRequested)
         ]);
     }
 }

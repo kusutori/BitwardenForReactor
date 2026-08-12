@@ -19,7 +19,7 @@ public static class AppCommands
 
     public static async Task InitializeAsync(Action<AppAction> dispatch, CancellationToken cancellationToken = default)
     {
-        dispatch(new BusyChanged(true, T("检测 Bitwarden 状态...")));
+        dispatch(new BusyChanged(true, T("Checking Bitwarden status...")));
         try
         {
             var status = await BitwardenApplicationService.Instance.GetStatusAsync(cancellationToken);
@@ -47,23 +47,23 @@ public static class AppCommands
     {
         if (string.IsNullOrWhiteSpace(masterPassword))
         {
-            dispatch(new NoticeShown(T("需要主密码"), T("请输入主密码。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("Master password required"), T("Enter your master password."), InfoBarSeverity.Warning));
             return;
         }
 
-        dispatch(new BusyChanged(true, T("正在解锁...")));
+        dispatch(new BusyChanged(true, T("Unlocking...")));
         try
         {
             var result = await BitwardenApplicationService.Instance.UnlockAsync(masterPassword);
             if (!result.Success)
             {
-                dispatch(new NoticeShown(T("解锁失败"), result.Message, InfoBarSeverity.Error));
+                dispatch(new NoticeShown(T("Unlock failed"), result.Message, InfoBarSeverity.Error));
                 setMasterPassword(string.Empty);
                 return;
             }
 
             setMasterPassword(string.Empty);
-            dispatch(new NoticeShown(T("已解锁"), result.Message, InfoBarSeverity.Success));
+            dispatch(new NoticeShown(T("Unlocked"), result.Message, InfoBarSeverity.Success));
             dispatch(new StatusLoaded(await BitwardenApplicationService.Instance.GetStatusAsync()));
             await LoadVaultAsync(dispatch);
         }
@@ -75,7 +75,7 @@ public static class AppCommands
 
     public static async Task LoadVaultAsync(Action<AppAction> dispatch, string? selectedItemId = null, CancellationToken cancellationToken = default)
     {
-        dispatch(new BusyChanged(true, T("正在加载密码库...")));
+        dispatch(new BusyChanged(true, T("Loading vault...")));
         try
         {
             var service = BitwardenApplicationService.Instance;
@@ -92,8 +92,8 @@ public static class AppCommands
             if (!itemsResult.IsSuccess)
             {
                 dispatch(new NoticeShown(
-                    T("密码库加载失败"),
-                    BitwardenApplicationService.DescribeError(itemsResult.Error, T("无法解析 Bitwarden CLI 返回的项目数据。")),
+                    T("Vault loading failed"),
+                    BitwardenApplicationService.DescribeError(itemsResult.Error, T("Could not parse the item data returned by Bitwarden CLI.")),
                     InfoBarSeverity.Error));
                 return;
             }
@@ -105,8 +105,8 @@ public static class AppCommands
             if (!trashResult.IsSuccess || !archivedResult.IsSuccess || !foldersResult.IsSuccess)
             {
                 dispatch(new NoticeShown(
-                    T("部分数据加载失败"),
-                    T("普通项目已加载，但回收站、归档或文件夹暂时不可用。"),
+                    T("Some data could not be loaded"),
+                    T("Regular items were loaded, but trash, archive, or folders are temporarily unavailable."),
                     InfoBarSeverity.Warning));
             }
             dispatch(new VaultLoaded(items, trash, archived, folders, selectedItemId));
@@ -122,13 +122,13 @@ public static class AppCommands
 
     public static async Task SyncAsync(Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, T("正在同步...")));
+        dispatch(new BusyChanged(true, T("Synchronizing...")));
         try
         {
             var success = await BitwardenApplicationService.Instance.SyncAsync();
             dispatch(success
-                ? new NoticeShown(T("同步完成"), T("密码库已同步。"), InfoBarSeverity.Success)
-                : new NoticeShown(T("同步失败"), T("请确认密码库已解锁且网络可用。"), InfoBarSeverity.Error));
+                ? new NoticeShown(T("Sync complete"), T("Vault synchronized."), InfoBarSeverity.Success)
+                : new NoticeShown(T("Sync failed"), T("Make sure the vault is unlocked and the network is available."), InfoBarSeverity.Error));
             if (success)
             {
                 await LoadVaultAsync(dispatch);
@@ -142,18 +142,18 @@ public static class AppCommands
 
     public static async Task LockAsync(Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, T("正在锁定...")));
+        dispatch(new BusyChanged(true, T("Locking...")));
         try
         {
             var success = await BitwardenApplicationService.Instance.LockAsync();
             if (success)
             {
                 dispatch(new Locked());
-                dispatch(new NoticeShown(T("已锁定"), T("密码库已锁定。"), InfoBarSeverity.Success));
+                dispatch(new NoticeShown(T("Locked"), T("Vault locked."), InfoBarSeverity.Success));
             }
             else
             {
-                dispatch(new NoticeShown(T("锁定失败"), T("Bitwarden CLI 未能锁定密码库。"), InfoBarSeverity.Error));
+                dispatch(new NoticeShown(T("Lock failed"), T("Bitwarden CLI could not lock the vault."), InfoBarSeverity.Error));
             }
         }
         finally
@@ -164,7 +164,7 @@ public static class AppCommands
 
     public static async Task SaveDraftAsync(VaultItemDraft draft, Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, draft.Id is null ? T("正在创建项目...") : T("正在保存项目...")));
+        dispatch(new BusyChanged(true, draft.Id is null ? T("Creating item...") : T("Saving item...")));
         try
         {
             var service = BitwardenApplicationService.Instance;
@@ -174,12 +174,12 @@ public static class AppCommands
 
             if (!success)
             {
-                dispatch(new NoticeShown(T("保存失败"), T("Bitwarden CLI 未能保存该项目。"), InfoBarSeverity.Error));
+                dispatch(new NoticeShown(T("Save failed"), T("Bitwarden CLI could not save the item."), InfoBarSeverity.Error));
                 return;
             }
 
             dispatch(new EditorClosed());
-            dispatch(new NoticeShown(T("已保存"), T("项目已保存。"), InfoBarSeverity.Success));
+            dispatch(new NoticeShown(T("Saved"), T("Item saved."), InfoBarSeverity.Success));
             await LoadVaultAsync(dispatch, draft.Id);
         }
         finally
@@ -192,11 +192,11 @@ public static class AppCommands
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            dispatch(new NoticeShown(existingFolder is null ? T("无法创建文件夹") : T("无法保存文件夹"), T("请输入文件夹名称。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(existingFolder is null ? T("Could not create folder") : T("Could not save folder"), T("Enter a folder name."), InfoBarSeverity.Warning));
             return;
         }
 
-        dispatch(new BusyChanged(true, existingFolder is null ? T("正在创建文件夹...") : T("正在保存文件夹...")));
+        dispatch(new BusyChanged(true, existingFolder is null ? T("Creating folder...") : T("Saving folder...")));
         try
         {
             var service = BitwardenApplicationService.Instance;
@@ -205,12 +205,12 @@ public static class AppCommands
                 : await service.EditFolderAsync(existingFolder.Id, name.Trim());
             if (folder is null)
             {
-                dispatch(new NoticeShown(existingFolder is null ? T("创建失败") : T("保存失败"), T("Bitwarden CLI 未能保存该文件夹。"), InfoBarSeverity.Error));
+                dispatch(new NoticeShown(existingFolder is null ? T("Creation failed") : T("Save failed"), T("Bitwarden CLI could not save the folder."), InfoBarSeverity.Error));
                 return;
             }
 
             dispatch(new FolderEditorClosed());
-            dispatch(new NoticeShown(existingFolder is null ? T("已创建") : T("已保存"), T("文件夹「{name}」已保存。", ("name", folder.Name)), InfoBarSeverity.Success));
+            dispatch(new NoticeShown(existingFolder is null ? T("Created") : T("Saved"), T("Folder “{name}” saved.", ("name", folder.Name)), InfoBarSeverity.Success));
             await LoadVaultAsync(dispatch);
         }
         finally
@@ -221,18 +221,18 @@ public static class AppCommands
 
     public static async Task DeleteFolderAsync(BitwardenFolder folder, Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, T("正在删除文件夹...")));
+        dispatch(new BusyChanged(true, T("Deleting folder...")));
         try
         {
             var success = await BitwardenApplicationService.Instance.DeleteFolderAsync(folder.Id);
             if (!success)
             {
-                dispatch(new NoticeShown(T("删除失败"), T("Bitwarden CLI 未能删除该文件夹。"), InfoBarSeverity.Error));
+                dispatch(new NoticeShown(T("Deletion failed"), T("Bitwarden CLI could not delete the folder."), InfoBarSeverity.Error));
                 return;
             }
 
             dispatch(new FolderEditorClosed());
-            dispatch(new NoticeShown(T("已删除"), T("文件夹「{name}」已删除。", ("name", folder.Name)), InfoBarSeverity.Success));
+            dispatch(new NoticeShown(T("Deleted"), T("Folder “{name}” deleted.", ("name", folder.Name)), InfoBarSeverity.Success));
             await LoadVaultAsync(dispatch);
         }
         finally
@@ -243,18 +243,18 @@ public static class AppCommands
 
     public static async Task DeleteAsync(BitwardenItem item, bool permanent, Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, permanent ? T("正在永久删除...") : T("正在删除...")));
+        dispatch(new BusyChanged(true, permanent ? T("Deleting permanently...") : T("Deleting...")));
         try
         {
             var success = await BitwardenApplicationService.Instance.DeleteItemAsync(item.Id, permanent);
             dispatch(new DeleteCancelled());
             if (!success)
             {
-                dispatch(new NoticeShown(T("删除失败"), T("Bitwarden CLI 未能删除该项目。"), InfoBarSeverity.Error));
+                dispatch(new NoticeShown(T("Deletion failed"), T("Bitwarden CLI could not delete the item."), InfoBarSeverity.Error));
                 return;
             }
 
-            dispatch(new NoticeShown(T("已删除"), permanent ? T("项目已永久删除。") : T("项目已移入回收站。"), InfoBarSeverity.Success));
+            dispatch(new NoticeShown(T("Deleted"), permanent ? T("Item permanently deleted.") : T("Item moved to Trash."), InfoBarSeverity.Success));
             await LoadVaultAsync(dispatch);
         }
         finally
@@ -265,13 +265,13 @@ public static class AppCommands
 
     public static async Task RestoreAsync(BitwardenItem item, Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, T("正在恢复...")));
+        dispatch(new BusyChanged(true, T("Restoring...")));
         try
         {
             var success = await BitwardenApplicationService.Instance.RestoreItemAsync(item.Id);
             dispatch(success
-                ? new NoticeShown(T("已恢复"), T("项目已恢复。"), InfoBarSeverity.Success)
-                : new NoticeShown(T("恢复失败"), T("Bitwarden CLI 未能恢复该项目。"), InfoBarSeverity.Error));
+                ? new NoticeShown(T("Restored"), T("Item restored."), InfoBarSeverity.Success)
+                : new NoticeShown(T("Restore failed"), T("Bitwarden CLI could not restore the item."), InfoBarSeverity.Error));
             if (success)
             {
                 await LoadVaultAsync(dispatch, item.Id);
@@ -285,13 +285,13 @@ public static class AppCommands
 
     public static async Task ArchiveAsync(BitwardenItem item, Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, T("正在归档...")));
+        dispatch(new BusyChanged(true, T("Archiving...")));
         try
         {
             var success = await BitwardenApplicationService.Instance.ArchiveItemAsync(item.Id);
             dispatch(success
-                ? new NoticeShown(T("已归档"), T("项目已归档。"), InfoBarSeverity.Success)
-                : new NoticeShown(T("归档失败"), T("Bitwarden CLI 未能归档该项目。"), InfoBarSeverity.Error));
+                ? new NoticeShown(T("Archived"), T("Item archived."), InfoBarSeverity.Success)
+                : new NoticeShown(T("Archive failed"), T("Bitwarden CLI could not archive the item."), InfoBarSeverity.Error));
             if (success)
             {
                 await LoadVaultAsync(dispatch);
@@ -308,7 +308,7 @@ public static class AppCommands
         var totp = await BitwardenApplicationService.Instance.GetTotpAsync(item.Id);
         if (string.IsNullOrWhiteSpace(totp))
         {
-            dispatch(new NoticeShown(T("TOTP 不可用"), T("未能获取验证码。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("TOTP unavailable"), T("Could not retrieve the verification code."), InfoBarSeverity.Warning));
             return;
         }
 
@@ -318,24 +318,24 @@ public static class AppCommands
     public static async Task CopyAsync(string value, Action<AppAction> dispatch)
     {
         await ClipboardService.CopyToClipboardWithTimeoutAsync(value, SettingsManager.Instance.Current.ClipboardClearSeconds);
-        dispatch(new NoticeShown(T("已复制"), T("内容已复制到剪贴板，并会按设置自动清除。"), InfoBarSeverity.Success));
+        dispatch(new NoticeShown(T("Copied"), T("Copied to the clipboard. It will be cleared according to your settings."), InfoBarSeverity.Success));
     }
 
     public static async Task ImportVaultAsync(string format, string? filePath, string pastedContent, Action<AppAction> dispatch)
     {
         if (string.IsNullOrWhiteSpace(format))
         {
-            dispatch(new NoticeShown(T("无法导入"), T("请选择文件格式。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("Could not import"), T("Select a file format."), InfoBarSeverity.Warning));
             return;
         }
 
         if (string.IsNullOrWhiteSpace(filePath) && string.IsNullOrWhiteSpace(pastedContent))
         {
-            dispatch(new NoticeShown(T("无法导入"), T("请选择要导入的文件，或粘贴文件内容。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("Could not import"), T("Select a file to import or paste its contents."), InfoBarSeverity.Warning));
             return;
         }
 
-        dispatch(new BusyChanged(true, T("正在导入...")));
+        dispatch(new BusyChanged(true, T("Importing...")));
         try
         {
             var service = BitwardenApplicationService.Instance;
@@ -345,17 +345,17 @@ public static class AppCommands
 
             if (!success)
             {
-                dispatch(new NoticeShown(T("导入失败"), T("Bitwarden CLI 未能导入该文件。请确认格式和内容匹配。"), InfoBarSeverity.Error));
+                dispatch(new NoticeShown(T("Import failed"), T("Bitwarden CLI could not import the file. Make sure the format matches its contents."), InfoBarSeverity.Error));
                 return;
             }
 
             dispatch(new ImportExportVisibilityChanged(null));
-            dispatch(new NoticeShown(T("导入完成"), T("密码库数据已导入。"), InfoBarSeverity.Success));
+            dispatch(new NoticeShown(T("Import complete"), T("Vault data was imported."), InfoBarSeverity.Success));
             await LoadVaultAsync(dispatch);
         }
         catch
         {
-            dispatch(new NoticeShown(T("导入失败"), T("导入参数无效，或 Bitwarden CLI 未能读取该文件。"), InfoBarSeverity.Error));
+            dispatch(new NoticeShown(T("Import failed"), T("The import options are invalid, or Bitwarden CLI could not read the file."), InfoBarSeverity.Error));
         }
         finally
         {
@@ -367,26 +367,26 @@ public static class AppCommands
     {
         if (string.IsNullOrWhiteSpace(outputPath))
         {
-            dispatch(new NoticeShown(T("无法导出"), T("请选择导出文件保存位置。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("Could not export"), T("Choose where to save the exported file."), InfoBarSeverity.Warning));
             return;
         }
 
-        dispatch(new BusyChanged(true, T("正在导出...")));
+        dispatch(new BusyChanged(true, T("Exporting...")));
         try
         {
             var success = await BitwardenApplicationService.Instance.ExportVaultAsync(format, outputPath);
             if (!success)
             {
-                dispatch(new NoticeShown(T("导出失败"), T("Bitwarden CLI 未能导出密码库。"), InfoBarSeverity.Error));
+                dispatch(new NoticeShown(T("Export failed"), T("Bitwarden CLI could not export the vault."), InfoBarSeverity.Error));
                 return;
             }
 
             dispatch(new ImportExportVisibilityChanged(null));
-            dispatch(new NoticeShown(T("导出完成"), T("密码库已导出到 {path}", ("path", outputPath)), InfoBarSeverity.Success));
+            dispatch(new NoticeShown(T("Export complete"), T("Vault exported to {path}", ("path", outputPath)), InfoBarSeverity.Success));
         }
         catch
         {
-            dispatch(new NoticeShown(T("导出失败"), T("导出路径无效，或 Bitwarden CLI 未能写入该文件。"), InfoBarSeverity.Error));
+            dispatch(new NoticeShown(T("Export failed"), T("The export path is invalid, or Bitwarden CLI could not write the file."), InfoBarSeverity.Error));
         }
         finally
         {
@@ -398,14 +398,14 @@ public static class AppCommands
     {
         if (string.IsNullOrWhiteSpace(uriText))
         {
-            dispatch(new NoticeShown(T("无法打开网站"), T("该项目没有配置网站地址。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("Could not open website"), T("This item does not have a website URL."), InfoBarSeverity.Warning));
             return;
         }
 
         var normalized = uriText.Contains("://", StringComparison.Ordinal) ? uriText : $"https://{uriText}";
         if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri) || !await Launcher.LaunchUriAsync(uri))
         {
-            dispatch(new NoticeShown(T("无法打开网站"), T("系统未能打开该项目的网站地址。"), InfoBarSeverity.Error));
+            dispatch(new NoticeShown(T("Could not open website"), T("Windows could not open the website URL for this item."), InfoBarSeverity.Error));
         }
     }
 
@@ -432,14 +432,14 @@ public static class AppCommands
 
     public static async Task ToggleFavoriteAsync(BitwardenItem item, Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, item.Favorite ? T("正在取消收藏...") : T("正在收藏...")));
+        dispatch(new BusyChanged(true, item.Favorite ? T("Removing from favorites...") : T("Adding to favorites...")));
         try
         {
             var update = new JsonObject { ["favorite"] = !item.Favorite };
             var success = await BitwardenApplicationService.Instance.EditItemAsync(item.Id, update);
             dispatch(success
-                ? new NoticeShown(item.Favorite ? T("已取消收藏") : T("已收藏"), item.Name, InfoBarSeverity.Success)
-                : new NoticeShown(T("操作失败"), T("Bitwarden CLI 未能更新收藏状态。"), InfoBarSeverity.Error));
+                ? new NoticeShown(item.Favorite ? T("Removed from favorites") : T("Added to favorites"), item.Name, InfoBarSeverity.Success)
+                : new NoticeShown(T("Operation failed"), T("Bitwarden CLI could not update the favorite status."), InfoBarSeverity.Error));
             if (success)
             {
                 await LoadVaultAsync(dispatch, item.Id);
@@ -453,13 +453,13 @@ public static class AppCommands
 
     public static async Task CloneItemAsync(BitwardenItem item, Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, T("正在克隆项目...")));
+        dispatch(new BusyChanged(true, T("Cloning item...")));
         try
         {
-            var success = await BitwardenApplicationService.Instance.CloneItemAsync(item.Id, T("{name} 副本", ("name", item.Name)));
+            var success = await BitwardenApplicationService.Instance.CloneItemAsync(item.Id, T("{name} copy", ("name", item.Name)));
             dispatch(success
-                ? new NoticeShown(T("已克隆"), T("已创建「{name} 副本」。", ("name", item.Name)), InfoBarSeverity.Success)
-                : new NoticeShown(T("克隆失败"), T("Bitwarden CLI 未能克隆该项目。"), InfoBarSeverity.Error));
+                ? new NoticeShown(T("Cloned"), T("Created “{name} copy”.", ("name", item.Name)), InfoBarSeverity.Success)
+                : new NoticeShown(T("Clone failed"), T("Bitwarden CLI could not clone the item."), InfoBarSeverity.Error));
             if (success)
             {
                 await LoadVaultAsync(dispatch);
@@ -476,7 +476,7 @@ public static class AppCommands
         await SettingsManager.Instance.SaveAsync(settings);
         BitwardenApplicationService.Instance.Reconfigure(settings);
         dispatch(new SettingsSaved(settings));
-        dispatch(new NoticeShown(T("设置已保存"), T("新设置已生效。"), InfoBarSeverity.Success));
+        dispatch(new NoticeShown(T("Settings saved"), T("The new settings are now active."), InfoBarSeverity.Success));
     }
 
     public static async Task SwitchAccountAsync(Guid accountId, Action<AppAction> dispatch)
@@ -500,7 +500,7 @@ public static class AppCommands
     {
         if (string.IsNullOrWhiteSpace(displayName))
         {
-            dispatch(new NoticeShown(T("无法添加账号"), T("请输入账号名称。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("Could not add account"), T("Enter an account name."), InfoBarSeverity.Warning));
             return;
         }
 
@@ -526,7 +526,7 @@ public static class AppCommands
         var current = SettingsManager.Instance.Current;
         if (current.Accounts.Count <= 1)
         {
-            dispatch(new NoticeShown(T("无法删除账号"), T("至少需要保留一个账号。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("Could not delete account"), T("At least one account is required."), InfoBarSeverity.Warning));
             return;
         }
 
@@ -544,15 +544,15 @@ public static class AppCommands
     {
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
-            dispatch(new NoticeShown(T("无法登录"), T("请输入邮箱和主密码。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("Could not sign in"), T("Enter your email and master password."), InfoBarSeverity.Warning));
             return;
         }
 
-        dispatch(new BusyChanged(true, T("正在登录...")));
+        dispatch(new BusyChanged(true, T("Signing in...")));
         try
         {
             var result = await BitwardenApplicationService.Instance.LoginWithPasswordAsync(email, password);
-            dispatch(new NoticeShown(result.Success ? T("登录成功") : T("登录失败"), result.Message, result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
+            dispatch(new NoticeShown(result.Success ? T("Signed in") : T("Sign-in failed"), result.Message, result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
             if (result.Success) await InitializeAsync(dispatch);
         }
         finally { dispatch(new BusyChanged(false)); }
@@ -562,15 +562,15 @@ public static class AppCommands
     {
         if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
         {
-            dispatch(new NoticeShown(T("无法登录"), T("请输入 Client ID 和 Client Secret。"), InfoBarSeverity.Warning));
+            dispatch(new NoticeShown(T("Could not sign in"), T("Enter the Client ID and Client Secret."), InfoBarSeverity.Warning));
             return;
         }
 
-        dispatch(new BusyChanged(true, T("正在使用 API Key 登录...")));
+        dispatch(new BusyChanged(true, T("Signing in with API key...")));
         try
         {
             var result = await BitwardenApplicationService.Instance.LoginWithApiKeyAsync(clientId, clientSecret);
-            dispatch(new NoticeShown(result.Success ? T("登录成功") : T("登录失败"), result.Message, result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
+            dispatch(new NoticeShown(result.Success ? T("Signed in") : T("Sign-in failed"), result.Message, result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
             if (result.Success) await InitializeAsync(dispatch);
         }
         finally { dispatch(new BusyChanged(false)); }
@@ -578,11 +578,11 @@ public static class AppCommands
 
     public static async Task LoginWithSsoAsync(Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, T("正在打开 SSO 登录...")));
+        dispatch(new BusyChanged(true, T("Opening SSO sign-in...")));
         try
         {
             var result = await BitwardenApplicationService.Instance.LoginWithSsoAsync();
-            dispatch(new NoticeShown(result.Success ? T("登录成功") : T("登录失败"), result.Message, result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
+            dispatch(new NoticeShown(result.Success ? T("Signed in") : T("Sign-in failed"), result.Message, result.Success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
             if (result.Success) await InitializeAsync(dispatch);
         }
         finally { dispatch(new BusyChanged(false)); }
@@ -590,11 +590,11 @@ public static class AppCommands
 
     public static async Task LogoutActiveAccountAsync(Action<AppAction> dispatch)
     {
-        dispatch(new BusyChanged(true, T("正在退出账号...")));
+        dispatch(new BusyChanged(true, T("Signing out...")));
         try
         {
             var success = await BitwardenApplicationService.Instance.LogoutAsync();
-            dispatch(new NoticeShown(success ? T("已退出账号") : T("退出失败"), success ? T("当前账号的 CLI 会话已清除。") : T("Bitwarden CLI 未能退出当前账号。"), success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
+            dispatch(new NoticeShown(success ? T("Signed out") : T("Sign-out failed"), success ? T("The CLI session for the current account has been cleared.") : T("Bitwarden CLI could not sign out of the current account."), success ? InfoBarSeverity.Success : InfoBarSeverity.Error));
             if (success)
             {
                 dispatch(new Locked());

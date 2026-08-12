@@ -33,7 +33,7 @@
         <Nullable>enable</Nullable>
         <!-- Core and optional sibling packages must stay on the same preview version. -->
         <MicrosoftUIReactorVersion>0.1.0-preview.13</MicrosoftUIReactorVersion>
-        <ReactorLocDefaultLocale>zh-CN</ReactorLocDefaultLocale>
+        <ReactorLocDefaultLocale>en-US</ReactorLocDefaultLocale>
         <ReactorLocStringsPath>Strings\</ReactorLocStringsPath>
         <!--
             Auto-resolve RuntimeIdentifier from the host SDK when the caller hasn't pinned

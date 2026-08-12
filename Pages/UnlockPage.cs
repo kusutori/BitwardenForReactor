@@ -30,15 +30,15 @@ public sealed class UnlockPage : Component<UnlockPageProps>
         var state = Props.State;
         var status = state.Status;
         var title = status is null
-            ? T("连接 Bitwarden CLI")
+            ? T("Connect to Bitwarden CLI")
             : !status.IsLoggedIn
-                ? T("需要先登录")
-                : T("密码库已锁定");
+                ? T("Sign-in required")
+                : T("Vault locked");
         Element? statusBanner = status is null
-            ? InfoBar(T("未检测到 Bitwarden CLI"), T("请安装 Bitwarden CLI，或在设置中配置 bw.exe 路径。"))
+            ? InfoBar(T("Bitwarden CLI was not detected"), T("Install Bitwarden CLI or configure the path to bw.exe in Settings."))
                 .Severity(InfoBarSeverity.Error)
             : !status.IsLoggedIn
-                ? InfoBar(T("尚未登录"), T("请在此应用登录当前账号。凭据只传给本次 CLI 进程，不会保存到设置。"))
+                ? InfoBar(T("Not signed in"), T("Sign in to the current account in this app. Credentials are passed only to this CLI process and are not saved in settings."))
                     .Severity(InfoBarSeverity.Warning)
                 : null;
 
@@ -53,55 +53,55 @@ public sealed class UnlockPage : Component<UnlockPageProps>
                                     .Background(Theme.SubtleFill)
                                     .HorizontalAlignment(HorizontalAlignment.Center),
                                 Heading(title).HorizontalAlignment(HorizontalAlignment.Center),
-                                TextBlock(status?.UserEmail ?? T("Bitwarden 密码库"))
+                                TextBlock(status?.UserEmail ?? T("Bitwarden vault"))
                                     .Foreground(Theme.SecondaryText)
                                     .HorizontalAlignment(HorizontalAlignment.Center)),
                             statusBanner,
                             status?.IsLoggedIn == false
                                 ? VStack(12,
-                                    ComboBox([T("邮箱和主密码"), "API Key", "SSO"], loginMode, setLoginMode)
+                                    ComboBox([T("Email and master password"), "API Key", "SSO"], loginMode, setLoginMode)
                                         .Width(360)
-                                        .Header(T("登录方式"))
-                                        .AutomationName(T("登录方式")),
+                                        .Header(T("Sign-in method"))
+                                        .AutomationName(T("Sign-in method")),
                                     loginMode == 0
                                         ? VStack(10,
-                                            TextBox(email, setEmail, header: T("邮箱"))
+                                            TextBox(email, setEmail, header: T("Email"))
                                                 .Width(360)
-                                                .AutomationName(T("登录邮箱")),
-                                            PasswordBox(Props.MasterPassword, Props.SetMasterPassword, T("输入主密码"))
-                                                .Header(T("主密码"))
+                                                .AutomationName(T("Sign-in email")),
+                                            PasswordBox(Props.MasterPassword, Props.SetMasterPassword, T("Enter master password"))
+                                                .Header(T("Master password"))
                                                 .Width(360)
-                                                .AutomationName(T("登录主密码")),
-                                            Button(T("登录"), () => _ = AppCommands.LoginWithPasswordAsync(email, Props.MasterPassword, Props.Dispatch))
+                                                .AutomationName(T("Sign-in master password")),
+                                            Button(T("Logins"), () => _ = AppCommands.LoginWithPasswordAsync(email, Props.MasterPassword, Props.Dispatch))
                                                 .AccentButton()
                                                 .Width(360)
-                                                .AutomationName(T("登录"))
+                                                .AutomationName(T("Logins"))
                                                 .IsEnabled(!state.IsBusy && !string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(Props.MasterPassword)))
                                         : loginMode == 1
                                             ? VStack(10,
                                             TextBox(clientId, setClientId, header: "Client ID")
                                                 .Width(360)
                                                 .AutomationName("API Client ID"),
-                                            PasswordBox(clientSecret, setClientSecret, T("输入 Client Secret"))
+                                            PasswordBox(clientSecret, setClientSecret, T("Enter Client Secret"))
                                                 .Header("Client Secret")
                                                 .Width(360)
                                                 .AutomationName("API Client Secret"),
-                                            Button(T("使用 API Key 登录"), () => _ = AppCommands.LoginWithApiKeyAsync(clientId, clientSecret, Props.Dispatch))
+                                            Button(T("Sign in with API key"), () => _ = AppCommands.LoginWithApiKeyAsync(clientId, clientSecret, Props.Dispatch))
                                                 .AccentButton()
                                                 .Width(360)
-                                                .AutomationName(T("使用 API Key 登录"))
+                                                .AutomationName(T("Sign in with API key"))
                                                 .IsEnabled(!state.IsBusy && !string.IsNullOrWhiteSpace(clientId) && !string.IsNullOrWhiteSpace(clientSecret)))
                                             : VStack(10,
-                                                TextBlock(T("将打开浏览器完成单点登录。"))
+                                                TextBlock(T("Your browser will open to complete single sign-on."))
                                                     .Foreground(Theme.SecondaryText),
-                                                Button(T("使用 SSO 登录"), () => _ = AppCommands.LoginWithSsoAsync(Props.Dispatch))
+                                                Button(T("Sign in with SSO"), () => _ = AppCommands.LoginWithSsoAsync(Props.Dispatch))
                                                     .AccentButton()
                                                     .Width(360)
-                                                    .AutomationName(T("使用 SSO 登录"))
+                                                    .AutomationName(T("Sign in with SSO"))
                                                     .IsEnabled(!state.IsBusy)))
                                 : VStack(12,
-                                PasswordBox(Props.MasterPassword, Props.SetMasterPassword, T("输入主密码"))
-                                    .Header(T("主密码"))
+                                PasswordBox(Props.MasterPassword, Props.SetMasterPassword, T("Enter master password"))
+                                    .Header(T("Master password"))
                                     .Width(360)
                                     .HorizontalAlignment(HorizontalAlignment.Center)
                                     .OnKeyDown((_, e) =>
@@ -112,29 +112,29 @@ public sealed class UnlockPage : Component<UnlockPageProps>
                                         }
                                     })
                                     .IsEnabled(!state.IsBusy)
-                                    .AutomationName(T("主密码")),
-                                Button(T("解锁密码库"), () => _ = AppCommands.UnlockAsync(Props.MasterPassword, Props.SetMasterPassword, Props.Dispatch))
+                                    .AutomationName(T("Master password")),
+                                Button(T("Unlock vault"), () => _ = AppCommands.UnlockAsync(Props.MasterPassword, Props.SetMasterPassword, Props.Dispatch))
                                     .AccentButton()
                                     .Width(360)
                                     .Height(40)
                                     .HorizontalAlignment(HorizontalAlignment.Center)
                                     .IsEnabled(!state.IsBusy && !string.IsNullOrWhiteSpace(Props.MasterPassword))
-                                    .AutomationName(T("解锁密码库"))),
+                                    .AutomationName(T("Unlock vault"))),
                             Border(VStack())
                                 .Height(1)
                                 .Background(Theme.DividerStroke),
                             Grid(
                                 columns: [GridSize.Auto, GridSize.Auto],
                                 rows: [GridSize.Auto],
-                                TextBlock(T("CLI 状态发生变化？"))
+                                TextBlock(T("Did the CLI status change?"))
                                     .Foreground(Theme.SecondaryText)
                                     .VerticalAlignment(VerticalAlignment.Center)
                                     .Grid(column: 0),
-                                HyperlinkButton(T("重新检测"), onClick: () => _ = AppCommands.InitializeAsync(Props.Dispatch))
+                                HyperlinkButton(T("Check again"), onClick: () => _ = AppCommands.InitializeAsync(Props.Dispatch))
                                     .Padding(0)
                                     .Margin(left: 14)
                                     .VerticalAlignment(VerticalAlignment.Center)
-                                    .AutomationName(T("重新检测状态"))
+                                    .AutomationName(T("Check status again"))
                                     .Grid(column: 1))
                             .HorizontalAlignment(HorizontalAlignment.Center)))
                     .Padding(28)

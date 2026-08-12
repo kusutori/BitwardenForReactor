@@ -24,7 +24,7 @@ public sealed class BusyIndicator : Component<AppState>
         Border(
                 HStack(10,
                     ProgressRing().IsActive().Width(22).Height(22),
-                    TextBlock(string.IsNullOrWhiteSpace(Props.BusyText) ? T("处理中...") : Props.BusyText)
+                    TextBlock(string.IsNullOrWhiteSpace(Props.BusyText) ? T("Working...") : Props.BusyText)
                         .Foreground(Theme.SecondaryText)))
             .Padding(12)
             .Background(Theme.SubtleFill);

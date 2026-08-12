@@ -27,18 +27,18 @@ public sealed class AccountManagerDialog : Component<AccountManagerDialogProps>
                     Grid(columns: [GridSize.Star(), GridSize.Auto], rows: [GridSize.Auto],
                         VStack(2,
                             TextBlock(account.DisplayName).SemiBold(),
-                            TextBlock(account.Email ?? account.ServerUrl ?? T("尚未登录"))
+                            TextBlock(account.Email ?? account.ServerUrl ?? T("Not signed in"))
                                 .Foreground(Theme.SecondaryText)
                                 .TextTrimming(TextTrimming.CharacterEllipsis))
                         .Grid(column: 0),
                         HStack(8,
                             account.Id == settings.ActiveAccountId
-                                ? Button(T("退出"), () => _ = AppCommands.LogoutActiveAccountAsync(Props.Dispatch))
-                                    .AutomationName(T("退出账号 {name}", ("name", account.DisplayName)))
+                                ? Button(T("Sign out"), () => _ = AppCommands.LogoutActiveAccountAsync(Props.Dispatch))
+                                    .AutomationName(T("Sign out of {name}", ("name", account.DisplayName)))
                                 : null,
-                            Button(T("删除"), () => _ = AppCommands.RemoveAccountAsync(account.Id, Props.Dispatch))
+                            Button(T("Delete"), () => _ = AppCommands.RemoveAccountAsync(account.Id, Props.Dispatch))
                                 .IsEnabled(settings.Accounts.Count > 1)
-                                .AutomationName(T("删除账号 {name}", ("name", account.DisplayName))))
+                                .AutomationName(T("Delete account {name}", ("name", account.DisplayName))))
                             .Grid(column: 1)))
                 .Padding(12)
                 .CornerRadius(6)
@@ -48,26 +48,26 @@ public sealed class AccountManagerDialog : Component<AccountManagerDialogProps>
             .ToArray();
 
         return ContentDialog(
-            T("管理账号"),
+            T("Manage accounts"),
             ScrollView(
                 VStack(16,
                     VStack(8,
-                        SubHeading(T("现有账号")),
+                        SubHeading(T("Existing accounts")),
                         VStack(8, accountRows)),
                     VStack(10,
-                        SubHeading(T("添加账号")),
-                        TextBox(name, setName, header: T("账号名称"))
-                            .AutomationName(T("新账号名称")),
-                        TextBox(server, setServer, placeholderText: T("留空使用 Bitwarden 云端"), header: T("服务器地址"))
-                            .AutomationName(T("新账号服务器地址")),
-                        ComboBox([T("主密码"), "API Key", "SSO"], mode, setMode)
-                            .Header(T("认证方式"))
-                            .AutomationName(T("新账号认证方式")))))
+                        SubHeading(T("Add account")),
+                        TextBox(name, setName, header: T("Account name"))
+                            .AutomationName(T("New account name")),
+                        TextBox(server, setServer, placeholderText: T("Leave blank to use Bitwarden cloud"), header: T("Server URL"))
+                            .AutomationName(T("New account server URL")),
+                        ComboBox([T("Master password"), "API Key", "SSO"], mode, setMode)
+                            .Header(T("Authentication method"))
+                            .AutomationName(T("New account authentication method")))))
             .Width(520),
-            T("添加账号")) with
+            T("Add account")) with
         {
             IsOpen = true,
-            SecondaryButtonText = T("关闭"),
+            SecondaryButtonText = T("Close"),
             IsPrimaryButtonEnabled = !string.IsNullOrWhiteSpace(name),
             DefaultButton = ContentDialogButton.Primary,
             OnClosed = result =>

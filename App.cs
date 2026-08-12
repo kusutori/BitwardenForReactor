@@ -31,7 +31,7 @@ public sealed class App : Component
                     new LocalizedAppProps(state, dispatch, masterPassword, setMasterPassword))
                 .WithKey(locale),
             resourceProvider: AppResourceProvider.Instance,
-            defaultLocale: AppLocales.SimplifiedChinese);
+            defaultLocale: AppLocales.English);
     }
 }
 

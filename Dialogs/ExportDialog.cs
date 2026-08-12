@@ -57,45 +57,45 @@ public sealed class ExportDialog : Component<ExportDialogProps>
         var selectedFormat = FormatValues[Math.Clamp(formatIndex, 0, FormatValues.Length - 1)];
         var canExport = !Props.State.IsBusy && !string.IsNullOrWhiteSpace(outputPath);
         var body = VStack(18,
-            TextBlock(T("导出设置")).SemiBold(),
+            TextBlock(T("Export settings")).SemiBold(),
             Card(VStack(14,
                 ComboBox(FormatNames, formatIndex, index =>
                     {
                         setFormatIndex(index);
                         setOutputPath(string.Empty);
                     })
-                    .Header(T("导出文件类型"))
-                    .AutomationName(T("导出文件类型")),
+                    .Header(T("Export file type"))
+                    .AutomationName(T("Export file type")),
                 VStack(6,
-                    TextBlock(T("导出文件")).SemiBold(),
+                    TextBlock(T("Export file")).SemiBold(),
                     Grid(
                         columns: [GridSize.Star(), GridSize.Auto],
                         rows: [GridSize.Auto],
-                        TextBox(outputPath, setOutputPath, placeholderText: T("未选择文件"))
-                            .AutomationName(T("导出文件路径"))
+                        TextBox(outputPath, setOutputPath, placeholderText: T("No file selected"))
+                            .AutomationName(T("Export file path"))
                             .Grid(column: 0),
-                        Button(T("选择位置"), PickOutputPath)
+                        Button(T("Choose location"), PickOutputPath)
                             .MinWidth(96)
-                            .AutomationName(T("选择导出位置"))
+                            .AutomationName(T("Choose export location"))
                             .Grid(column: 1)
                             .Margin(left: 8))),
-                TextBlock(T("导出的文件可能包含敏感数据，请保存到可信位置。"))
+                TextBlock(T("The exported file may contain sensitive data. Save it in a trusted location."))
                     .Foreground(Theme.SecondaryText)
                     .TextWrapping())))
             .Padding(24);
 
         return DialogShell(
-            T("导出"),
+            T("Export"),
             body,
             HStack(12,
-                Button(T("导出"), () => _ = AppCommands.ExportVaultAsync(selectedFormat, outputPath, Props.Dispatch))
+                Button(T("Export"), () => _ = AppCommands.ExportVaultAsync(selectedFormat, outputPath, Props.Dispatch))
                     .AccentButton()
                     .MinWidth(96)
                     .IsEnabled(canExport)
-                    .AutomationName(T("导出密码库")),
-                Button(T("取消"), () => Props.Dispatch(new ImportExportVisibilityChanged(null)))
+                    .AutomationName(T("Export vault")),
+                Button(T("Cancel"), () => Props.Dispatch(new ImportExportVisibilityChanged(null)))
                     .MinWidth(96)
-                    .AutomationName(T("取消导出"))));
+                    .AutomationName(T("Cancel export"))));
     }
 
     private static string ExtensionFor(VaultExportFormat format) => format switch
@@ -136,7 +136,7 @@ public sealed class ExportDialog : Component<ExportDialogProps>
                     .HorizontalAlignment(HorizontalAlignment.Center)
                     .VerticalAlignment(VerticalAlignment.Center))
             .Background(Theme.SmokeFill)
-            .AutomationName(T("{title}遮罩", ("title", title)));
+            .AutomationName(T("{title} overlay", ("title", title)));
 
     private static Element Card(Element child) =>
         Border(child)

@@ -30,9 +30,9 @@ public sealed class VaultListPane : Component<VaultPaneProps>
                         TextBlock(VaultDisplay.FilterDescription(state)).Foreground(Theme.SecondaryText))
                     .Margin(left: 12, top: 12, right: 12, bottom: 0),
                     AutoSuggestBox(state.SearchQuery, query => Props.Dispatch(new SearchChanged(query)))
-                        .PlaceholderText(T("搜索密码库..."))
+                        .PlaceholderText(T("Search vault..."))
                         .QueryIcon(SymbolIcon("Find"))
-                        .AutomationName(T("搜索密码库"))
+                        .AutomationName(T("Search vault"))
                         .Margin(12),
                     items.Count == 0
                         ? RenderEmptyList()
@@ -51,9 +51,9 @@ public sealed class VaultListPane : Component<VaultPaneProps>
                             .Flex(grow: 1, basis: 0),
                     Border(
                             HStack(8,
-                                TextBlock(T("{count} 个项目", ("count", items.Count))).Foreground(Theme.SecondaryText),
+                                TextBlock(T("{count, plural, one {# item} other {# items}}", ("count", items.Count))).Foreground(Theme.SecondaryText),
                                 !string.IsNullOrWhiteSpace(state.SearchQuery)
-                                    ? TextBlock(T("搜索：{query}", ("query", state.SearchQuery)))
+                                    ? TextBlock(T("Search: {query}", ("query", state.SearchQuery)))
                                         .Foreground(Theme.SecondaryText)
                                         .TextTrimming(TextTrimming.CharacterEllipsis)
                                     : null))

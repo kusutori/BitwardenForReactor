@@ -54,12 +54,12 @@ public sealed class VaultListItem : Component<VaultListItemProps>
                             .Foreground(Theme.SecondaryText)
                             .TextTrimming(TextTrimming.CharacterEllipsis),
                         Props.IsTrashView && item.DeletedDate is not null
-                            ? TextBlock(T("已删除 · {date}", ("date", item.DeletedDate.Value.ToString("yyyy-MM-dd"))))
+                            ? TextBlock(T("Deleted · {date}", ("date", item.DeletedDate.Value.ToString("yyyy-MM-dd"))))
                                 .Foreground(Theme.SecondaryText)
                                 .FontSize(11)
                             : null,
                         Props.IsArchiveView && item.ArchivedDate is not null
-                            ? TextBlock(T("已归档 · {date}", ("date", item.ArchivedDate.Value.ToString("yyyy-MM-dd"))))
+                            ? TextBlock(T("Archived · {date}", ("date", item.ArchivedDate.Value.ToString("yyyy-MM-dd"))))
                                 .Foreground(Theme.SecondaryText)
                                 .FontSize(11)
                             : null)
@@ -78,18 +78,18 @@ public sealed class VaultListItem : Component<VaultListItemProps>
     }
 
     private Element BuildOpenButton(BitwardenItem item) =>
-        CompactButton("\uE8A7", T("前往项目网站"),
+        CompactButton("\uE8A7", T("Open item website"),
                 () => _ = AppCommands.OpenUriAsync(VaultDisplay.PrimaryUri(item), Props.Dispatch))
             .IsEnabled(!string.IsNullOrWhiteSpace(VaultDisplay.PrimaryUri(item)))
-            .ToolTip(T("前往网站"));
+            .ToolTip(T("Open website"));
 
     private Element BuildCopyMenu(BitwardenItem item)
     {
         var actions = CopyActions(item);
         var canCopy = actions.Any(action => !string.IsNullOrWhiteSpace(action.Value));
-        var anchor = CompactButton("\uE8C8", T("打开复制菜单"))
+        var anchor = CompactButton("\uE8C8", T("Open copy menu"))
             .IsEnabled(canCopy)
-            .ToolTip(T("复制"));
+            .ToolTip(T("Copy"));
 
         return MenuFlyout(
             anchor,
@@ -103,8 +103,8 @@ public sealed class VaultListItem : Component<VaultListItemProps>
 
     private Element BuildMoreMenu(BitwardenItem item)
     {
-        return CompactButton("\uE712", T("打开更多操作菜单"))
-            .ToolTip(T("更多操作"))
+        return CompactButton("\uE712", T("Open more actions menu"))
+            .ToolTip(T("More actions"))
             .Set(button => button.Flyout = BuildMoreFlyout(item));
     }
 
@@ -113,23 +113,23 @@ public sealed class VaultListItem : Component<VaultListItemProps>
         var flyout = new WinUI.MenuFlyout();
         if (Props.IsTrashView)
         {
-            flyout.Items.Add(NativeMenuItem(T("恢复"), "\uE7A7", () => _ = AppCommands.RestoreAsync(item, Props.Dispatch)));
+            flyout.Items.Add(NativeMenuItem(T("Restore"), "\uE7A7", () => _ = AppCommands.RestoreAsync(item, Props.Dispatch)));
             flyout.Items.Add(new WinUI.MenuFlyoutSeparator());
-            flyout.Items.Add(NativeMenuItem(T("永久删除"), "\uE74D", () => Props.Dispatch(new DeleteRequested(item, true)), critical: true));
+            flyout.Items.Add(NativeMenuItem(T("Delete permanently"), "\uE74D", () => Props.Dispatch(new DeleteRequested(item, true)), critical: true));
             return flyout;
         }
 
         AddPrimaryActions(flyout, item);
-        flyout.Items.Add(NativeMenuItem(item.Favorite ? T("取消收藏") : T("收藏"), "\uE735", () => _ = AppCommands.ToggleFavoriteAsync(item, Props.Dispatch)));
-        flyout.Items.Add(NativeMenuItem(T("编辑"), "\uE70F", () => Props.Dispatch(new EditorOpened(VaultItemDraft.FromItem(item)))));
-        flyout.Items.Add(NativeMenuItem(T("附件"), "\uE723", null, enabled: false));
-        flyout.Items.Add(NativeMenuItem(T("克隆"), "\uE8C8", () => _ = AppCommands.CloneItemAsync(item, Props.Dispatch)));
+        flyout.Items.Add(NativeMenuItem(item.Favorite ? T("Remove from favorites") : T("Favorite"), "\uE735", () => _ = AppCommands.ToggleFavoriteAsync(item, Props.Dispatch)));
+        flyout.Items.Add(NativeMenuItem(T("Edit"), "\uE70F", () => Props.Dispatch(new EditorOpened(VaultItemDraft.FromItem(item)))));
+        flyout.Items.Add(NativeMenuItem(T("Attachments"), "\uE723", null, enabled: false));
+        flyout.Items.Add(NativeMenuItem(T("Clone"), "\uE8C8", () => _ = AppCommands.CloneItemAsync(item, Props.Dispatch)));
         if (!Props.IsArchiveView)
         {
-            flyout.Items.Add(NativeMenuItem(T("归档"), "\uE7B8", () => _ = AppCommands.ArchiveAsync(item, Props.Dispatch)));
+            flyout.Items.Add(NativeMenuItem(T("Archive"), "\uE7B8", () => _ = AppCommands.ArchiveAsync(item, Props.Dispatch)));
         }
         flyout.Items.Add(new WinUI.MenuFlyoutSeparator());
-        flyout.Items.Add(NativeMenuItem(T("删除"), "\uE74D", () => Props.Dispatch(new DeleteRequested(item, false)), critical: true));
+        flyout.Items.Add(NativeMenuItem(T("Delete"), "\uE74D", () => Props.Dispatch(new DeleteRequested(item, false)), critical: true));
         return flyout;
     }
 
@@ -138,7 +138,7 @@ public sealed class VaultListItem : Component<VaultListItemProps>
         var actions = CopyActions(item);
         if (item.Type == BitwardenItemType.Login)
         {
-            flyout.Items.Add(NativeMenuItem(T("前往"), "\uE8A7", () => _ = AppCommands.OpenUriAsync(VaultDisplay.PrimaryUri(item), Props.Dispatch), !string.IsNullOrWhiteSpace(VaultDisplay.PrimaryUri(item))));
+            flyout.Items.Add(NativeMenuItem(T("Go to"), "\uE8A7", () => _ = AppCommands.OpenUriAsync(VaultDisplay.PrimaryUri(item), Props.Dispatch), !string.IsNullOrWhiteSpace(VaultDisplay.PrimaryUri(item))));
         }
 
         foreach (var action in actions)
@@ -157,22 +157,22 @@ public sealed class VaultListItem : Component<VaultListItemProps>
         {
             BitwardenItemType.Login =>
             [
-                new CopyAction(T("复制用户名"), VaultDisplay.Username(item)),
-                new CopyAction(T("复制密码"), item.Login?.Password)
+                new CopyAction(T("Copy username"), VaultDisplay.Username(item)),
+                new CopyAction(T("Copy password"), item.Login?.Password)
             ],
             BitwardenItemType.Card =>
             [
-                new CopyAction(T("复制号码"), item.Card?.Number),
-                new CopyAction(T("复制安全码"), item.Card?.Code)
+                new CopyAction(T("Copy number"), item.Card?.Number),
+                new CopyAction(T("Copy security code"), item.Card?.Code)
             ],
             BitwardenItemType.Identity =>
             [
-                new CopyAction(T("复制用户名"), item.Identity?.Username),
-                new CopyAction(T("复制电子邮箱"), item.Identity?.Email)
+                new CopyAction(T("Copy username"), item.Identity?.Username),
+                new CopyAction(T("Copy email"), item.Identity?.Email)
             ],
             BitwardenItemType.SecureNote =>
             [
-                new CopyAction(T("复制备注"), item.Notes)
+                new CopyAction(T("Copy notes"), item.Notes)
             ],
             _ => []
         };
@@ -242,7 +242,7 @@ public sealed class VaultListItem : Component<VaultListItemProps>
             return item.Notes.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)[0];
         }
 
-        return T("无附加信息");
+        return T("No additional information");
     }
 
     private static string? TryGetHost(string uriText)

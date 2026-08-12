@@ -1,0 +1,1260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="+  Add website">
+    <value>+  添加网站</value>
+  </data>
+  <data name="Secure notes">
+    <value>安全笔记</value>
+  </data>
+  <data name="Secure notes only require a name and notes.">
+    <value>安全笔记只需要名称和备注内容。</value>
+  </data>
+  <data name="Include">
+    <value>包含</value>
+  </data>
+  <data name="Include numbers">
+    <value>包含数字</value>
+  </data>
+  <data name="Save">
+    <value>保存</value>
+  </data>
+  <data name="Save settings">
+    <value>保存设置</value>
+  </data>
+  <data name="Save failed">
+    <value>保存失败</value>
+  </data>
+  <data name="Save folder">
+    <value>保存文件夹</value>
+  </data>
+  <data name="Save item">
+    <value>保存项目</value>
+  </data>
+  <data name="Notes">
+    <value>备注</value>
+  </data>
+  <data name="Notes and options">
+    <value>备注与选项</value>
+  </data>
+  <data name="Note">
+    <value>笔记</value>
+  </data>
+  <data name="Avoid ambiguous characters">
+    <value>避免易混淆的字符</value>
+  </data>
+  <data name="Edit">
+    <value>编辑</value>
+  </data>
+  <data name="Edit folder">
+    <value>编辑文件夹</value>
+  </data>
+  <data name="Edit item">
+    <value>编辑项目</value>
+  </data>
+  <data name="Frequently used items marked as favorites">
+    <value>标记为收藏的常用项目</value>
+  </data>
+  <data name="Do not assign a folder">
+    <value>不指定文件夹</value>
+  </data>
+  <data name="Some data could not be loaded">
+    <value>部分数据加载失败</value>
+  </data>
+  <data name="Operation failed">
+    <value>操作失败</value>
+  </data>
+  <data name="Cardholder">
+    <value>持卡人</value>
+  </data>
+  <data name="Working...">
+    <value>处理中...</value>
+  </data>
+  <data name="Create">
+    <value>创建</value>
+  </data>
+  <data name="Creation failed">
+    <value>创建失败</value>
+  </data>
+  <data name="Creation date">
+    <value>创建时间</value>
+  </data>
+  <data name="Create folder">
+    <value>创建文件夹</value>
+  </data>
+  <data name="Open copy menu">
+    <value>打开复制菜单</value>
+  </data>
+  <data name="Open more actions menu">
+    <value>打开更多操作菜单</value>
+  </data>
+  <data name="Word separator">
+    <value>单词分隔符</value>
+  </data>
+  <data name="Number of words">
+    <value>单词个数</value>
+  </data>
+  <data name="Vault items in the current folder">
+    <value>当前文件夹中的密码库项目</value>
+  </data>
+  <data name="Current account">
+    <value>当前账号</value>
+  </data>
+  <data name="The CLI session for the current account has been cleared.">
+    <value>当前账号的 CLI 会话已清除。</value>
+  </data>
+  <data name="Current status">
+    <value>当前状态</value>
+  </data>
+  <data name="Export">
+    <value>导出</value>
+  </data>
+  <data name="The exported file may contain sensitive data. Save it in a trusted location.">
+    <value>导出的文件可能包含敏感数据，请保存到可信位置。</value>
+  </data>
+  <data name="The export path is invalid, or Bitwarden CLI could not write the file.">
+    <value>导出路径无效，或 Bitwarden CLI 未能写入该文件。</value>
+  </data>
+  <data name="Export vault">
+    <value>导出密码库</value>
+  </data>
+  <data name="Export settings">
+    <value>导出设置</value>
+  </data>
+  <data name="Export failed">
+    <value>导出失败</value>
+  </data>
+  <data name="Export complete">
+    <value>导出完成</value>
+  </data>
+  <data name="Export file">
+    <value>导出文件</value>
+  </data>
+  <data name="Export file type">
+    <value>导出文件类型</value>
+  </data>
+  <data name="Export file path">
+    <value>导出文件路径</value>
+  </data>
+  <data name="Import">
+    <value>导入</value>
+  </data>
+  <data name="The import options are invalid, or Bitwarden CLI could not read the file.">
+    <value>导入参数无效，或 Bitwarden CLI 未能读取该文件。</value>
+  </data>
+  <data name="Import vault">
+    <value>导入密码库</value>
+  </data>
+  <data name="Destination vault">
+    <value>导入目标密码库</value>
+  </data>
+  <data name="Destination folder">
+    <value>导入目标文件夹</value>
+  </data>
+  <data name="Import failed">
+    <value>导入失败</value>
+  </data>
+  <data name="Import complete">
+    <value>导入完成</value>
+  </data>
+  <data name="Import file format">
+    <value>导入文件格式</value>
+  </data>
+  <data name="Import file path">
+    <value>导入文件路径</value>
+  </data>
+  <data name="Import file contents">
+    <value>导入文件内容</value>
+  </data>
+  <data name="Address">
+    <value>地址</value>
+  </data>
+  <data name="Logins">
+    <value>登录</value>
+  </data>
+  <data name="Signed in">
+    <value>登录成功</value>
+  </data>
+  <data name="Sign-in method">
+    <value>登录方式</value>
+  </data>
+  <data name="Sign-in failed">
+    <value>登录失败</value>
+  </data>
+  <data name="Sign-in failed.">
+    <value>登录失败。</value>
+  </data>
+  <data name="Login information">
+    <value>登录信息</value>
+  </data>
+  <data name="Sign-in email">
+    <value>登录邮箱</value>
+  </data>
+  <data name="Sign-in master password">
+    <value>登录主密码</value>
+  </data>
+  <data name="Click to retrieve the one-time password">
+    <value>点击获取一次性验证码</value>
+  </data>
+  <data name="Phone">
+    <value>电话</value>
+  </data>
+  <data name="Discard changes">
+    <value>放弃更改</value>
+  </data>
+  <data name="Discard settings changes">
+    <value>放弃设置更改</value>
+  </data>
+  <data name="Server URL">
+    <value>服务器地址</value>
+  </data>
+  <data name="Server configuration failed.">
+    <value>服务器配置失败。</value>
+  </data>
+  <data name="Minimum special characters">
+    <value>符号最少个数</value>
+  </data>
+  <data name="Attachments">
+    <value>附件</value>
+  </data>
+  <data name="Copy">
+    <value>复制</value>
+  </data>
+  <data name="Copy security code">
+    <value>复制安全码</value>
+  </data>
+  <data name="Copy notes">
+    <value>复制备注</value>
+  </data>
+  <data name="Copy email">
+    <value>复制电子邮箱</value>
+  </data>
+  <data name="Copy number">
+    <value>复制号码</value>
+  </data>
+  <data name="Copy password">
+    <value>复制密码</value>
+  </data>
+  <data name="After a sensitive field is copied, the clipboard is cleared after the specified number of seconds. Use 0 to disable automatic clearing.">
+    <value>复制敏感字段后，应用会在指定秒数后清空剪贴板。0 表示不自动清除。</value>
+  </data>
+  <data name="Copy generated value">
+    <value>复制生成结果</value>
+  </data>
+  <data name="Copy username">
+    <value>复制用户名</value>
+  </data>
+  <data name="Copy TOTP">
+    <value>复制TOTP</value>
+  </data>
+  <data name="This item does not have a website URL.">
+    <value>该项目没有配置网站地址。</value>
+  </data>
+  <data name="Advanced">
+    <value>高级</value>
+  </data>
+  <data name="Use KEY1=VALUE1;KEY2=VALUE2 format. Do not store passwords, sessions, or API secrets here.">
+    <value>格式为 KEY1=VALUE1;KEY2=VALUE2。请勿在此保存密码、Session 或 API Secret。</value>
+  </data>
+  <data name="Use system setting">
+    <value>跟随系统</value>
+  </data>
+  <data name="More actions">
+    <value>更多操作</value>
+  </data>
+  <data name="Company">
+    <value>公司</value>
+  </data>
+  <data name="Close">
+    <value>关闭</value>
+  </data>
+  <data name="Manage accounts">
+    <value>管理账号</value>
+  </data>
+  <data name="Archive">
+    <value>归档</value>
+  </data>
+  <data name="Archive failed">
+    <value>归档失败</value>
+  </data>
+  <data name="Archive is empty">
+    <value>归档为空</value>
+  </data>
+  <data name="Archive item">
+    <value>归档项目</value>
+  </data>
+  <data name="No favorites yet">
+    <value>还没有收藏项目</value>
+  </data>
+  <data name="Passport">
+    <value>护照</value>
+  </data>
+  <data name="Try another keyword, or clear the search box to view all items.">
+    <value>换一个关键词，或清空搜索框后查看全部项目。</value>
+  </data>
+  <data name="Restore">
+    <value>恢复</value>
+  </data>
+  <data name="Restore failed">
+    <value>恢复失败</value>
+  </data>
+  <data name="Restore item">
+    <value>恢复项目</value>
+  </data>
+  <data name="Trash">
+    <value>回收站</value>
+  </data>
+  <data name="Trash is empty">
+    <value>回收站为空</value>
+  </data>
+  <data name="Or paste the contents of the file to import">
+    <value>或复制/粘贴要导入的文件内容</value>
+  </data>
+  <data name="Get">
+    <value>获取</value>
+  </data>
+  <data name="General">
+    <value>基础设置</value>
+  </data>
+  <data name="Basic information">
+    <value>基础信息</value>
+  </data>
+  <data name="Encrypted plain-text notes">
+    <value>加密保存的纯文本笔记</value>
+  </data>
+  <data name="Driver's license">
+    <value>驾照</value>
+  </data>
+  <data name="Clear clipboard automatically">
+    <value>剪贴板自动清除</value>
+  </data>
+  <data name="Clipboard clearing delay in seconds">
+    <value>剪贴板自动清除秒数</value>
+  </data>
+  <data name="Checking Bitwarden status...">
+    <value>检测 Bitwarden 状态...</value>
+  </data>
+  <data name="Check status">
+    <value>检测状态</value>
+  </data>
+  <data name="Your browser will open to complete single sign-on.">
+    <value>将打开浏览器完成单点登录。</value>
+  </data>
+  <data name="Unlock vault">
+    <value>解锁密码库</value>
+  </data>
+  <data name="Unlock failed">
+    <value>解锁失败</value>
+  </data>
+  <data name="Unlock failed.">
+    <value>解锁失败。</value>
+  </data>
+  <data name="Card number">
+    <value>卡号</value>
+  </data>
+  <data name="Cards">
+    <value>卡片</value>
+  </data>
+  <data name="Card information">
+    <value>卡片信息</value>
+  </data>
+  <data name="Select New item in the title bar to get started.">
+    <value>可以点击标题栏的新建项目开始添加。</value>
+  </data>
+  <data name="Clone">
+    <value>克隆</value>
+  </data>
+  <data name="Clone failed">
+    <value>克隆失败</value>
+  </data>
+  <data name="Type">
+    <value>类型</value>
+  </data>
+  <data name="Connect to Bitwarden CLI">
+    <value>连接 Bitwarden CLI</value>
+  </data>
+  <data name="Contacts, addresses, and identity information">
+    <value>联系人、地址和身份信息</value>
+  </data>
+  <data name="Browse every item in the current vault">
+    <value>浏览当前密码库中的全部项目</value>
+  </data>
+  <data name="Leave blank to use Bitwarden cloud">
+    <value>留空使用 Bitwarden 云端</value>
+  </data>
+  <data name="No secure notes">
+    <value>没有安全笔记</value>
+  </data>
+  <data name="No login items">
+    <value>没有登录项目</value>
+  </data>
+  <data name="No card items">
+    <value>没有卡片项目</value>
+  </data>
+  <data name="No identity items">
+    <value>没有身份项目</value>
+  </data>
+  <data name="No search results">
+    <value>没有搜索结果</value>
+  </data>
+  <data name="Password">
+    <value>密码</value>
+  </data>
+  <data name="Passphrase">
+    <value>密码短语</value>
+  </data>
+  <data name="Vault">
+    <value>密码库</value>
+  </data>
+  <data name="Vault loading failed">
+    <value>密码库加载失败</value>
+  </data>
+  <data name="Vault data was imported.">
+    <value>密码库数据已导入。</value>
+  </data>
+  <data name="Vault is empty">
+    <value>密码库为空</value>
+  </data>
+  <data name="Vault unlocked.">
+    <value>密码库已解锁。</value>
+  </data>
+  <data name="Vault locked">
+    <value>密码库已锁定</value>
+  </data>
+  <data name="Vault locked.">
+    <value>密码库已锁定。</value>
+  </data>
+  <data name="Vault synchronized.">
+    <value>密码库已同步。</value>
+  </data>
+  <data name="Password length">
+    <value>密码长度</value>
+  </data>
+  <data name="First name">
+    <value>名</value>
+  </data>
+  <data name="Name">
+    <value>名称</value>
+  </data>
+  <data name="Name is required.">
+    <value>名称必填。</value>
+  </data>
+  <data name="Default server">
+    <value>默认服务器</value>
+  </data>
+  <data name="Uses bw from PATH by default. Enter the full path to bw.exe to use a custom location.">
+    <value>默认使用 PATH 中的 bw。需要自定义位置时填写 bw.exe 的完整路径。</value>
+  </data>
+  <data name="Destination">
+    <value>目的地</value>
+  </data>
+  <data name="Content">
+    <value>内容</value>
+  </data>
+  <data name="Copied to the clipboard. It will be cleared according to your settings.">
+    <value>内容已复制到剪贴板，并会按设置自动清除。</value>
+  </data>
+  <data name="Year">
+    <value>年份</value>
+  </data>
+  <data name="Configure Bitwarden CLI, clipboard protection, and the authentication environment. Changes are written locally only after you select Save settings.">
+    <value>配置 Bitwarden CLI、剪贴板安全策略和认证环境。设置只在点击保存后写入本地文件。</value>
+  </data>
+  <data name="Configure non-sensitive environment variables added to each CLI call. Account credentials are used temporarily only while signing in.">
+    <value>配置附加到每次 CLI 调用的非敏感环境变量。账号凭据只在登录时临时使用。</value>
+  </data>
+  <data name="Brand">
+    <value>品牌</value>
+  </data>
+  <data name="Regular items were loaded, but trash, archive, or folders are temporarily unavailable.">
+    <value>普通项目已加载，但回收站、归档或文件夹暂时不可用。</value>
+  </data>
+  <data name="Go to">
+    <value>前往</value>
+  </data>
+  <data name="Open website">
+    <value>前往网站</value>
+  </data>
+  <data name="Open item website">
+    <value>前往项目网站</value>
+  </data>
+  <data name="Light">
+    <value>浅色</value>
+  </data>
+  <data name="Install Bitwarden CLI or configure the path to bw.exe in Settings.">
+    <value>请安装 Bitwarden CLI，或在设置中配置 bw.exe 路径。</value>
+  </data>
+  <data name="Make sure the vault is unlocked and the network is available.">
+    <value>请确认密码库已解锁且网络可用。</value>
+  </data>
+  <data name="Enter the Client ID and Client Secret.">
+    <value>请输入 Client ID 和 Client Secret。</value>
+  </data>
+  <data name="Enter a folder name.">
+    <value>请输入文件夹名称。</value>
+  </data>
+  <data name="Enter your email and master password.">
+    <value>请输入邮箱和主密码。</value>
+  </data>
+  <data name="Enter an account name.">
+    <value>请输入账号名称。</value>
+  </data>
+  <data name="Enter your master password.">
+    <value>请输入主密码。</value>
+  </data>
+  <data name="Choose where to save the exported file.">
+    <value>请选择导出文件保存位置。</value>
+  </data>
+  <data name="Select a file format.">
+    <value>请选择文件格式。</value>
+  </data>
+  <data name="Select a file to import or paste its contents.">
+    <value>请选择要导入的文件，或粘贴文件内容。</value>
+  </data>
+  <data name="Sign in to the current account in this app. Credentials are passed only to this CLI process and are not saved in settings.">
+    <value>请在此应用登录当前账号。凭据只传给本次 CLI 进程，不会保存到设置。</value>
+  </data>
+  <data name="Cancel">
+    <value>取消</value>
+  </data>
+  <data name="Cancel editing">
+    <value>取消编辑</value>
+  </data>
+  <data name="Cancel folder editing">
+    <value>取消编辑文件夹</value>
+  </data>
+  <data name="Cancel export">
+    <value>取消导出</value>
+  </data>
+  <data name="Cancel import">
+    <value>取消导入</value>
+  </data>
+  <data name="Cancel generator">
+    <value>取消生成器</value>
+  </data>
+  <data name="Remove from favorites">
+    <value>取消收藏</value>
+  </data>
+  <data name="All items">
+    <value>全部项目</value>
+  </data>
+  <data name="Confirm deletion">
+    <value>确认删除</value>
+  </data>
+  <data name="Confirm folder deletion">
+    <value>确认删除文件夹</value>
+  </data>
+  <data name="Authentication method">
+    <value>认证方式</value>
+  </data>
+  <data name="Authentication and environment">
+    <value>认证与环境</value>
+  </data>
+  <data name="If you select a file and paste content, the selected file takes precedence.">
+    <value>如果同时选择了文件并粘贴了内容，将优先导入所选文件。</value>
+  </data>
+  <data name="Delete">
+    <value>删除</value>
+  </data>
+  <data name="Deleted items are moved to Trash first, where you can restore or permanently delete them.">
+    <value>删除的项目会先进入回收站，可以在这里恢复或永久删除。</value>
+  </data>
+  <data name="Deletion failed">
+    <value>删除失败</value>
+  </data>
+  <data name="Remove website">
+    <value>删除网站</value>
+  </data>
+  <data name="Delete folder">
+    <value>删除文件夹</value>
+  </data>
+  <data name="Delete item">
+    <value>删除项目</value>
+  </data>
+  <data name="Not signed in">
+    <value>尚未登录</value>
+  </data>
+  <data name="Settings">
+    <value>设置</value>
+  </data>
+  <data name="Settings saved">
+    <value>设置已保存</value>
+  </data>
+  <data name="Identities">
+    <value>身份</value>
+  </data>
+  <data name="Identity information">
+    <value>身份信息</value>
+  </data>
+  <data name="Dark">
+    <value>深色</value>
+  </data>
+  <data name="Generator">
+    <value>生成器</value>
+  </data>
+  <data name="Generator history">
+    <value>生成器历史记录</value>
+  </data>
+  <data name="Generator overlay">
+    <value>生成器遮罩</value>
+  </data>
+  <data name="Generation failed">
+    <value>生成失败</value>
+  </data>
+  <data name="Sign in with API key">
+    <value>使用 API Key 登录</value>
+  </data>
+  <data name="Sign in with SSO">
+    <value>使用 SSO 登录</value>
+  </data>
+  <data name="Items appear here after you use Archive from the item menu.">
+    <value>使用项目菜单中的归档操作后，项目会显示在这里。</value>
+  </data>
+  <data name="Favorite">
+    <value>收藏</value>
+  </data>
+  <data name="Favorites">
+    <value>收藏夹</value>
+  </data>
+  <data name="Capitalize">
+    <value>首字母大写</value>
+  </data>
+  <data name="Enter Client Secret">
+    <value>输入 Client Secret</value>
+  </data>
+  <data name="Enter a name to create a folder in the current vault.">
+    <value>输入名称后会在当前密码库中创建文件夹。</value>
+  </data>
+  <data name="Enter master password">
+    <value>输入主密码</value>
+  </data>
+  <data name="Data">
+    <value>数据</value>
+  </data>
+  <data name="Minimum numbers">
+    <value>数字最少个数</value>
+  </data>
+  <data name="Search vault">
+    <value>搜索密码库</value>
+  </data>
+  <data name="Search vault...">
+    <value>搜索密码库...</value>
+  </data>
+  <data name="Random word">
+    <value>随机单词</value>
+  </data>
+  <data name="All vaults">
+    <value>所有密码库</value>
+  </data>
+  <data name="All vault items">
+    <value>所有项目</value>
+  </data>
+  <data name="Lock">
+    <value>锁定</value>
+  </data>
+  <data name="Lock vault">
+    <value>锁定密码库</value>
+  </data>
+  <data name="Lock failed">
+    <value>锁定失败</value>
+  </data>
+  <data name="Add website">
+    <value>添加网站</value>
+  </data>
+  <data name="Add account">
+    <value>添加账号</value>
+  </data>
+  <data name="To nest folders, add “/” after the parent folder name. Example: Social/Forums">
+    <value>通过在父文件夹名后面添加“/”来嵌套文件夹。示例：Social/Forums</value>
+  </data>
+  <data name="Sync">
+    <value>同步</value>
+  </data>
+  <data name="Sync vault">
+    <value>同步密码库</value>
+  </data>
+  <data name="Sync failed">
+    <value>同步失败</value>
+  </data>
+  <data name="Sync complete">
+    <value>同步完成</value>
+  </data>
+  <data name="Sign out">
+    <value>退出</value>
+  </data>
+  <data name="Sign-out failed">
+    <value>退出失败</value>
+  </data>
+  <data name="Drag website">
+    <value>拖动网站</value>
+  </data>
+  <data name="Appearance">
+    <value>外观</value>
+  </data>
+  <data name="Network unavailable.">
+    <value>网络不可用。</value>
+  </data>
+  <data name="Website">
+    <value>网站</value>
+  </data>
+  <data name="Website (URI)">
+    <value>网站 (URI)</value>
+  </data>
+  <data name="Website URI">
+    <value>网站 URI</value>
+  </data>
+  <data name="Website prefix">
+    <value>网站前缀</value>
+  </data>
+  <data name="Website accounts, app accounts, and passkey-related items">
+    <value>网站账号、应用账号和通行密钥相关项目</value>
+  </data>
+  <data name="Bitwarden CLI was not detected">
+    <value>未检测到 Bitwarden CLI</value>
+  </data>
+  <data name="Bitwarden CLI was not detected or its status is unavailable">
+    <value>未检测到 Bitwarden CLI 或状态不可用</value>
+  </data>
+  <data name="No account detected">
+    <value>未检测到账户</value>
+  </data>
+  <data name="Unnamed field">
+    <value>未命名字段</value>
+  </data>
+  <data name="Could not retrieve the verification code.">
+    <value>未能获取验证码。</value>
+  </data>
+  <data name="No file selected">
+    <value>未选择文件</value>
+  </data>
+  <data name="Unknown">
+    <value>未知</value>
+  </data>
+  <data name="File format">
+    <value>文件格式</value>
+  </data>
+  <data name="Folders">
+    <value>文件夹</value>
+  </data>
+  <data name="Folder editor">
+    <value>文件夹编辑器</value>
+  </data>
+  <data name="Folder editor overlay">
+    <value>文件夹编辑器遮罩</value>
+  </data>
+  <data name="Folder name">
+    <value>文件夹名称</value>
+  </data>
+  <data name="Folder name (required)">
+    <value>文件夹名称（必填）</value>
+  </data>
+  <data name="Folder is empty">
+    <value>文件夹为空</value>
+  </data>
+  <data name="My vault">
+    <value>我的密码库</value>
+  </data>
+  <data name="Could not save folder">
+    <value>无法保存文件夹</value>
+  </data>
+  <data name="Could not create folder">
+    <value>无法创建文件夹</value>
+  </data>
+  <data name="Could not open website">
+    <value>无法打开网站</value>
+  </data>
+  <data name="Could not export">
+    <value>无法导出</value>
+  </data>
+  <data name="Could not import">
+    <value>无法导入</value>
+  </data>
+  <data name="Could not sign in">
+    <value>无法登录</value>
+  </data>
+  <data name="Could not parse the item data returned by Bitwarden CLI.">
+    <value>无法解析 Bitwarden CLI 返回的项目数据。</value>
+  </data>
+  <data name="Could not delete account">
+    <value>无法删除账号</value>
+  </data>
+  <data name="Could not generate a value. Check the options and try again.">
+    <value>无法生成内容，请检查选项后重试。</value>
+  </data>
+  <data name="Could not add account">
+    <value>无法添加账号</value>
+  </data>
+  <data name="No additional information">
+    <value>无附加信息</value>
+  </data>
+  <data name="No folder">
+    <value>无文件夹</value>
+  </data>
+  <data name="Windows could not open the website URL for this item.">
+    <value>系统未能打开该项目的网站地址。</value>
+  </data>
+  <data name="Show">
+    <value>显示</value>
+  </data>
+  <data name="Shows the result of the most recent bw status command.">
+    <value>显示最近一次 bw status 的结果。</value>
+  </data>
+  <data name="Existing accounts">
+    <value>现有账号</value>
+  </data>
+  <data name="Item">
+    <value>项目</value>
+  </data>
+  <data name="Item ID">
+    <value>项目 ID</value>
+  </data>
+  <data name="Item editor">
+    <value>项目编辑器</value>
+  </data>
+  <data name="Item editor overlay">
+    <value>项目编辑器遮罩</value>
+  </data>
+  <data name="Item details">
+    <value>项目记录</value>
+  </data>
+  <data name="Item type">
+    <value>项目类型</value>
+  </data>
+  <data name="Item saved.">
+    <value>项目已保存。</value>
+  </data>
+  <data name="Item archived.">
+    <value>项目已归档。</value>
+  </data>
+  <data name="Item restored.">
+    <value>项目已恢复。</value>
+  </data>
+  <data name="Item moved to Trash.">
+    <value>项目已移入回收站。</value>
+  </data>
+  <data name="Item permanently deleted.">
+    <value>项目已永久删除。</value>
+  </data>
+  <data name="New folder">
+    <value>新建文件夹</value>
+  </data>
+  <data name="New item">
+    <value>新建项目</value>
+  </data>
+  <data name="The new settings are now active.">
+    <value>新设置已生效。</value>
+  </data>
+  <data name="New account server URL">
+    <value>新账号服务器地址</value>
+  </data>
+  <data name="New account name">
+    <value>新账号名称</value>
+  </data>
+  <data name="New account authentication method">
+    <value>新账号认证方式</value>
+  </data>
+  <data name="Credit cards, debit cards, and payment information">
+    <value>信用卡、借记卡和付款信息</value>
+  </data>
+  <data name="Last name">
+    <value>姓</value>
+  </data>
+  <data name="Full name">
+    <value>姓名</value>
+  </data>
+  <data name="Changing the name will replace the current folder name.">
+    <value>修改名称后会覆盖当前文件夹名称。</value>
+  </data>
+  <data name="Modified">
+    <value>修改时间</value>
+  </data>
+  <data name="Sign-in required">
+    <value>需要先登录</value>
+  </data>
+  <data name="Master password required">
+    <value>需要主密码</value>
+  </data>
+  <data name="Options">
+    <value>选项</value>
+  </data>
+  <data name="Choose export location">
+    <value>选择导出位置</value>
+  </data>
+  <data name="Choose import file">
+    <value>选择导入文件</value>
+  </data>
+  <data name="Choose location">
+    <value>选择位置</value>
+  </data>
+  <data name="Choose file">
+    <value>选择文件</value>
+  </data>
+  <data name="Select a file to import">
+    <value>选择要导入的文件</value>
+  </data>
+  <data name="Select an item to view its details">
+    <value>选择一个项目查看详情</value>
+  </data>
+  <data name="Choose the language used by the app.">
+    <value>选择应用界面的显示语言。</value>
+  </data>
+  <data name="Choose the app color mode.">
+    <value>选择应用界面的颜色模式。</value>
+  </data>
+  <data name="Saved">
+    <value>已保存</value>
+  </data>
+  <data name="Created">
+    <value>已创建</value>
+  </data>
+  <data name="Copied">
+    <value>已复制</value>
+  </data>
+  <data name="Archived">
+    <value>已归档</value>
+  </data>
+  <data name="Archived vault items">
+    <value>已归档的密码库项目</value>
+  </data>
+  <data name="Restored">
+    <value>已恢复</value>
+  </data>
+  <data name="Unlocked">
+    <value>已解锁</value>
+  </data>
+  <data name="Cloned">
+    <value>已克隆</value>
+  </data>
+  <data name="Removed from favorites">
+    <value>已取消收藏</value>
+  </data>
+  <data name="Deleted">
+    <value>已删除</value>
+  </data>
+  <data name="Deleted items that can still be restored">
+    <value>已删除但仍可恢复的项目</value>
+  </data>
+  <data name="Added to favorites">
+    <value>已收藏</value>
+  </data>
+  <data name="Locked">
+    <value>已锁定</value>
+  </data>
+  <data name="Signed out">
+    <value>已退出账号</value>
+  </data>
+  <data name="Hide">
+    <value>隐藏</value>
+  </data>
+  <data name="App language">
+    <value>应用语言</value>
+  </data>
+  <data name="App theme">
+    <value>应用主题</value>
+  </data>
+  <data name="Delete permanently">
+    <value>永久删除</value>
+  </data>
+  <data name="Permanently delete item">
+    <value>永久删除项目</value>
+  </data>
+  <data name="Username">
+    <value>用户名</value>
+  </data>
+  <data name="Username type">
+    <value>用户名类型</value>
+  </data>
+  <data name="Username website">
+    <value>用户名网站</value>
+  </data>
+  <data name="Username email">
+    <value>用户名邮箱</value>
+  </data>
+  <data name="Email">
+    <value>邮箱</value>
+  </data>
+  <data name="Email and master password">
+    <value>邮箱和主密码</value>
+  </data>
+  <data name="Email prefix">
+    <value>邮箱前缀</value>
+  </data>
+  <data name="Expiration">
+    <value>有效期</value>
+  </data>
+  <data name="Reserved for a future idle-timeout vault lock.">
+    <value>预留设置项。后续可用于空闲超时锁定密码库。</value>
+  </data>
+  <data name="Month">
+    <value>月份</value>
+  </data>
+  <data name="Items appear here after you mark them as favorites in the details pane or Bitwarden.">
+    <value>在详情页或 Bitwarden 中为项目加星标后会显示在这里。</value>
+  </data>
+  <data name="No folders">
+    <value>暂无文件夹</value>
+  </data>
+  <data name="Length">
+    <value>长度</value>
+  </data>
+  <data name="Account signed in successfully.">
+    <value>账号登录成功。</value>
+  </data>
+  <data name="Account name">
+    <value>账号名称</value>
+  </data>
+  <data name="The account is not signed in.">
+    <value>账号尚未登录。</value>
+  </data>
+  <data name="There are no items in this folder yet.">
+    <value>这个文件夹下还没有项目。</value>
+  </data>
+  <data name="Diagnostics">
+    <value>诊断</value>
+  </data>
+  <data name="Saving folder...">
+    <value>正在保存文件夹...</value>
+  </data>
+  <data name="Saving item...">
+    <value>正在保存项目...</value>
+  </data>
+  <data name="Creating folder...">
+    <value>正在创建文件夹...</value>
+  </data>
+  <data name="Creating item...">
+    <value>正在创建项目...</value>
+  </data>
+  <data name="Opening SSO sign-in...">
+    <value>正在打开 SSO 登录...</value>
+  </data>
+  <data name="Exporting...">
+    <value>正在导出...</value>
+  </data>
+  <data name="Importing...">
+    <value>正在导入...</value>
+  </data>
+  <data name="Signing in...">
+    <value>正在登录...</value>
+  </data>
+  <data name="Archiving...">
+    <value>正在归档...</value>
+  </data>
+  <data name="Restoring...">
+    <value>正在恢复...</value>
+  </data>
+  <data name="Loading vault...">
+    <value>正在加载密码库...</value>
+  </data>
+  <data name="Unlocking...">
+    <value>正在解锁...</value>
+  </data>
+  <data name="Cloning item...">
+    <value>正在克隆项目...</value>
+  </data>
+  <data name="Removing from favorites...">
+    <value>正在取消收藏...</value>
+  </data>
+  <data name="Deleting...">
+    <value>正在删除...</value>
+  </data>
+  <data name="Deleting folder...">
+    <value>正在删除文件夹...</value>
+  </data>
+  <data name="Generating...">
+    <value>正在生成...</value>
+  </data>
+  <data name="Signing in with API key...">
+    <value>正在使用 API Key 登录...</value>
+  </data>
+  <data name="Adding to favorites...">
+    <value>正在收藏...</value>
+  </data>
+  <data name="Locking...">
+    <value>正在锁定...</value>
+  </data>
+  <data name="Synchronizing...">
+    <value>正在同步...</value>
+  </data>
+  <data name="Signing out...">
+    <value>正在退出账号...</value>
+  </data>
+  <data name="Deleting permanently...">
+    <value>正在永久删除...</value>
+  </data>
+  <data name="Payment cards">
+    <value>支付卡</value>
+  </data>
+  <data name="The value must be between 3 and 20. Use 6 or more words for a strong passphrase.">
+    <value>值必须在 3 和 20 之间。使用 6 个或更多单词生成强大的密码短语。</value>
+  </data>
+  <data name="The value must be between 5 and 128. Use 14 or more characters for a strong password.">
+    <value>值必须在 5 和 128 之间。使用 14 个或更多字符生成强大的密码。</value>
+  </data>
+  <data name="At least one account is required.">
+    <value>至少需要保留一个账号。</value>
+  </data>
+  <data name="Run bw status again to verify the CLI path, sign-in state, and vault lock state.">
+    <value>重新调用 bw status，确认 CLI 路径、登录状态和密码库锁定状态。</value>
+  </data>
+  <data name="Check again">
+    <value>重新检测</value>
+  </data>
+  <data name="Check status again">
+    <value>重新检测状态</value>
+  </data>
+  <data name="Generate again">
+    <value>重新生成</value>
+  </data>
+  <data name="Master password">
+    <value>主密码</value>
+  </data>
+  <data name="The master password is incorrect.">
+    <value>主密码不正确。</value>
+  </data>
+  <data name="Custom environment variables">
+    <value>自定义环境变量</value>
+  </data>
+  <data name="Custom fields">
+    <value>自定义字段</value>
+  </data>
+  <data name="Lock automatically">
+    <value>自动锁定</value>
+  </data>
+  <data name="Automatic lock delay in minutes">
+    <value>自动锁定分钟数</value>
+  </data>
+  <data name="API key sign-in succeeded.">
+    <value>API Key 登录成功。</value>
+  </data>
+  <data name="Bitwarden vault">
+    <value>Bitwarden 密码库</value>
+  </data>
+  <data name="The Bitwarden CLI operation timed out.">
+    <value>Bitwarden CLI 操作超时。</value>
+  </data>
+  <data name="Bitwarden CLI does not currently support selecting a destination folder during import. Organize imported items afterward if needed.">
+    <value>Bitwarden CLI 当前不支持在导入时指定目标文件夹。需要移动到文件夹时，请在导入后批量整理。</value>
+  </data>
+  <data name="Bitwarden CLI environment">
+    <value>Bitwarden CLI 环境</value>
+  </data>
+  <data name="Bitwarden CLI path">
+    <value>Bitwarden CLI 路径</value>
+  </data>
+  <data name="Bitwarden CLI could not save the folder.">
+    <value>Bitwarden CLI 未能保存该文件夹。</value>
+  </data>
+  <data name="Bitwarden CLI could not save the item.">
+    <value>Bitwarden CLI 未能保存该项目。</value>
+  </data>
+  <data name="Bitwarden CLI could not export the vault.">
+    <value>Bitwarden CLI 未能导出密码库。</value>
+  </data>
+  <data name="Bitwarden CLI could not import the file. Make sure the format matches its contents.">
+    <value>Bitwarden CLI 未能导入该文件。请确认格式和内容匹配。</value>
+  </data>
+  <data name="Bitwarden CLI could not update the favorite status.">
+    <value>Bitwarden CLI 未能更新收藏状态。</value>
+  </data>
+  <data name="Bitwarden CLI could not archive the item.">
+    <value>Bitwarden CLI 未能归档该项目。</value>
+  </data>
+  <data name="Bitwarden CLI could not restore the item.">
+    <value>Bitwarden CLI 未能恢复该项目。</value>
+  </data>
+  <data name="Bitwarden CLI could not clone the item.">
+    <value>Bitwarden CLI 未能克隆该项目。</value>
+  </data>
+  <data name="Bitwarden CLI could not delete the folder.">
+    <value>Bitwarden CLI 未能删除该文件夹。</value>
+  </data>
+  <data name="Bitwarden CLI could not delete the item.">
+    <value>Bitwarden CLI 未能删除该项目。</value>
+  </data>
+  <data name="Bitwarden CLI could not lock the vault.">
+    <value>Bitwarden CLI 未能锁定密码库。</value>
+  </data>
+  <data name="Bitwarden CLI could not sign out of the current account.">
+    <value>Bitwarden CLI 未能退出当前账号。</value>
+  </data>
+  <data name="Did the CLI status change?">
+    <value>CLI 状态发生变化？</value>
+  </data>
+  <data name="SSO sign-in succeeded.">
+    <value>SSO 登录成功。</value>
+  </data>
+  <data name="SSO sign-in failed.">
+    <value>SSO 登录失败。</value>
+  </data>
+  <data name="TOTP unavailable">
+    <value>TOTP 不可用</value>
+  </data>
+  <data name="{count, plural, one {# item} other {# items}}">
+    <value>{count} 个项目</value>
+  </data>
+  <data name="Search: {query}">
+    <value>搜索：{query}</value>
+  </data>
+  <data name="Deleted · {date}">
+    <value>已删除 · {date}</value>
+  </data>
+  <data name="Archived · {date}">
+    <value>已归档 · {date}</value>
+  </data>
+  <data name="Deleted {date}">
+    <value>已删除 {date}</value>
+  </data>
+  <data name="Archived {date}">
+    <value>已归档 {date}</value>
+  </data>
+  <data name="Copy {label}">
+    <value>复制{label}</value>
+  </data>
+  <data name="Unlocked · {server}">
+    <value>已解锁 · {server}</value>
+  </data>
+  <data name="Locked · {server}">
+    <value>已锁定 · {server}</value>
+  </data>
+  <data name="{status} · {server}">
+    <value>{status} · {server}</value>
+  </data>
+  <data name="Folder “{name}” saved.">
+    <value>文件夹「{name}」已保存。</value>
+  </data>
+  <data name="Folder “{name}” deleted.">
+    <value>文件夹「{name}」已删除。</value>
+  </data>
+  <data name="Vault exported to {path}">
+    <value>密码库已导出到 {path}</value>
+  </data>
+  <data name="{name} copy">
+    <value>{name} 副本</value>
+  </data>
+  <data name="Created “{name} copy”.">
+    <value>已创建「{name} 副本」。</value>
+  </data>
+  <data name="Sign out of {name}">
+    <value>退出账号 {name}</value>
+  </data>
+  <data name="Delete account {name}">
+    <value>删除账号 {name}</value>
+  </data>
+  <data name="Permanently delete “{name}”? This action cannot be undone.">
+    <value>确定要永久删除「{name}」吗？此操作无法撤销。</value>
+  </data>
+  <data name="Move “{name}” to Trash?">
+    <value>确定要将「{name}」移入回收站吗？</value>
+  </data>
+  <data name="{title} overlay">
+    <value>{title}遮罩</value>
+  </data>
+  <data name="Edit folder {name}">
+    <value>编辑文件夹 {name}</value>
+  </data>
+  <data name="Simplified Chinese">
+    <value>简体中文</value>
+  </data>
+  <data name="English">
+    <value>English</value>
+  </data>
+</root>

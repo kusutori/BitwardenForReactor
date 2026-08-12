@@ -39,7 +39,7 @@ public sealed class ItemEditorDialog : Component<ItemEditorDialogProps>
                 .HorizontalAlignment(HorizontalAlignment.Center)
                 .VerticalAlignment(VerticalAlignment.Center))
             .Background(Theme.SmokeFill)
-            .AutomationName(T("项目编辑器遮罩"));
+            .AutomationName(T("Item editor overlay"));
 }
 
 internal sealed record ItemEditorFormProps(
@@ -58,20 +58,20 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
         void Update(Func<VaultItemDraft, VaultItemDraft> change) =>
             setDraft(change);
 
-        var typeNames = new[] { T("登录"), T("安全笔记"), T("卡片"), T("身份") };
+        var typeNames = new[] { T("Logins"), T("Secure notes"), T("Cards"), T("Identities") };
         var typeValues = new[] { BitwardenItemType.Login, BitwardenItemType.SecureNote, BitwardenItemType.Card, BitwardenItemType.Identity };
         var selectedType = Math.Max(0, Array.IndexOf(typeValues, draft.Type));
-        var folderNames = new[] { T("无文件夹") }.Concat(Props.Folders.Select(folder => folder.Name)).ToArray();
+        var folderNames = new[] { T("No folder") }.Concat(Props.Folders.Select(folder => folder.Name)).ToArray();
         var selectedFolder = string.IsNullOrWhiteSpace(draft.FolderId)
             ? 0
             : Math.Max(0, Props.Folders.ToList().FindIndex(folder => folder.Id == draft.FolderId) + 1);
 
         var form = ScrollView(
                 VStack(16,
-                EditorSection(T("基础信息"),
+                EditorSection(T("Basic information"),
                 [
                     VStack(6,
-                        TextBlock(T("类型")).Foreground(Theme.SecondaryText),
+                        TextBlock(T("Type")).Foreground(Theme.SecondaryText),
                         Segmented(items: typeNames, selectedIndex: selectedType, onSelectedIndexChanged: index =>
                         {
                             Update(current => current with
@@ -80,9 +80,9 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                             });
                             formScroll.Current?.ScrollTo(0, 0);
                         })
-                            .AutomationName(T("项目类型"))),
-                    TextBox(draft.Name, value => Update(current => current with { Name = value }), header: T("名称"))
-                        .AutomationName(T("名称")),
+                            .AutomationName(T("Item type"))),
+                    TextBox(draft.Name, value => Update(current => current with { Name = value }), header: T("Name"))
+                        .AutomationName(T("Name")),
                     ComboBox(folderNames, selectedFolder, index =>
                             Update(current => current with
                             {
@@ -90,26 +90,26 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                                     ? null
                                     : Props.Folders[index - 1].Id
                             }))
-                        .Header(T("文件夹"))
+                        .Header(T("Folders"))
                         .HorizontalAlignment(HorizontalAlignment.Stretch)
-                        .AutomationName(T("文件夹")),
+                        .AutomationName(T("Folders")),
                     string.IsNullOrWhiteSpace(draft.Name)
-                        ? TextBlock(T("名称必填。")).Foreground(Theme.SystemCaution)
+                        ? TextBlock(T("Name is required.")).Foreground(Theme.SystemCaution)
                         : null
                 ]),
                 draft.Type == BitwardenItemType.Login ? RenderLogin(draft, Update) : null,
                 draft.Type == BitwardenItemType.Card ? RenderCard(draft, Update) : null,
                 draft.Type == BitwardenItemType.Identity ? RenderIdentity(draft, Update) : null,
                 draft.Type == BitwardenItemType.SecureNote ? RenderSecureNote() : null,
-                EditorSection(T("备注与选项"),
+                EditorSection(T("Notes and options"),
                 [
-                    TextBox(draft.Notes ?? string.Empty, value => Update(current => current with { Notes = value }), header: T("备注"))
+                    TextBox(draft.Notes ?? string.Empty, value => Update(current => current with { Notes = value }), header: T("Notes"))
                         .TextWrapping()
                         .AcceptsReturn()
                         .MinHeight(100)
-                        .AutomationName(T("备注")),
-                    CheckBox(draft.Favorite, value => Update(current => current with { Favorite = value }), T("收藏"))
-                        .AutomationName(T("收藏"))
+                        .AutomationName(T("Notes")),
+                    CheckBox(draft.Favorite, value => Update(current => current with { Favorite = value }), T("Favorite"))
+                        .AutomationName(T("Favorite"))
                 ])))
             .Padding(24)
             .Ref(formScroll)
@@ -119,19 +119,19 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
                 Grid(
                     columns: [GridSize.Star()],
                     rows: [GridSize.Auto, GridSize.Star(), GridSize.Auto],
-                    Heading(draft.Id is null ? T("新建项目") : T("编辑项目"))
+                    Heading(draft.Id is null ? T("New item") : T("Edit item"))
                         .Margin(left: 24, top: 20, right: 24, bottom: 12)
                         .Grid(row: 0),
                     form,
                     Border(
                             HStack(12,
-                                Button(T("保存"), () => Props.OnSave(draft))
+                                Button(T("Save"), () => Props.OnSave(draft))
                                     .MinWidth(96)
                                     .IsEnabled(!string.IsNullOrWhiteSpace(draft.Name))
-                                    .AutomationName(T("保存项目")),
-                                Button(T("取消"), Props.OnCancel)
+                                    .AutomationName(T("Save item")),
+                                Button(T("Cancel"), Props.OnCancel)
                                     .MinWidth(96)
-                                    .AutomationName(T("取消编辑")))
+                                    .AutomationName(T("Cancel editing")))
                                 .HorizontalAlignment(HorizontalAlignment.Left))
                         .WithBorder(Theme.CardStroke, 1)
                         .Padding(16)
@@ -144,36 +144,36 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
             .MaxHeight(680)
             .HorizontalAlignment(HorizontalAlignment.Stretch)
             .VerticalAlignment(VerticalAlignment.Stretch)
-            .AutomationName(T("项目编辑器"));
+            .AutomationName(T("Item editor"));
     }
 
     private static Element RenderLogin(VaultItemDraft draft, Action<Func<VaultItemDraft, VaultItemDraft>> update) =>
-        EditorSection(T("登录信息"),
+        EditorSection(T("Login information"),
         [
-            TextBox(draft.Username ?? string.Empty, value => update(current => current with { Username = value }), header: T("用户名")).AutomationName(T("用户名")),
-            PasswordBox(draft.Password ?? string.Empty, value => update(current => current with { Password = value }), T("密码"))
-                .Header(T("密码"))
+            TextBox(draft.Username ?? string.Empty, value => update(current => current with { Username = value }), header: T("Username")).AutomationName(T("Username")),
+            PasswordBox(draft.Password ?? string.Empty, value => update(current => current with { Password = value }), T("Password"))
+                .Header(T("Password"))
                 .Set(passwordBox => passwordBox.PasswordRevealMode = PasswordRevealMode.Peek)
-                .AutomationName(T("密码")),
+                .AutomationName(T("Password")),
             Component<UriEditorList, UriEditorListProps>(new UriEditorListProps(
                 draft.Uris,
                 uris => update(current => current with { Uris = uris })))
         ]);
 
     private static Element RenderCard(VaultItemDraft draft, Action<Func<VaultItemDraft, VaultItemDraft>> update) =>
-        EditorSection(T("卡片信息"),
+        EditorSection(T("Card information"),
         [
-            TextBox(draft.CardBrand ?? string.Empty, value => update(current => current with { CardBrand = value }), header: T("品牌")).AutomationName(T("品牌")),
-            TextBox(draft.CardholderName ?? string.Empty, value => update(current => current with { CardholderName = value }), header: T("持卡人")).AutomationName(T("持卡人")),
-            PasswordBox(draft.CardNumber ?? string.Empty, value => update(current => current with { CardNumber = value }), T("卡号"))
-                .Header(T("卡号"))
+            TextBox(draft.CardBrand ?? string.Empty, value => update(current => current with { CardBrand = value }), header: T("Brand")).AutomationName(T("Brand")),
+            TextBox(draft.CardholderName ?? string.Empty, value => update(current => current with { CardholderName = value }), header: T("Cardholder")).AutomationName(T("Cardholder")),
+            PasswordBox(draft.CardNumber ?? string.Empty, value => update(current => current with { CardNumber = value }), T("Card number"))
+                .Header(T("Card number"))
                 .Set(passwordBox => passwordBox.PasswordRevealMode = PasswordRevealMode.Peek)
-                .AutomationName(T("卡号")),
+                .AutomationName(T("Card number")),
             HStack(8,
-                TextBox(draft.CardExpMonth ?? string.Empty, value => update(current => current with { CardExpMonth = value }), header: T("月份"))
-                    .Flex(grow: 1, basis: 0).AutomationName(T("月份")),
-                TextBox(draft.CardExpYear ?? string.Empty, value => update(current => current with { CardExpYear = value }), header: T("年份"))
-                    .Flex(grow: 1, basis: 0).AutomationName(T("年份"))),
+                TextBox(draft.CardExpMonth ?? string.Empty, value => update(current => current with { CardExpMonth = value }), header: T("Month"))
+                    .Flex(grow: 1, basis: 0).AutomationName(T("Month")),
+                TextBox(draft.CardExpYear ?? string.Empty, value => update(current => current with { CardExpYear = value }), header: T("Year"))
+                    .Flex(grow: 1, basis: 0).AutomationName(T("Year"))),
             PasswordBox(draft.CardCode ?? string.Empty, value => update(current => current with { CardCode = value }), "CVV")
                 .Header("CVV")
                 .Set(passwordBox => passwordBox.PasswordRevealMode = PasswordRevealMode.Peek)
@@ -181,23 +181,23 @@ internal sealed class ItemEditorForm : Component<ItemEditorFormProps>
         ]);
 
     private static Element RenderIdentity(VaultItemDraft draft, Action<Func<VaultItemDraft, VaultItemDraft>> update) =>
-        EditorSection(T("身份信息"),
+        EditorSection(T("Identity information"),
         [
             HStack(8,
-                TextBox(draft.FirstName ?? string.Empty, value => update(current => current with { FirstName = value }), header: T("名"))
-                    .Flex(grow: 1, basis: 0).AutomationName(T("名")),
-                TextBox(draft.LastName ?? string.Empty, value => update(current => current with { LastName = value }), header: T("姓"))
-                    .Flex(grow: 1, basis: 0).AutomationName(T("姓"))),
-            TextBox(draft.Email ?? string.Empty, value => update(current => current with { Email = value }), header: T("邮箱")).AutomationName(T("邮箱")),
-            TextBox(draft.Phone ?? string.Empty, value => update(current => current with { Phone = value }), header: T("电话")).AutomationName(T("电话")),
-            TextBox(draft.Company ?? string.Empty, value => update(current => current with { Company = value }), header: T("公司")).AutomationName(T("公司")),
-            TextBox(draft.Address ?? string.Empty, value => update(current => current with { Address = value }), header: T("地址")).AutomationName(T("地址"))
+                TextBox(draft.FirstName ?? string.Empty, value => update(current => current with { FirstName = value }), header: T("First name"))
+                    .Flex(grow: 1, basis: 0).AutomationName(T("First name")),
+                TextBox(draft.LastName ?? string.Empty, value => update(current => current with { LastName = value }), header: T("Last name"))
+                    .Flex(grow: 1, basis: 0).AutomationName(T("Last name"))),
+            TextBox(draft.Email ?? string.Empty, value => update(current => current with { Email = value }), header: T("Email")).AutomationName(T("Email")),
+            TextBox(draft.Phone ?? string.Empty, value => update(current => current with { Phone = value }), header: T("Phone")).AutomationName(T("Phone")),
+            TextBox(draft.Company ?? string.Empty, value => update(current => current with { Company = value }), header: T("Company")).AutomationName(T("Company")),
+            TextBox(draft.Address ?? string.Empty, value => update(current => current with { Address = value }), header: T("Address")).AutomationName(T("Address"))
         ]);
 
     private static Element RenderSecureNote() =>
-        EditorSection(T("安全笔记"),
+        EditorSection(T("Secure notes"),
         [
-            TextBlock(T("安全笔记只需要名称和备注内容。"))
+            TextBlock(T("Secure notes only require a name and notes."))
                 .Foreground(Theme.SecondaryText)
                 .TextWrapping()
         ]);
@@ -289,7 +289,7 @@ internal sealed class UriEditorList : Component<UriEditorListProps>
                             .Margin(top: 24, right: 8)
                             .CornerRadius(4)
                             .Background(Theme.SubtleFill)
-                            .AutomationName(T("拖动网站"))
+                            .AutomationName(T("Drag website"))
                             .OnDragStart<BorderElement, Guid>(
                                 getPayload: () =>
                                 {
@@ -303,12 +303,12 @@ internal sealed class UriEditorList : Component<UriEditorListProps>
                                     setHoverKey(null);
                                 })
                             .Grid(column: 0),
-                        TextBox(uri.Value, value => Props.OnChanged(Replace(uri.Key, current => current with { Value = value })), header: T("网站 (URI)"))
-                            .AutomationName(T("网站 URI"))
+                        TextBox(uri.Value, value => Props.OnChanged(Replace(uri.Key, current => current with { Value = value })), header: T("Website (URI)"))
+                            .AutomationName(T("Website URI"))
                             .Grid(column: 1),
                         Button(Icon(FontIcon("\uE74D")), () => Props.OnChanged(Remove(uri.Key)))
                             .IsEnabled(Props.Uris.Count > 1)
-                            .AutomationName(T("删除网站"))
+                            .AutomationName(T("Remove website"))
                             .Margin(left: 8, top: 24, right: 0, bottom: 0)
                             .Grid(column: 2)))
                 .WithBorder(isHover ? Theme.Accent : Theme.CardStroke, isHover ? 2 : isFocused ? 1 : 0)
@@ -336,9 +336,9 @@ internal sealed class UriEditorList : Component<UriEditorListProps>
         return VStack(8,
             Props.Uris.Select(Row)
                 .Append(
-                    Button(T("+  添加网站"), () => Props.OnChanged([.. Props.Uris, VaultUriDraft.New()]))
+                    Button(T("+  Add website"), () => Props.OnChanged([.. Props.Uris, VaultUriDraft.New()]))
                         .HorizontalAlignment(HorizontalAlignment.Left)
-                        .AutomationName(T("添加网站")))
+                        .AutomationName(T("Add website")))
                 .ToArray());
     }
 }

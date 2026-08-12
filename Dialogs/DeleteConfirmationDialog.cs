@@ -19,13 +19,13 @@ public sealed class DeleteConfirmationDialog : Component<DeleteConfirmationDialo
     public override Element Render()
     {
         var message = Props.Permanent
-            ? T("确定要永久删除「{name}」吗？此操作无法撤销。", ("name", Props.Target.Name))
-            : T("确定要将「{name}」移入回收站吗？", ("name", Props.Target.Name));
+            ? T("Permanently delete “{name}”? This action cannot be undone.", ("name", Props.Target.Name))
+            : T("Move “{name}” to Trash?", ("name", Props.Target.Name));
 
-        return ContentDialog(T("确认删除"), TextBlock(message).TextWrapping(), Props.Permanent ? T("永久删除") : T("删除")) with
+        return ContentDialog(T("Confirm deletion"), TextBlock(message).TextWrapping(), Props.Permanent ? T("Delete permanently") : T("Delete")) with
         {
             IsOpen = true,
-            SecondaryButtonText = T("取消"),
+            SecondaryButtonText = T("Cancel"),
             CloseButtonText = string.Empty,
             DefaultButton = ContentDialogButton.Secondary,
             OnClosed = result =>

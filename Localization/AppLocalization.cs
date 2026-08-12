@@ -20,7 +20,7 @@ public sealed class AppResourceProvider : IStringResourceProvider
 {
     public static AppResourceProvider Instance { get; } = new();
 
-    private readonly ReswResourceProvider _resw = new(AppLocales.SimplifiedChinese);
+    private readonly ReswResourceProvider _resw = new(AppLocales.English);
 
     private AppResourceProvider()
     {
@@ -28,7 +28,7 @@ public sealed class AppResourceProvider : IStringResourceProvider
 
     public string? GetString(string locale, string ns, string key)
     {
-        if (locale.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
+        if (locale.StartsWith("en", StringComparison.OrdinalIgnoreCase))
         {
             return key;
         }

@@ -35,19 +35,19 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                         Grid(
                             columns: [GridSize.Star()],
                             rows: [GridSize.Auto, GridSize.Auto, GridSize.Auto],
-                            Heading(isEditing ? T("编辑文件夹") : T("新建文件夹"))
+                            Heading(isEditing ? T("Edit folder") : T("New folder"))
                                 .Margin(left: 20, top: 18, right: 20, bottom: 10)
                                 .Grid(row: 0),
                             VStack(10,
-                                TextBlock(isEditing ? T("修改名称后会覆盖当前文件夹名称。") : T("输入名称后会在当前密码库中创建文件夹。"))
+                                TextBlock(isEditing ? T("Changing the name will replace the current folder name.") : T("Enter a name to create a folder in the current vault."))
                                     .Foreground(Theme.SecondaryText)
                                     .TextWrapping(),
                                 TextBox(name, value =>
                                     {
                                         setName(value);
                                         setConfirmDelete(false);
-                                    }, header: T("文件夹名称（必填）"))
-                                    .AutomationName(T("文件夹名称"))
+                                    }, header: T("Folder name (required)"))
+                                    .AutomationName(T("Folder name"))
                                     .OnKeyDown((_, e) =>
                                     {
                                         if (e.Key == VirtualKey.Enter)
@@ -56,7 +56,7 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                                             e.Handled = true;
                                         }
                                     }),
-                                TextBlock(T("通过在父文件夹名后面添加“/”来嵌套文件夹。示例：Social/Forums"))
+                                TextBlock(T("To nest folders, add “/” after the parent folder name. Example: Social/Forums"))
                                     .Foreground(Theme.SecondaryText)
                                     .TextWrapping())
                                 .Padding(left: 20, top: 4, right: 20, bottom: 18)
@@ -66,14 +66,14 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                                         columns: [GridSize.Star(), GridSize.Auto],
                                         rows: [GridSize.Auto],
                                         HStack(12,
-                                                Button(isEditing ? T("保存") : T("创建"), Save)
+                                                Button(isEditing ? T("Save") : T("Create"), Save)
                                                     .AccentButton()
                                                     .MinWidth(96)
                                                     .IsEnabled(!string.IsNullOrWhiteSpace(name))
-                                                    .AutomationName(isEditing ? T("保存文件夹") : T("创建文件夹")),
-                                                Button(T("取消"), () => Props.Dispatch(new FolderEditorClosed()))
+                                                    .AutomationName(isEditing ? T("Save folder") : T("Create folder")),
+                                                Button(T("Cancel"), () => Props.Dispatch(new FolderEditorClosed()))
                                                     .MinWidth(96)
-                                                    .AutomationName(T("取消编辑文件夹")))
+                                                    .AutomationName(T("Cancel folder editing")))
                                             .Grid(column: 0),
                                         isEditing
                                             ? DeleteButton(Props.Folder!, confirmDelete, setConfirmDelete)
@@ -88,15 +88,15 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
                     .Width(420)
                     .HorizontalAlignment(HorizontalAlignment.Center)
                     .VerticalAlignment(VerticalAlignment.Center)
-                    .AutomationName(T("文件夹编辑器")))
+                    .AutomationName(T("Folder editor")))
             .Background(Theme.SmokeFill)
-            .AutomationName(T("文件夹编辑器遮罩"));
+            .AutomationName(T("Folder editor overlay"));
     }
 
     private Element DeleteButton(BitwardenFolder folder, bool confirmDelete, Action<bool> setConfirmDelete) =>
         Button(
             confirmDelete
-                ? TextBlock(T("确认删除"))
+                ? TextBlock(T("Confirm deletion"))
                 : Icon(FontIcon("\uE74D", fontSize: 18)),
             () =>
             {
@@ -110,6 +110,6 @@ public sealed class FolderEditorDialog : Component<FolderEditorDialogProps>
             })
             .MinWidth(confirmDelete ? 96 : 40)
             .Foreground(Theme.SystemCritical)
-            .AutomationName(confirmDelete ? T("确认删除文件夹") : T("删除文件夹"))
-            .ToolTip(confirmDelete ? T("确认删除文件夹") : T("删除文件夹"));
+            .AutomationName(confirmDelete ? T("Confirm folder deletion") : T("Delete folder"))
+            .ToolTip(confirmDelete ? T("Confirm folder deletion") : T("Delete folder"));
 }
