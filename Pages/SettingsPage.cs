@@ -23,6 +23,8 @@ public sealed class SettingsPage : Component<SettingsPageProps>
         var state = Props.State;
         var settings = state.Settings;
         var status = state.Status;
+        AppLanguage[] languageValues = [AppLanguage.System, AppLanguage.SimplifiedChinese, AppLanguage.English];
+        var selectedLanguageIndex = Array.IndexOf(languageValues, settings.Language);
 
         return ScrollView(
                 Border(
@@ -37,12 +39,15 @@ public sealed class SettingsPage : Component<SettingsPageProps>
                                 header: T("App language"),
                                 description: T("Choose the language used by the app."),
                                 content: ComboBox(
-                                        [T("Simplified Chinese"), T("English")],
-                                        Math.Clamp((int)settings.Language, 0, 1),
-                                        index => Change(settings with
+                                        [T("Use system setting"), T("Simplified Chinese"), T("English")],
+                                        Math.Max(0, selectedLanguageIndex),
+                                        index =>
                                         {
-                                            Language = (AppLanguage)Math.Clamp(index, 0, 1)
-                                        }))
+                                            if (index >= 0 && index < languageValues.Length && languageValues[index] != settings.Language)
+                                            {
+                                                Change(settings with { Language = languageValues[index] });
+                                            }
+                                        })
                                     .Width(160)
                                     .AutomationName(T("App language")),
                                 headerIcon: Icon(FontIcon("\uE8C1"))),
@@ -52,10 +57,14 @@ public sealed class SettingsPage : Component<SettingsPageProps>
                                 content: ComboBox(
                                         [T("Use system setting"), T("Light"), T("Dark")],
                                         Math.Clamp((int)settings.ThemeMode, 0, 2),
-                                        index => Change(settings with
+                                        index =>
                                         {
-                                            ThemeMode = (AppThemeMode)Math.Clamp(index, 0, 2)
-                                        }))
+                                            var themeMode = (AppThemeMode)Math.Clamp(index, 0, 2);
+                                            if (index >= 0 && index <= 2 && themeMode != settings.ThemeMode)
+                                            {
+                                                Change(settings with { ThemeMode = themeMode });
+                                            }
+                                        })
                                     .Width(160)
                                     .AutomationName(T("App theme")),
                                 headerIcon: Icon(FontIcon("\uE708")))),

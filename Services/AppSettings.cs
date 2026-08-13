@@ -13,7 +13,8 @@ public enum AppThemeMode
 public enum AppLanguage
 {
     SimplifiedChinese,
-    English
+    English,
+    System
 }
 
 public sealed record AppSettings

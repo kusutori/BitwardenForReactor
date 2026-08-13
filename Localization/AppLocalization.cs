@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.UI.Reactor.Localization;
+using Windows.System.UserProfile;
 
 namespace BitwardenForReactor.Localization;
 
@@ -12,8 +14,14 @@ public static class AppLocales
     public static string FromLanguage(Services.AppLanguage language) => language switch
     {
         Services.AppLanguage.English => English,
+        Services.AppLanguage.System => SystemLocale(),
         _ => SimplifiedChinese
     };
+
+    private static string SystemLocale() => GlobalizationPreferences.Languages.Any(
+        static language => language.StartsWith("zh", StringComparison.OrdinalIgnoreCase))
+            ? SimplifiedChinese
+            : English;
 }
 
 public sealed class AppResourceProvider : IStringResourceProvider

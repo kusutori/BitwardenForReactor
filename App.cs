@@ -9,6 +9,7 @@ using Microsoft.UI.Reactor;
 using Microsoft.UI.Reactor.Core;
 using Microsoft.UI.Reactor.Layout;
 using Microsoft.UI.Reactor.Localization;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using static Microsoft.UI.Reactor.Factories;
 
@@ -20,18 +21,39 @@ public sealed class App : Component
     {
         var (state, dispatch) = UseReducer<AppState, AppAction>(AppReducer.Reduce, new AppState());
         var (masterPassword, setMasterPassword) = UseState(string.Empty);
+        var window = UseWindow();
 
         UseEffect(() => { _ = AppCommands.InitializeAsync(dispatch); });
+
+        UseEffect(() =>
+        {
+            if (window is not null)
+            {
+                window.AppWindow.TitleBar.PreferredTheme = state.Settings.ThemeMode switch
+                {
+                    AppThemeMode.Light => TitleBarTheme.Light,
+                    AppThemeMode.Dark => TitleBarTheme.Dark,
+                    _ => TitleBarTheme.UseDefaultAppMode
+                };
+            }
+        }, state.Settings.ThemeMode);
 
         var locale = AppLocales.FromLanguage(state.Settings.Language);
 
         return LocaleProvider(
             locale,
-            Component<LocalizedApp, LocalizedAppProps>(
+                Component<LocalizedApp, LocalizedAppProps>(
                     new LocalizedAppProps(state, dispatch, masterPassword, setMasterPassword))
                 .WithKey(locale),
             resourceProvider: AppResourceProvider.Instance,
-            defaultLocale: AppLocales.English);
+            defaultLocale: AppLocales.English)
+            .Backdrop(BackdropKind.Mica)
+            .RequestedTheme(state.Settings.ThemeMode switch
+            {
+                AppThemeMode.Light => ElementTheme.Light,
+                AppThemeMode.Dark => ElementTheme.Dark,
+                _ => ElementTheme.Default
+            });
     }
 }
 
@@ -77,13 +99,6 @@ public sealed class LocalizedApp : Component<LocalizedAppProps>
                 state.ShowAccountManager
                     ? Component<AccountManagerDialog, AccountManagerDialogProps>(
                         new AccountManagerDialogProps(state, Props.Dispatch))
-                    : null)
-            .Backdrop(BackdropKind.Mica)
-            .RequestedTheme(state.Settings.ThemeMode switch
-            {
-                AppThemeMode.Light => ElementTheme.Light,
-                AppThemeMode.Dark => ElementTheme.Dark,
-                _ => ElementTheme.Default
-            });
+                    : null);
     }
 }
