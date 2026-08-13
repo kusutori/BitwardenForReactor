@@ -215,11 +215,25 @@ jobs:
           $output = Join-Path $env:RUNNER_TEMP "BitwardenForReactor-${{ steps.package.outputs.version }}-${{ matrix.platform }}.msix"
           Copy-Item $package.FullName $output
 
+      - name: Export public development certificate
+        if: matrix.platform == 'x64'
+        shell: pwsh
+        run: |
+          Export-Certificate `
+            -Cert "Cert:\CurrentUser\My\${{ steps.certificate.outputs.thumbprint }}" `
+            -FilePath (Join-Path $env:RUNNER_TEMP 'BitwardenForReactor-Development.cer') `
+            -Type CERT | Out-Null
+          Copy-Item '${{ env.APP_DIRECTORY }}/docs/development-msix-install.md' `
+            (Join-Path $env:RUNNER_TEMP 'DEVELOPMENT-MSIX-INSTALL.md')
+
       - name: Upload signed package
         uses: actions/upload-artifact@v4
         with:
           name: signed-msix-${{ matrix.platform }}
-          path: ${{ runner.temp }}/BitwardenForReactor-${{ steps.package.outputs.version }}-${{ matrix.platform }}.msix
+          path: |
+            ${{ runner.temp }}/BitwardenForReactor-${{ steps.package.outputs.version }}-${{ matrix.platform }}.msix
+            ${{ runner.temp }}/BitwardenForReactor-Development.cer
+            ${{ runner.temp }}/DEVELOPMENT-MSIX-INSTALL.md
           if-no-files-found: error
 
       - name: Remove signing certificate

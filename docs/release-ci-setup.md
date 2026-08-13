@@ -18,9 +18,9 @@ git push origin v0.1.0
 
 The portable ZIP is unpackaged and self-contained. Users extract it and run `BitwardenForReactor.exe`; Bitwarden CLI remains a separate prerequisite. Native AOT debugging symbols are published as a separate symbols ZIP for crash analysis.
 
-### Optional signed MSIX
+### Self-signed development MSIX
 
-Set `ENABLE_SIGNED_MSIX=true` and create these repository variables only after obtaining a publicly trusted production code-signing certificate:
+GitHub development releases may include a self-signed MSIX. This is separate from the Microsoft Store package and is not a publicly trusted production signature. Configure these repository variables:
 
 | Variable | Value |
 | --- | --- |
@@ -45,7 +45,13 @@ Encode a PFX without writing the result to the terminal:
 
 The certificate subject must exactly equal `PACKAGE_PUBLISHER`. Never commit a PFX, its password, or its Base64 representation.
 
-Do not enable this job with a self-signed certificate for public distribution. Users would have to trust that certificate manually.
+The workflow exports the public `.cer` alongside the signed packages. Users must manually place that certificate in the Local Machine **Trusted People** store before installing the MSIX. The private PFX remains only in GitHub Actions Secrets.
+
+Current development certificate:
+
+- Subject: `CN=kusutori`
+- SHA-1 thumbprint: `96C08C0E5244F2825325D1958ECD821724093985`
+- Valid through: 2031-08-13
 
 ## Microsoft Store package
 
