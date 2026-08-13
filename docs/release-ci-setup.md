@@ -63,6 +63,7 @@ Reserve the app name in Partner Center, then create these repository variables u
 | `STORE_PUBLISHER` | Package/Identity/Publisher |
 | `STORE_PUBLISHER_DISPLAY_NAME` | Publisher display name |
 | `STORE_PRODUCT_ID` | Partner Center product ID used by `msstore publish` |
+| `ENABLE_STORE_PACKAGE` | Set to `true` after Store identity configuration to build Store packages on release tags |
 
 Generating and downloading the `.msixupload` artifact does not require Partner Center API credentials. To enable the optional **publish** checkbox, associate an Entra application with Partner Center and add:
 

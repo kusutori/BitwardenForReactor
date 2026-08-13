@@ -26,6 +26,7 @@ env:
 jobs:
   package:
     name: Build Store upload package
+    if: github.event_name == 'workflow_dispatch' || vars.ENABLE_STORE_PACKAGE == 'true'
     runs-on: windows-latest
     steps:
       - name: Check out application
